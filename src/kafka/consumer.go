@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/cenkalti/backoff"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -90,6 +91,35 @@ func StartConsumers() {
 ////////////////////
 func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	saramaConfig := sarama.NewConfig()
+
+	////////////////////
+	// Wait for topic //
+	////////////////////
+	admin, err := getAdmin(k.brokerURL, saramaConfig)
+	if err != nil {
+		zap.S().Fatal("KAFKA ADMIN ERROR: ", err.Error())
+	}
+	defer func() { _ = admin.Close() }()
+
+	for {
+		allTopicsCreated := true
+		topics, err := admin.ListTopics()
+
+		for _, topicName := range k.topicNames {
+			if _, ok := topics[topicName]; ok == false {
+				// Topic not created
+				allTopicsCreated = false
+				break
+			}
+		}
+
+		if allTopicsCreated {
+			break
+		}
+
+		zap.S().Warn("KAFKA ADMIN WARN: topics not created yet...sleeping")
+		time.Sleep(1 * time.Second)
+	}
 
 	///////////////////////////
 	// Consumer Group Config //
@@ -259,6 +289,35 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, startOffset int) {
 	saramaConfig := sarama.NewConfig()
 
+	////////////////////
+	// Wait for topic //
+	////////////////////
+	admin, err := getAdmin(k.brokerURL, saramaConfig)
+	if err != nil {
+		zap.S().Fatal("KAFKA ADMIN ERROR: ", err.Error())
+	}
+	defer func() { _ = admin.Close() }()
+
+	for {
+		allTopicsCreated := true
+		topics, err := admin.ListTopics()
+
+		for _, topicName := range k.topicNames {
+			if _, ok := topics[topicName]; ok == false {
+				// Topic not created
+				allTopicsCreated = false
+				break
+			}
+		}
+
+		if allTopicsCreated {
+			break
+		}
+
+		zap.S().Warn("KAFKA ADMIN WARN: topics not created yet...sleeping")
+		time.Sleep(1 * time.Second)
+	}
+
 	///////////////////////////
 	// Consumer Group Config //
 	///////////////////////////
@@ -323,4 +382,20 @@ func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, start
 
 		zap.S().Debug("Consumer ", topic, ": Broadcasted message key=", string(topic_msg.Key))
 	}
+}
+
+func getAdmin(brokerURL string, saramaConfig *sarama.Config) (sarama.ClusterAdmin, error) {
+	var admin sarama.ClusterAdmin
+	operation := func() error {
+		a, err := sarama.NewClusterAdmin([]string{brokerURL}, saramaConfig)
+		if err != nil {
+			zap.S().Warn("KAFKA ADMIN NEWCLUSTERADMIN WARN: ", err.Error())
+		} else {
+			admin = a
+		}
+		return err
+	}
+	neb := backoff.NewConstantBackOff(time.Second)
+	err := backoff.Retry(operation, neb)
+	return admin, err
 }
