@@ -16,7 +16,7 @@ type BlockCrud struct {
 	db            *gorm.DB
 	model         *models.Block
 	modelORM      *models.BlockORM
-	LoaderChannel chan interface{}
+	LoaderChannel chan *models.Block
 }
 
 var blockCrud *BlockCrud
@@ -34,7 +34,7 @@ func GetBlockCrud() *BlockCrud {
 			db:            dbConn,
 			model:         &models.Block{},
 			modelORM:      &models.BlockORM{},
-			LoaderChannel: make(chan interface{}, 1),
+			LoaderChannel: make(chan *models.Block, 1),
 		}
 
 		err := blockCrud.Migrate()
@@ -84,17 +84,12 @@ func StartBlockLoader() {
 
 		for {
 			// Read block
-			newBlockInterface := <-GetBlockCrud().LoaderChannel
-			newBlock, ok := newBlockInterface.(models.Block)
-			if ok == false {
-				zap.S().Warn("Loader=Block - Error: Invalid type")
-				continue
-			}
+			newBlock := <-GetBlockCrud().LoaderChannel
 
 			//////////////////////
 			// Load to postgres //
 			//////////////////////
-			err := GetBlockCrud().UpsertOne(&newBlock)
+			err := GetBlockCrud().UpsertOne(newBlock)
 			zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Upserted")
 			if err != nil {
 				// Postgres error

@@ -8,23 +8,19 @@ message Block {
   option (gorm.opts) = {ormable: true};
 
   // Base
-  string signature = 1;
-  string item_id = 2;
-  string next_leader = 3;
-  uint32 transaction_count = 4;
-  string type = 5;
-  string version = 6;
-  string peer_id = 7[(gorm.field).tag = {index: "block_idx_peer_id"}];
-  uint32 number = 8 [(gorm.field).tag = {primary_key: true}];
-  string merkle_root_hash = 9;
-  string item_timestamp = 10;
-  string hash = 11;
-  string parent_hash = 12;
-  uint64 timestamp = 13;
-  string transaction_fees = 14;
-  string transaction_amount = 15;
-  string internal_transaction_amount = 16;
-  uint32 internal_transaction_count = 17;
-  uint32 failed_transaction_count = 18;
-  uint64 block_time = 19;
+  int64 number = 1 [(gorm.field).tag = {primary_key: true}];
+  string peer_id = 3 [(gorm.field).tag = {index: "block_idx_peer_id"}];
+  string signature = 4;
+  string version = 5;
+  string merkle_root_hash = 6;
+  string hash = 7;
+  string parent_hash = 8;
+  int64 timestamp = 9;
+  int64 transaction_count = 10;
+  int64 log_count = 11;
+  int64 failed_transaction_count = 12;
+  int64 internal_transaction_count = 13;
+  string transaction_amount = 14;
+  string internal_transaction_amount = 15;
+  string transaction_fees = 16;
 }

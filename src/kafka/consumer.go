@@ -89,38 +89,37 @@ func StartConsumers() {
 // Group Consumer //
 ////////////////////
 func (k *kafkaTopicConsumer) consumeGroup(group string) {
-	version, err := sarama.ParseKafkaVersion("2.1.1")
-	if err != nil {
-		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
-	}
+	config := sarama.NewConfig()
 
 	///////////////////////////
 	// Consumer Group Config //
 	///////////////////////////
 
-	saramaConfig := sarama.NewConfig()
-
 	// Version
-	saramaConfig.Version = version
+	version, err := sarama.ParseKafkaVersion("2.1.1")
+	if err != nil {
+		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
+	}
+	config.Version = version
 
 	// Initial Offset
-	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
 	// Balance Strategy
 	switch config.Config.ConsumerGroupBalanceStrategy {
 	case "BalanceStrategyRange":
-		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	case "BalanceStrategySticky":
-		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
 	case "BalanceStrategyRoundRobin":
-		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
 	default:
-		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	}
 
 	var consumerGroup sarama.ConsumerGroup
 	for {
-		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
+		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, config)
 		if err != nil {
 			zap.S().Warn("Creating consumer group consumerGroup err: ", err.Error())
 			zap.S().Info("Retrying in 3 seconds...")
@@ -258,26 +257,25 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 // Partition Consumer //
 ////////////////////////
 func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, startOffset int) {
-	version, err := sarama.ParseKafkaVersion("2.1.1")
-	if err != nil {
-		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
-	}
+	config := sarama.NewConfig()
 
 	///////////////////////////
 	// Consumer Group Config //
 	///////////////////////////
 
-	saramaConfig := sarama.NewConfig()
-
 	// Version
-	saramaConfig.Version = version
+	version, err := sarama.ParseKafkaVersion("2.1.1")
+	if err != nil {
+		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
+	}
+	config.Version = version
 
 	// Initial Offset
-	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetNewest
+	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	var consumer sarama.Consumer
 	for {
-		consumer, err = sarama.NewConsumer([]string{k.brokerURL}, saramaConfig)
+		consumer, err = sarama.NewConsumer([]string{k.brokerURL}, config)
 		if err != nil {
 			zap.S().Warn("Creating consumer err: ", err.Error())
 			zap.S().Info("Retrying in 3 seconds...")

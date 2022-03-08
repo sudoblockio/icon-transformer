@@ -21,24 +21,20 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type BlockORM struct {
-	BlockTime                 uint64
-	FailedTransactionCount    uint32
+	FailedTransactionCount    int64
 	Hash                      string
 	InternalTransactionAmount string
-	InternalTransactionCount  uint32
-	ItemId                    string
-	ItemTimestamp             string
+	InternalTransactionCount  int64
+	LogCount                  int64
 	MerkleRootHash            string
-	NextLeader                string
-	Number                    uint32 `gorm:"primary_key"`
+	Number                    int64 `gorm:"primary_key"`
 	ParentHash                string
 	PeerId                    string `gorm:"index:block_idx_peer_id"`
 	Signature                 string
-	Timestamp                 uint64
+	Timestamp                 int64
 	TransactionAmount         string
-	TransactionCount          uint32
+	TransactionCount          int64
 	TransactionFees           string
-	Type                      string
 	Version                   string
 }
 
@@ -57,25 +53,21 @@ func (m *Block) ToORM(ctx context.Context) (BlockORM, error) {
 			return to, err
 		}
 	}
-	to.Signature = m.Signature
-	to.ItemId = m.ItemId
-	to.NextLeader = m.NextLeader
-	to.TransactionCount = m.TransactionCount
-	to.Type = m.Type
-	to.Version = m.Version
-	to.PeerId = m.PeerId
 	to.Number = m.Number
+	to.PeerId = m.PeerId
+	to.Signature = m.Signature
+	to.Version = m.Version
 	to.MerkleRootHash = m.MerkleRootHash
-	to.ItemTimestamp = m.ItemTimestamp
 	to.Hash = m.Hash
 	to.ParentHash = m.ParentHash
 	to.Timestamp = m.Timestamp
-	to.TransactionFees = m.TransactionFees
+	to.TransactionCount = m.TransactionCount
+	to.LogCount = m.LogCount
+	to.FailedTransactionCount = m.FailedTransactionCount
+	to.InternalTransactionCount = m.InternalTransactionCount
 	to.TransactionAmount = m.TransactionAmount
 	to.InternalTransactionAmount = m.InternalTransactionAmount
-	to.InternalTransactionCount = m.InternalTransactionCount
-	to.FailedTransactionCount = m.FailedTransactionCount
-	to.BlockTime = m.BlockTime
+	to.TransactionFees = m.TransactionFees
 	if posthook, ok := interface{}(m).(BlockWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -92,25 +84,21 @@ func (m *BlockORM) ToPB(ctx context.Context) (Block, error) {
 			return to, err
 		}
 	}
-	to.Signature = m.Signature
-	to.ItemId = m.ItemId
-	to.NextLeader = m.NextLeader
-	to.TransactionCount = m.TransactionCount
-	to.Type = m.Type
-	to.Version = m.Version
-	to.PeerId = m.PeerId
 	to.Number = m.Number
+	to.PeerId = m.PeerId
+	to.Signature = m.Signature
+	to.Version = m.Version
 	to.MerkleRootHash = m.MerkleRootHash
-	to.ItemTimestamp = m.ItemTimestamp
 	to.Hash = m.Hash
 	to.ParentHash = m.ParentHash
 	to.Timestamp = m.Timestamp
-	to.TransactionFees = m.TransactionFees
+	to.TransactionCount = m.TransactionCount
+	to.LogCount = m.LogCount
+	to.FailedTransactionCount = m.FailedTransactionCount
+	to.InternalTransactionCount = m.InternalTransactionCount
 	to.TransactionAmount = m.TransactionAmount
 	to.InternalTransactionAmount = m.InternalTransactionAmount
-	to.InternalTransactionCount = m.InternalTransactionCount
-	to.FailedTransactionCount = m.FailedTransactionCount
-	to.BlockTime = m.BlockTime
+	to.TransactionFees = m.TransactionFees
 	if posthook, ok := interface{}(m).(BlockWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -182,44 +170,24 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 	}
 	var err error
 	for _, f := range updateMask.Paths {
-		if f == prefix+"Signature" {
-			patchee.Signature = patcher.Signature
-			continue
-		}
-		if f == prefix+"ItemId" {
-			patchee.ItemId = patcher.ItemId
-			continue
-		}
-		if f == prefix+"NextLeader" {
-			patchee.NextLeader = patcher.NextLeader
-			continue
-		}
-		if f == prefix+"TransactionCount" {
-			patchee.TransactionCount = patcher.TransactionCount
-			continue
-		}
-		if f == prefix+"Type" {
-			patchee.Type = patcher.Type
-			continue
-		}
-		if f == prefix+"Version" {
-			patchee.Version = patcher.Version
+		if f == prefix+"Number" {
+			patchee.Number = patcher.Number
 			continue
 		}
 		if f == prefix+"PeerId" {
 			patchee.PeerId = patcher.PeerId
 			continue
 		}
-		if f == prefix+"Number" {
-			patchee.Number = patcher.Number
+		if f == prefix+"Signature" {
+			patchee.Signature = patcher.Signature
+			continue
+		}
+		if f == prefix+"Version" {
+			patchee.Version = patcher.Version
 			continue
 		}
 		if f == prefix+"MerkleRootHash" {
 			patchee.MerkleRootHash = patcher.MerkleRootHash
-			continue
-		}
-		if f == prefix+"ItemTimestamp" {
-			patchee.ItemTimestamp = patcher.ItemTimestamp
 			continue
 		}
 		if f == prefix+"Hash" {
@@ -234,8 +202,20 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 			patchee.Timestamp = patcher.Timestamp
 			continue
 		}
-		if f == prefix+"TransactionFees" {
-			patchee.TransactionFees = patcher.TransactionFees
+		if f == prefix+"TransactionCount" {
+			patchee.TransactionCount = patcher.TransactionCount
+			continue
+		}
+		if f == prefix+"LogCount" {
+			patchee.LogCount = patcher.LogCount
+			continue
+		}
+		if f == prefix+"FailedTransactionCount" {
+			patchee.FailedTransactionCount = patcher.FailedTransactionCount
+			continue
+		}
+		if f == prefix+"InternalTransactionCount" {
+			patchee.InternalTransactionCount = patcher.InternalTransactionCount
 			continue
 		}
 		if f == prefix+"TransactionAmount" {
@@ -246,16 +226,8 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 			patchee.InternalTransactionAmount = patcher.InternalTransactionAmount
 			continue
 		}
-		if f == prefix+"InternalTransactionCount" {
-			patchee.InternalTransactionCount = patcher.InternalTransactionCount
-			continue
-		}
-		if f == prefix+"FailedTransactionCount" {
-			patchee.FailedTransactionCount = patcher.FailedTransactionCount
-			continue
-		}
-		if f == prefix+"BlockTime" {
-			patchee.BlockTime = patcher.BlockTime
+		if f == prefix+"TransactionFees" {
+			patchee.TransactionFees = patcher.TransactionFees
 			continue
 		}
 	}
