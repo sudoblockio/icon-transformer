@@ -117,7 +117,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			break
 		}
 
-		zap.S().Warn("KAFKA ADMIN WARN: topics not created yet...sleeping")
+		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...sleeping")
 		time.Sleep(1 * time.Second)
 	}
 
@@ -151,7 +151,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	for {
 		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
 		if err != nil {
-			zap.S().Warn("Creating consumer group consumerGroup err: ", err.Error())
+			zap.S().Info("Creating consumer group consumerGroup err: ", err.Error())
 			zap.S().Info("Retrying in 3 seconds...")
 			time.Sleep(3 * time.Second)
 			continue
@@ -202,7 +202,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			// recreated to get the new claims
 			err := consumerGroup.Consume(ctx, k.topicNames, claimConsumer)
 			if err != nil {
-				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
+				zap.S().Info("CONSUME GROUP ERROR: from consumer: ", err.Error())
 			}
 			// check if context was cancelled, signaling that the consumer should stop
 			if ctx.Err() != nil {
@@ -246,7 +246,7 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 		select {
 		case msg := <-claim.Messages():
 			if msg == nil {
-				zap.S().Warn("GROUP=", c.group, ",TOPIC=", topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
+				zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
 				return nil
 			}
 
@@ -255,7 +255,7 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - No new kafka messages, waited 5 secs...")
 			continue
 		case <-sess.Context().Done():
-			zap.S().Warn("GROUP=", c.group, ",TOPIC=", topicName, " - Session is done, exiting ConsumeClaim loop...")
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Session is done, exiting ConsumeClaim loop...")
 			return nil
 		}
 
@@ -314,7 +314,7 @@ func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, start
 			break
 		}
 
-		zap.S().Warn("KAFKA ADMIN WARN: topics not created yet...sleeping")
+		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...sleeping")
 		time.Sleep(1 * time.Second)
 	}
 
@@ -336,7 +336,7 @@ func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, start
 	for {
 		consumer, err = sarama.NewConsumer([]string{k.brokerURL}, saramaConfig)
 		if err != nil {
-			zap.S().Warn("Creating consumer err: ", err.Error())
+			zap.S().Info("Creating consumer err: ", err.Error())
 			zap.S().Info("Retrying in 3 seconds...")
 			time.Sleep(3 * time.Second)
 			continue
@@ -368,8 +368,7 @@ func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, start
 		case msg := <-pc.Messages():
 			topic_msg = msg
 		case consumerErr := <-pc.Errors():
-			zap.S().Warn("KAFKA PARTITION CONSUMER ERROR:", consumerErr.Err)
-			//consumerErr.Err
+			zap.S().Info("KAFKA PARTITION CONSUMER ERROR:", consumerErr.Err)
 			continue
 		case <-time.After(5 * time.Second):
 			zap.S().Debug("Consumer ", topic, ": No new kafka messages, waited 5 secs")
@@ -389,7 +388,7 @@ func getAdmin(brokerURL string, saramaConfig *sarama.Config) (sarama.ClusterAdmi
 	operation := func() error {
 		a, err := sarama.NewClusterAdmin([]string{brokerURL}, saramaConfig)
 		if err != nil {
-			zap.S().Warn("KAFKA ADMIN NEWCLUSTERADMIN WARN: ", err.Error())
+			zap.S().Info("KAFKA ADMIN NEWCLUSTERADMIN WARN: ", err.Error())
 		} else {
 			admin = a
 		}
