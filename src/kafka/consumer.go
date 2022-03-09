@@ -103,7 +103,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 
 	for {
 		allTopicsCreated := true
-		topics, err := admin.ListTopics()
+		topics, _ := admin.ListTopics()
 
 		for _, topicName := range k.topicNames {
 			if _, ok := topics[topicName]; ok == false {
@@ -300,7 +300,7 @@ func (k *kafkaTopicConsumer) consumePartition(topic string, partition int, start
 
 	for {
 		allTopicsCreated := true
-		topics, err := admin.ListTopics()
+		topics, _ := admin.ListTopics()
 
 		for _, topicName := range k.topicNames {
 			if _, ok := topics[topicName]; ok == false {
