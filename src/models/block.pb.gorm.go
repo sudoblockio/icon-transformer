@@ -63,11 +63,11 @@ func (m *Block) ToORM(ctx context.Context) (BlockORM, error) {
 	to.Timestamp = m.Timestamp
 	to.TransactionCount = m.TransactionCount
 	to.LogCount = m.LogCount
+	to.TransactionAmount = m.TransactionAmount
+	to.TransactionFees = m.TransactionFees
 	to.FailedTransactionCount = m.FailedTransactionCount
 	to.InternalTransactionCount = m.InternalTransactionCount
-	to.TransactionAmount = m.TransactionAmount
 	to.InternalTransactionAmount = m.InternalTransactionAmount
-	to.TransactionFees = m.TransactionFees
 	if posthook, ok := interface{}(m).(BlockWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -94,11 +94,11 @@ func (m *BlockORM) ToPB(ctx context.Context) (Block, error) {
 	to.Timestamp = m.Timestamp
 	to.TransactionCount = m.TransactionCount
 	to.LogCount = m.LogCount
+	to.TransactionAmount = m.TransactionAmount
+	to.TransactionFees = m.TransactionFees
 	to.FailedTransactionCount = m.FailedTransactionCount
 	to.InternalTransactionCount = m.InternalTransactionCount
-	to.TransactionAmount = m.TransactionAmount
 	to.InternalTransactionAmount = m.InternalTransactionAmount
-	to.TransactionFees = m.TransactionFees
 	if posthook, ok := interface{}(m).(BlockWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -210,6 +210,14 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 			patchee.LogCount = patcher.LogCount
 			continue
 		}
+		if f == prefix+"TransactionAmount" {
+			patchee.TransactionAmount = patcher.TransactionAmount
+			continue
+		}
+		if f == prefix+"TransactionFees" {
+			patchee.TransactionFees = patcher.TransactionFees
+			continue
+		}
 		if f == prefix+"FailedTransactionCount" {
 			patchee.FailedTransactionCount = patcher.FailedTransactionCount
 			continue
@@ -218,16 +226,8 @@ func DefaultApplyFieldMaskBlock(ctx context.Context, patchee *Block, patcher *Bl
 			patchee.InternalTransactionCount = patcher.InternalTransactionCount
 			continue
 		}
-		if f == prefix+"TransactionAmount" {
-			patchee.TransactionAmount = patcher.TransactionAmount
-			continue
-		}
 		if f == prefix+"InternalTransactionAmount" {
 			patchee.InternalTransactionAmount = patcher.InternalTransactionAmount
-			continue
-		}
-		if f == prefix+"TransactionFees" {
-			patchee.TransactionFees = patcher.TransactionFees
 			continue
 		}
 	}
