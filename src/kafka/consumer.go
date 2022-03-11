@@ -117,7 +117,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			break
 		}
 
-		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...sleeping")
+		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...")
 		time.Sleep(1 * time.Second)
 	}
 

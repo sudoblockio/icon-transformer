@@ -1,0 +1,37 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message Transaction {
+  option (gorm.opts) = {ormable: true};
+
+  string hash = 1 [(gorm.field).tag = {primary_key: true}];
+  int64  log_index = 2 [(gorm.field).tag = {primary_key: true}];
+  string type = 3 [(gorm.field).tag = {index: "transaction_idx_type"}];
+  string method = 4 [(gorm.field).tag = {index: "transaction_idx_method"}];
+  string from_address = 5 [(gorm.field).tag = {index: "transaction_idx_from_address"}];
+  string to_address = 6 [(gorm.field).tag = {index: "transaction_idx_to_address"}];
+  int64 block_number = 7 [(gorm.field).tag = {index: "transaction_idx_block_number"}];
+  string version = 8;
+  string value = 9;
+  double value_decimal = 10;
+  string step_limit = 11;
+  int64 timestamp = 12;
+  int64 block_timestamp = 13;
+  string nid = 14;
+  string nonce = 15;
+  int64 transaction_index = 16;
+  string block_hash = 17;
+  string transaction_fee = 18;
+  string signature = 19;
+  string data_type = 20;
+  string data = 21;
+  string cumulative_step_used = 22;
+  string step_used = 23;
+  string step_price = 24;
+  string score_address = 25;
+  string logs_bloom = 26;
+  string status = 27;
+}

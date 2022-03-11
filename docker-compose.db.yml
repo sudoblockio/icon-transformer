@@ -2,6 +2,31 @@ version: "3.7"
 
 services:
 
+  etl:
+    image: sudoblock/icon-go-etl:latest
+    environment:
+      NAME: "blocks"
+      NETWORK_NAME: "mainnet"
+      LOG_LEVEL: "DEBUG"
+      LOG_TO_FILE: "false"
+      LOG_FILE_NAME: ""
+      LOG_FORMAT: "console"
+      LOG_IS_DEVELOPMENT: "true"
+      KAFKA_BROKER_URL: "kafka:9092"
+      DB_DRIVER: "postgres"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "changeme"
+      DB_DBNAME: "postgres"
+      DB_SSL_MODE: "disable"
+      DB_TIMEZONE: "UTC"
+      START_CLAIM_EXTRACTORS: "false"
+      NUM_CLAIM_EXTRACTORS: "4"
+      MAX_CLAIM_SIZE: "1000"
+      START_HEAD_EXTRACTOR: "true"
+      HEAD_EXTRACTOR_START_BLOCK: "47132506"
+
   ############
   # Database #
   ############
@@ -36,12 +61,14 @@ services:
     hostname: kafka
     depends_on:
       - zookeeper
+    ports:
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 0
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_BROKER_RACK: "r1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1

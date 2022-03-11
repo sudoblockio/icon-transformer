@@ -7,7 +7,7 @@ import (
 )
 
 type configType struct {
-	Name        string `envconfig:"NAME" required:"false" default:"blocks-service"`
+	Name        string `envconfig:"NAME" required:"false" default:"icon-go-worker"`
 	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
 	// Logging

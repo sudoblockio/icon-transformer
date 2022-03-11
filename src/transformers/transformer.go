@@ -1,6 +1,7 @@
 package transformers
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"strings"
@@ -26,6 +27,7 @@ func start() {
 
 	// Output channels
 	blockLoaderChannel := crud.GetBlockCrud().LoaderChannel
+	transactionLoaderChannel := crud.GetTransactionCrud().LoaderChannel
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {
@@ -50,6 +52,14 @@ func start() {
 			block := transformBlockETLToBlock(blockETL)
 			blockLoaderChannel <- block
 		}()
+
+		// Transaction Loader
+		go func() {
+			transactions := transformBlockETLToTransactions(blockETL)
+			for _, transaction := range transactions {
+				transactionLoaderChannel <- transaction
+			}
+		}()
 	}
 }
 
@@ -70,23 +80,23 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 
 	sumTransactionAmountBig := big.NewInt(0)
 	sumTransactionFeesBig := big.NewInt(0)
-	for _, transaction := range blockETL.Transactions {
+	for _, transactionETL := range blockETL.Transactions {
 
 		// transactionAmount
 		transactionAmountBig := big.NewInt(0)
-		if transaction.Value != "" {
-			transactionAmountBig.SetString(transaction.Value[2:], 16)
+		if transactionETL.Value != "" {
+			transactionAmountBig.SetString(transactionETL.Value[2:], 16)
 		}
 		sumTransactionAmountBig = sumTransactionAmountBig.Add(sumTransactionAmountBig, transactionAmountBig)
 
 		// transactionFees
 		stepPriceBig := big.NewInt(0)
-		if transaction.StepPrice != "" {
-			stepPriceBig.SetString(transaction.StepPrice[2:], 16)
+		if transactionETL.StepPrice != "" {
+			stepPriceBig.SetString(transactionETL.StepPrice[2:], 16)
 		}
 		stepUsedBig := big.NewInt(0)
-		if transaction.StepUsed != "" {
-			stepUsedBig.SetString(transaction.StepUsed[2:], 16)
+		if transactionETL.StepUsed != "" {
+			stepUsedBig.SetString(transactionETL.StepUsed[2:], 16)
 		}
 		transactionFeeBig := stepUsedBig.Mul(stepUsedBig, stepPriceBig)
 		sumTransactionFeesBig = sumTransactionFeesBig.Add(sumTransactionFeesBig, transactionFeeBig)
@@ -98,9 +108,9 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 	// Failed Transactions //
 	/////////////////////////
 	failedTransactionCount := int64(0)
-	for _, transaction := range blockETL.Transactions {
+	for _, transactionETL := range blockETL.Transactions {
 
-		if transaction.Status == "0x0" {
+		if transactionETL.Status == "0x0" {
 			// failedTransactionCount
 			failedTransactionCount++
 		}
@@ -110,8 +120,8 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 	// Logs //
 	//////////
 	logCount := int64(0)
-	for _, transaction := range blockETL.Transactions {
-		logCount += int64(len(transaction.Logs))
+	for _, transactionETL := range blockETL.Transactions {
+		logCount += int64(len(transactionETL.Logs))
 	}
 
 	///////////////////////////
@@ -121,8 +131,8 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 	internalTransactionAmount := "0x0"
 
 	sumInternalTransactionAmountBig := big.NewInt(0)
-	for _, transaction := range blockETL.Transactions {
-		for _, log := range transaction.Logs {
+	for _, transactionETL := range blockETL.Transactions {
+		for _, log := range transactionETL.Logs {
 			method := strings.Split(log.Indexed[0], "(")[0]
 
 			if method == "ICXTransfer" {
@@ -155,4 +165,89 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 		InternalTransactionCount:  internalTransactionCount,
 		InternalTransactionAmount: internalTransactionAmount,
 	}
+}
+
+func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transaction {
+
+	transactions := []*models.Transaction{}
+
+	//////////////////
+	// Transactions //
+	//////////////////
+	for _, transactionETL := range blockETL.Transactions {
+
+		// Method
+		method := ""
+		if transactionETL.Data != "" {
+			dataJSON := map[string]interface{}{}
+			err := json.Unmarshal([]byte(transactionETL.Data), &dataJSON)
+			if err == nil {
+				// Parsing successful
+				if methodInterface, ok := dataJSON["method"]; ok {
+					// Method field is in dataJSON
+					method = methodInterface.(string)
+				}
+			} else {
+				// Parsing error
+				zap.S().Warn("Transaction data field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
+			}
+		}
+
+		// Value Decimal
+		valueDecimal := float64(0)
+		if transactionETL.Value != "" {
+			valueDecimal = stringHexToFloat64(transactionETL.Value, 18)
+		}
+
+		// Transaction Fee
+		stepPriceBig := big.NewInt(0)
+		if transactionETL.StepPrice != "" {
+			stepPriceBig.SetString(transactionETL.StepPrice[2:], 16)
+		}
+		stepUsedBig := big.NewInt(0)
+		if transactionETL.StepUsed != "" {
+			stepUsedBig.SetString(transactionETL.StepUsed[2:], 16)
+		}
+		transactionFeeBig := stepUsedBig.Mul(stepUsedBig, stepPriceBig)
+		transactionFee := fmt.Sprintf("0x%x", transactionFeeBig)
+
+		transaction := &models.Transaction{
+			Hash:               transactionETL.Hash,
+			LogIndex:           -1,
+			Type:               "transaction",
+			Method:             method,
+			FromAddress:        transactionETL.FromAddress,
+			ToAddress:          transactionETL.ToAddress,
+			BlockNumber:        blockETL.Number,
+			Version:            transactionETL.Version,
+			Value:              transactionETL.Value,
+			ValueDecimal:       valueDecimal,
+			StepLimit:          transactionETL.StepLimit,
+			Timestamp:          transactionETL.Timestamp,
+			BlockTimestamp:     blockETL.Timestamp,
+			Nid:                transactionETL.Nid,
+			Nonce:              transactionETL.Nonce,
+			TransactionIndex:   transactionETL.TransactionIndex,
+			BlockHash:          blockETL.Hash,
+			TransactionFee:     transactionFee,
+			Signature:          transactionETL.Signature,
+			DataType:           transactionETL.DataType,
+			Data:               transactionETL.Data,
+			CumulativeStepUsed: transactionETL.CumulativeStepUsed,
+			StepUsed:           transactionETL.StepUsed,
+			StepPrice:          transactionETL.StepPrice,
+			ScoreAddress:       transactionETL.ScoreAddress,
+			LogsBloom:          transactionETL.LogsBloom,
+			Status:             transactionETL.Status,
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	//////////
+	// Logs //
+	//////////
+	// TODO
+
+	return transactions
 }
