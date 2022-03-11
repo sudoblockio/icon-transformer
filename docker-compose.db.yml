@@ -131,3 +131,11 @@ services:
       PORT: 9021
     networks:
       - default
+
+  #########
+  # Redis #
+  #########
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

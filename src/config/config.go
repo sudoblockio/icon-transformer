@@ -10,6 +10,9 @@ type configType struct {
 	Name        string `envconfig:"NAME" required:"false" default:"icon-go-worker"`
 	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
+	// Icon node service
+	IconNodeServiceURL string `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
+
 	// Logging
 	LogLevel         string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
 	LogToFile        bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
@@ -49,6 +52,14 @@ type configType struct {
 
 	// GORM
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`
+
+	// Redis
+	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"localhost"`
+	RedisPort                     string `envconfig:"REDIS_PORT" required:"false" default:"6379"`
+	RedisPassword                 string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
+	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"blocks"`
+	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
+	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
 }
 
 // Config - runtime config struct

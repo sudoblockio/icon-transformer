@@ -1,4 +1,4 @@
-package transformers
+package utils
 
 import (
 	"math/big"
@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func stringInSlice(a string, list []string) bool {
+func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
@@ -15,7 +15,7 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func stringHexToFloat64(hex string, base int) float64 {
+func StringHexToFloat64(hex string, base int) float64 {
 	valueDecimal := float64(0)
 
 	valueBigInt, success := new(big.Int).SetString(hex[2:], 16)
