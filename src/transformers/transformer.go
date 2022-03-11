@@ -247,7 +247,60 @@ func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transa
 	//////////
 	// Logs //
 	//////////
-	// TODO
+	for _, transactionETL := range blockETL.Transactions {
+		for iL, logETL := range transactionETL.Logs {
+
+			method := strings.Split(logETL.Indexed[0], "(")[0]
+			if method == "ICXTransfer" {
+				// Internal Transaction
+
+				// From Address
+				fromAddress := logETL.Indexed[1]
+
+				// To Address
+				toAddress := logETL.Indexed[2]
+
+				// Value
+				value := logETL.Indexed[3]
+
+				// Transaction Decimal Value
+				// Hex -> float64
+				valueDecimal := stringHexToFloat64(value, 18)
+
+				transaction := &models.Transaction{
+					Hash:               transactionETL.Hash,
+					LogIndex:           int64(iL), // NOTE logs will always be in the same order from ETL
+					Type:               "log",
+					Method:             method,
+					FromAddress:        fromAddress,
+					ToAddress:          toAddress,
+					BlockNumber:        blockETL.Number,
+					Version:            transactionETL.Version,
+					Value:              value,
+					ValueDecimal:       valueDecimal,
+					StepLimit:          transactionETL.StepLimit,
+					Timestamp:          transactionETL.Timestamp,
+					BlockTimestamp:     blockETL.Timestamp,
+					Nid:                transactionETL.Nid,
+					Nonce:              transactionETL.Nonce,
+					TransactionIndex:   transactionETL.TransactionIndex,
+					BlockHash:          blockETL.Hash,
+					TransactionFee:     "0x0",
+					Signature:          transactionETL.Signature,
+					DataType:           "",
+					Data:               "",
+					CumulativeStepUsed: "0x0",
+					StepUsed:           "0x0",
+					StepPrice:          "0x0",
+					ScoreAddress:       logETL.Address,
+					LogsBloom:          "",
+					Status:             "0x1",
+				}
+
+				transactions = append(transactions, transaction)
+			}
+		}
+	}
 
 	return transactions
 }
