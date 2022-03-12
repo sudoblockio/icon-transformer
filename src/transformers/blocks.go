@@ -3,7 +3,6 @@ package transformers
 import (
 	"fmt"
 	"math/big"
-	"strings"
 
 	"github.com/sudoblockio/icon-go-worker/models"
 )
@@ -71,8 +70,8 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 
 	sumInternalTransactionAmountBig := big.NewInt(0)
 	for _, transactionETL := range blockETL.Transactions {
-		for _, log := range transactionETL.Logs {
-			method := strings.Split(log.Indexed[0], "(")[0]
+		for _, logETL := range transactionETL.Logs {
+			method := extractMethodFromLogETL(logETL)
 
 			if method == "ICXTransfer" {
 				// internalTransactionCount
@@ -80,7 +79,7 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {
 
 				// internalTransactionAmount
 				internalTransactionAmountBig := big.NewInt(0)
-				internalTransactionAmountBig.SetString(log.Indexed[3][2:], 16)
+				internalTransactionAmountBig.SetString(logETL.Indexed[3][2:], 16)
 				sumInternalTransactionAmountBig = sumInternalTransactionAmountBig.Add(sumInternalTransactionAmountBig, internalTransactionAmountBig)
 			}
 		}

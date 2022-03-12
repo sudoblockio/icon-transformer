@@ -1,14 +1,12 @@
 package transformers
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/sudoblockio/icon-go-worker/utils"
 	"math/big"
-	"strings"
+
+	"github.com/sudoblockio/icon-go-worker/utils"
 
 	"github.com/sudoblockio/icon-go-worker/models"
-	"go.uber.org/zap"
 )
 
 func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transaction {
@@ -21,21 +19,7 @@ func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transa
 	for _, transactionETL := range blockETL.Transactions {
 
 		// Method
-		method := ""
-		if transactionETL.Data != "" {
-			dataJSON := map[string]interface{}{}
-			err := json.Unmarshal([]byte(transactionETL.Data), &dataJSON)
-			if err == nil {
-				// Parsing successful
-				if methodInterface, ok := dataJSON["method"]; ok {
-					// Method field is in dataJSON
-					method = methodInterface.(string)
-				}
-			} else {
-				// Parsing error
-				zap.S().Warn("Transaction data field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
-			}
-		}
+		method := extractMethodFromTransactionETL(transactionETL)
 
 		// Value Decimal
 		valueDecimal := float64(0)
@@ -94,7 +78,9 @@ func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transa
 	for _, transactionETL := range blockETL.Transactions {
 		for iL, logETL := range transactionETL.Logs {
 
-			method := strings.Split(logETL.Indexed[0], "(")[0]
+			method := extractMethodFromLogETL(logETL)
+
+			// NOTE 'ICXTransfer' is a protected name in Icon
 			if method == "ICXTransfer" {
 				// Internal Transaction
 

@@ -20,6 +20,8 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 	for _, transactionETL := range blockETL.Transactions {
 		for iL, logETL := range transactionETL.Logs {
 
+			// NOTE check for specific log definition
+			// NOTE 'Transfer' is not a protected name in Icon
 			if logETL.Indexed[0] == "Transfer(Address,Address,int,bytes)" && len(logETL.Indexed) == 4 {
 				// Token Transfers
 

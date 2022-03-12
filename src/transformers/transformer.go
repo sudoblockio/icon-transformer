@@ -24,6 +24,7 @@ func start() {
 	blockLoaderChannel := crud.GetBlockCrud().LoaderChannel
 	transactionLoaderChannel := crud.GetTransactionCrud().LoaderChannel
 	tokenTransferLoaderChannel := crud.GetTokenTransferCrud().LoaderChannel
+	transactionCreateScoreLoaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {
@@ -65,11 +66,13 @@ func start() {
 			}
 		}()
 
-		// Token Holder Loader
-		// TODO
-
 		// Transaction Create Score Loader
-		// TODO
+		go func() {
+			transactionCreateScores := transformBlockETLToTransactionCreateScores(blockETL)
+			for _, transactionCreateScore := range transactionCreateScores {
+				transactionCreateScoreLoaderChannel <- transactionCreateScore
+			}
+		}()
 	}
 }
 
