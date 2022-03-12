@@ -23,6 +23,7 @@ func start() {
 	// Output channels
 	blockLoaderChannel := crud.GetBlockCrud().LoaderChannel
 	transactionLoaderChannel := crud.GetTransactionCrud().LoaderChannel
+	logLoaderChannel := crud.GetLogCrud().LoaderChannel
 	tokenTransferLoaderChannel := crud.GetTokenTransferCrud().LoaderChannel
 	transactionCreateScoreLoaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
 
@@ -55,6 +56,14 @@ func start() {
 			transactions := transformBlockETLToTransactions(blockETL)
 			for _, transaction := range transactions {
 				transactionLoaderChannel <- transaction
+			}
+		}()
+
+		// Log Loader
+		go func() {
+			logs := transformBlockETLToLogs(blockETL)
+			for _, log := range logs {
+				logLoaderChannel <- log
 			}
 		}()
 
