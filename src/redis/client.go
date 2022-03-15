@@ -60,7 +60,13 @@ func GetRedisClient() *Client {
 			}
 
 			// Init pubsub
-			redisClient.pubsub = redisClient.client.Subscribe(ctx, config.Config.RedisChannel)
+			redisClient.pubsub = redisClient.client.Subscribe(
+				ctx,
+				config.Config.RedisBlocksChannel,
+				config.Config.RedisTransactionsChannel,
+				config.Config.RedisLogsChannel,
+				config.Config.RedisTokenTransfersChannel,
+			)
 
 			// Test pubsub
 			_, err = redisClient.pubsub.Receive(ctx)
