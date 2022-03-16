@@ -174,10 +174,10 @@ func start() {
 				/////////////////
 				// Total count //
 				/////////////////
-				countRegular := int64(0)
-				countInternal := int64(0)
 
 				// Get count
+				countRegular := int64(0)
+				countInternal := int64(0)
 				for _, transaction := range transactions {
 					if transaction.Type == "transaction" {
 						// Regular
@@ -216,10 +216,10 @@ func start() {
 				//////////////////////
 				// Count by address //
 				//////////////////////
-				countByAddressRegular := map[string]int64{}
-				countByAddressInternal := map[string]int64{}
 
 				// Get count
+				countByAddressRegular := map[string]int64{}
+				countByAddressInternal := map[string]int64{}
 				for _, transaction := range transactions {
 					fromAddress := transaction.FromAddress
 					toAddress := transaction.ToAddress
@@ -271,7 +271,7 @@ func start() {
 							"Routine=Transformer,",
 							" BlockNumber=", blockETL.Number,
 							" Address=", address,
-							" Step=", "Inc transaction regular count by address",
+							" Step=", "Inc count transaction regular by address",
 							" Error=", err.Error(),
 						)
 					}
@@ -286,7 +286,7 @@ func start() {
 							"Routine=Transformer,",
 							" BlockNumber=", blockETL.Number,
 							" Address=", address,
-							" Step=", "Inc transaction internal count by address",
+							" Step=", "Inc count transaction internal by address",
 							" Error=", err.Error(),
 						)
 					}
@@ -294,7 +294,61 @@ func start() {
 			}()
 
 			// Logs count
-			// TODO
+			go func() {
+				logs := transformBlockETLToLogs(blockETL)
+
+				/////////////////
+				// Total count //
+				/////////////////
+
+				// Get count
+				count := int64(len(logs))
+
+				// Set count
+				countKey := config.Config.RedisKeyPrefix + "log_count"
+
+				_, err = redis.GetRedisClient().IncCountBy(countKey, count)
+				if err != nil {
+					zap.S().Warn(
+						"Routine=Transformer,",
+						" BlockNumber=", blockETL.Number,
+						" Step=", "Inc count log",
+						" Error=", err.Error(),
+					)
+				}
+
+				//////////////////////
+				// Count by address //
+				//////////////////////
+				countByAddress := map[string]int64{}
+
+				// Get count
+				for _, log := range logs {
+					address := log.Address
+
+					if _, ok := countByAddress[address]; ok == true {
+						countByAddress[address]++
+					} else {
+						countByAddress[address] = 1
+					}
+				}
+
+				// Set count
+				for address, count := range countByAddress {
+
+					countByAddressKey := config.Config.RedisKeyPrefix + "log_count_by_address_" + address
+					_, err = redis.GetRedisClient().IncCountBy(countByAddressKey, count)
+					if err != nil {
+						zap.S().Warn(
+							"Routine=Transformer,",
+							" BlockNumber=", blockETL.Number,
+							" Address=", address,
+							" Step=", "Inc count log by address",
+							" Error=", err.Error(),
+						)
+					}
+				}
+			}()
 
 			// Token Transfers count
 			// TODO
