@@ -351,7 +351,95 @@ func start() {
 			}()
 
 			// Token Transfers count
-			// TODO
+			go func() {
+				tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
+
+				/////////////////
+				// Total count //
+				/////////////////
+
+				// Get count
+				count := int64(len(tokenTransfers))
+
+				// Set count
+				countKey := config.Config.RedisKeyPrefix + "token_transfer_count"
+
+				_, err = redis.GetRedisClient().IncCountBy(countKey, count)
+				if err != nil {
+					zap.S().Warn(
+						"Routine=Transformer,",
+						" BlockNumber=", blockETL.Number,
+						" Step=", "Inc count token transfers",
+						" Error=", err.Error(),
+					)
+				}
+
+				//////////////////////
+				// Count by address //
+				//////////////////////
+
+				// Get count
+				countByAddress := map[string]int64{}
+				countByTokenContract := map[string]int64{}
+				for _, tokenTransfer := range tokenTransfers {
+					fromAddress := tokenTransfer.FromAddress
+					toAddress := tokenTransfer.ToAddress
+					tokenContractAddress := tokenTransfer.TokenContractAddress
+
+					// From address
+					if _, ok := countByAddress[fromAddress]; ok == true {
+						countByAddress[fromAddress]++
+					} else {
+						countByAddress[fromAddress] = 1
+					}
+
+					// To address
+					if _, ok := countByAddress[toAddress]; ok == true {
+						countByAddress[toAddress]++
+					} else {
+						countByAddress[toAddress] = 1
+					}
+
+					// Token Contract Address
+					if _, ok := countByTokenContract[tokenContractAddress]; ok == true {
+						countByTokenContract[tokenContractAddress]++
+					} else {
+						countByTokenContract[tokenContractAddress] = 1
+					}
+				}
+
+				// Set count
+				for address, count := range countByAddress {
+					// Count by address
+
+					countByAddressKey := config.Config.RedisKeyPrefix + "token_transfer_count_by_address_" + address
+					_, err = redis.GetRedisClient().IncCountBy(countByAddressKey, count)
+					if err != nil {
+						zap.S().Warn(
+							"Routine=Transformer,",
+							" BlockNumber=", blockETL.Number,
+							" Address=", address,
+							" Step=", "Inc count token transfer by address",
+							" Error=", err.Error(),
+						)
+					}
+				}
+				for tokenContract, count := range countByTokenContract {
+					// Count by token contract
+
+					countByTokenContractKey := config.Config.RedisKeyPrefix + "token_transfer_count_by_token_contract_" + tokenContract
+					_, err = redis.GetRedisClient().IncCountBy(countByTokenContractKey, count)
+					if err != nil {
+						zap.S().Warn(
+							"Routine=Transformer,",
+							" BlockNumber=", blockETL.Number,
+							" TokenContract=", tokenContract,
+							" Step=", "Inc count token transfer by token contract",
+							" Error=", err.Error(),
+						)
+					}
+				}
+			}()
 
 			//////////////////
 			// Commit Block //
