@@ -111,7 +111,7 @@ func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
 func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error) {
 
 	// Redis cache
-	redisCacheKey := "icon_transactions_token_contract_decimals_" + tokenContractAddress
+	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_decimals_" + tokenContractAddress
 	decimals, err := redis.GetRedisClient().GetCount(redisCacheKey)
 	if err != nil {
 		zap.S().Fatal(err)
@@ -193,7 +193,7 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, error) {
 
 	// Redis cache
-	redisCacheKey := "icon_transactions_token_contract_name_" + tokenContractAddress
+	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_name_" + tokenContractAddress
 	tokenContractName, err := redis.GetRedisClient().GetValue(redisCacheKey)
 	if err != nil {
 		zap.S().Fatal(err)
@@ -274,7 +274,7 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string, error) {
 
 	// Redis cache
-	redisCacheKey := "icon_transactions_token_contract_symbol_" + tokenContractAddress
+	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_symbol_" + tokenContractAddress
 	tokenContractSymbol, err := redis.GetRedisClient().GetValue(redisCacheKey)
 	if err != nil {
 		zap.S().Fatal(err)

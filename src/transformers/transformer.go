@@ -61,6 +61,8 @@ func start() {
 		// NOTE transform blockETL to various database views
 		// NOTE blocks may be passed multiple times, loaders use upserts
 
+		// TODO export all go func to their own functions
+
 		// Block Loader
 		go func() {
 			block := transformBlockETLToBlock(blockETL)
@@ -104,6 +106,7 @@ func start() {
 		/////////////////////
 		// NOTE indexed loaders index messages by block number
 		// NOTE each block number can only pass through once
+
 		_, err = crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Block not seen yet, proceed
@@ -149,6 +152,151 @@ func start() {
 			//////////////
 			// Counters //
 			//////////////
+
+			// Block count
+			go func() {
+				countKey := config.Config.RedisKeyPrefix + "block_count"
+				_, err = redis.GetRedisClient().IncCountBy(countKey, 1)
+				if err != nil {
+					zap.S().Warn(
+						"Routine=Transformer,",
+						" BlockNumber=", blockETL.Number,
+						" Step=", "Inc count block",
+						" Error=", err.Error(),
+					)
+				}
+			}()
+
+			// Transactions count
+			go func() {
+				transactions := transformBlockETLToTransactions(blockETL)
+
+				/////////////////
+				// Total count //
+				/////////////////
+				countRegular := int64(0)
+				countInternal := int64(0)
+
+				// Get count
+				for _, transaction := range transactions {
+					if transaction.Type == "transaction" {
+						// Regular
+
+						countRegular++
+					} else if transaction.Type == "log" {
+						// Internal
+
+						countInternal++
+					}
+				}
+
+				// Set count
+				countKeyRegular := config.Config.RedisKeyPrefix + "transaction_regular_count"
+				countKeyInternal := config.Config.RedisKeyPrefix + "transaction_internal_count"
+
+				_, err = redis.GetRedisClient().IncCountBy(countKeyRegular, countRegular)
+				if err != nil {
+					zap.S().Warn(
+						"Routine=Transformer,",
+						" BlockNumber=", blockETL.Number,
+						" Step=", "Inc count transactions regular",
+						" Error=", err.Error(),
+					)
+				}
+				_, err = redis.GetRedisClient().IncCountBy(countKeyInternal, countInternal)
+				if err != nil {
+					zap.S().Warn(
+						"Routine=Transformer,",
+						" BlockNumber=", blockETL.Number,
+						" Step=", "Inc count transactions internal",
+						" Error=", err.Error(),
+					)
+				}
+
+				//////////////////////
+				// Count by address //
+				//////////////////////
+				countByAddressRegular := map[string]int64{}
+				countByAddressInternal := map[string]int64{}
+
+				// Get count
+				for _, transaction := range transactions {
+					fromAddress := transaction.FromAddress
+					toAddress := transaction.ToAddress
+
+					if transaction.Type == "transaction" {
+						// Regular
+
+						// From address
+						if _, ok := countByAddressRegular[fromAddress]; ok == true {
+							countByAddressRegular[fromAddress]++
+						} else {
+							countByAddressRegular[fromAddress] = 1
+						}
+
+						// To address
+						if _, ok := countByAddressRegular[toAddress]; ok == true {
+							countByAddressRegular[toAddress]++
+						} else {
+							countByAddressRegular[toAddress] = 1
+						}
+
+					} else if transaction.Type == "log" {
+						// Internal
+
+						// From address
+						if _, ok := countByAddressInternal[fromAddress]; ok == true {
+							countByAddressInternal[fromAddress]++
+						} else {
+							countByAddressInternal[fromAddress] = 1
+						}
+
+						// To address
+						if _, ok := countByAddressInternal[toAddress]; ok == true {
+							countByAddressInternal[toAddress]++
+						} else {
+							countByAddressInternal[toAddress] = 1
+						}
+					}
+				}
+
+				// Set count
+				for address, count := range countByAddressRegular {
+					// Regular transactions
+
+					countByAddressKey := config.Config.RedisKeyPrefix + "transaction_regular_count_by_address_" + address
+					_, err = redis.GetRedisClient().IncCountBy(countByAddressKey, count)
+					if err != nil {
+						zap.S().Warn(
+							"Routine=Transformer,",
+							" BlockNumber=", blockETL.Number,
+							" Address=", address,
+							" Step=", "Inc transaction regular count by address",
+							" Error=", err.Error(),
+						)
+					}
+				}
+				for address, count := range countByAddressInternal {
+					// Internal transactions
+
+					countByAddressKey := config.Config.RedisKeyPrefix + "transaction_internal_count_by_address_" + address
+					_, err = redis.GetRedisClient().IncCountBy(countByAddressKey, count)
+					if err != nil {
+						zap.S().Warn(
+							"Routine=Transformer,",
+							" BlockNumber=", blockETL.Number,
+							" Address=", address,
+							" Step=", "Inc transaction internal count by address",
+							" Error=", err.Error(),
+						)
+					}
+				}
+			}()
+
+			// Logs count
+			// TODO
+
+			// Token Transfers count
 			// TODO
 
 			//////////////////
@@ -158,7 +306,7 @@ func start() {
 			err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
 
 		} else if err != nil {
-			// ERROR
+			// ERROR inserting block index
 			zap.S().Warn(
 				"Routine=Transformer,",
 				" BlockNumber=", blockETL.Number,
@@ -174,3 +322,22 @@ func convertToBlockETLProtoBuf(value []byte) (*models.BlockETL, error) {
 	err := proto.Unmarshal(value, block)
 	return block, err
 }
+
+// Testing generic function
+// func sendToLoader(
+// 	loader chan *interface{},
+// 	transformerFunc func(*models.BlockETL) *interface{},
+// 	block *models.BlockETL,
+// ) {
+//
+// 	transformedObject := transformerFunc(blockETL)
+//
+// 	transformedObjects, ok := transformedObject.([]interface{})
+// 	if ok == true {
+// 		for _, object := range transformedObjects {
+// 			loader <- object
+// 		}
+// 	} else {
+// 		loader <- transformedObject
+// 	}
+// }

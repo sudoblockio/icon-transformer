@@ -29,9 +29,11 @@ func (c *Client) SetCount(countKey string, count int64) error {
 	return err
 }
 
-func (c *Client) IncCount(countKey string) (int64, error) {
+func (c *Client) IncCountBy(countKey string, count int64) (int64, error) {
 
-	count, err := c.client.Incr(context.Background(), countKey).Result()
+	// NOTE is key does not exist, it will be set to 0 first
+	// NOTE https://redis.io/commands/INCR
+	count, err := c.client.IncrBy(context.Background(), countKey, count).Result()
 
 	return count, err
 }
