@@ -90,10 +90,20 @@ func StartLogLoader() {
 			// Load to postgres //
 			//////////////////////
 			err := GetLogCrud().UpsertOne(newLog)
-			zap.S().Debug("Loader=Log, TransactionHash=", newLog.TransactionHash, ", LogIndex=", newLog.LogIndex, " - Upserted")
+			zap.S().Debug(
+				"Loader=Log",
+				" TransactionHash=", newLog.TransactionHash,
+				" LogIndex=", newLog.LogIndex,
+				" - Upserted",
+			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal("Loader=Log, TransactionHash=", newLog.TransactionHash, ", LogIndex=", newLog.LogIndex, " - Error: ", err.Error())
+				zap.S().Fatal(
+					"Loader=Log",
+					" TransactionHash=", newLog.TransactionHash,
+					" LogIndex=", newLog.LogIndex,
+					" - Error: ", err.Error(),
+				)
 			}
 		}
 	}()

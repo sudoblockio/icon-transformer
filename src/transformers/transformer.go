@@ -55,20 +55,38 @@ func start() {
 		// NOTE transform blockETL to various database views
 		// NOTE blocks may be passed multiple times, loaders use upserts
 
-		// Block Loader
+		// Block loader
 		go transformToLoadBlock(blockETL)
 
-		// Transaction Loader
+		// Transaction loader
 		go transformToLoadTransactions(blockETL)
 
-		// Log Loader
+		// Transaction by address loader
+		go transformToLoadTransactionByAddresses(blockETL)
+
+		// Transaction internal by address loader
+		go transformToLoadTransactionInternalByAddresses(blockETL)
+
+		// Log loader
 		go transformToLoadLogs(blockETL)
 
-		// Token Transfer Loader
+		// Token transfer loader
 		go transformToLoadTokenTransfers(blockETL)
 
-		// Transaction Create Score Loader
+		// TODO
+		// Token transfer by address loader
+		// go transformToLoadTokenTransferByAddresses(blockETL)
+
+		// Transaction create score loader
 		go transformToLoadTransactionCreateScores(blockETL)
+
+		// TODO
+		// Address loader
+		// go transformToLoadAddresses(blockETL)
+
+		// TODO
+		// Address token loader
+		// go transformToLoadAddressTokens(blockETL)
 
 		/////////////////////
 		// Indexed loaders //
@@ -81,7 +99,7 @@ func start() {
 			// Block not seen yet, proceed
 
 			////////////////////
-			// Redis Channels //
+			// Redis channels //
 			////////////////////
 
 			// Blocks channel
@@ -93,7 +111,7 @@ func start() {
 			// Logs channel
 			go transformToChannelLogs(blockETL)
 
-			// Token Transfers channel
+			// Token transfers channel
 			go transformToChannelTokenTransfers(blockETL)
 
 			//////////////
@@ -109,11 +127,11 @@ func start() {
 			// Logs count
 			go transformToCountLogs(blockETL)
 
-			// Token Transfers count
+			// Token transfers count
 			go transformToCountTokenTransfers(blockETL)
 
 			//////////////////
-			// Commit Block //
+			// Commit block //
 			//////////////////
 			blockIndex := &models.BlockIndex{Number: blockETL.Number}
 			err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
@@ -145,6 +163,26 @@ func transformToLoadTransactions(blockETL *models.BlockETL) {
 	transactions := transformBlockETLToTransactions(blockETL)
 	for _, transaction := range transactions {
 		loaderChannel <- transaction
+	}
+}
+
+// Transaction by addresses loader
+func transformToLoadTransactionByAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
+
+	transactionByAddresses := transformBlockETLToTransactionByAddresses(blockETL)
+	for _, transactionByAddress := range transactionByAddresses {
+		loaderChannel <- transactionByAddress
+	}
+}
+
+// Transaction internal by addresses loader
+func transformToLoadTransactionInternalByAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionInternalByAddressCrud().LoaderChannel
+
+	transactionInternalByAddresses := transformBlockETLToTransactionInternalByAddresses(blockETL)
+	for _, transactionInternalByAddress := range transactionInternalByAddresses {
+		loaderChannel <- transactionInternalByAddress
 	}
 }
 

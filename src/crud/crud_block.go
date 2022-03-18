@@ -90,10 +90,18 @@ func StartBlockLoader() {
 			// Load to postgres //
 			//////////////////////
 			err := GetBlockCrud().UpsertOne(newBlock)
-			zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Upserted")
+			zap.S().Debug(
+				"Loader=Block",
+				" Number=", newBlock.Number,
+				" - Upserted",
+			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal("Loader=Block, Number=", newBlock.Number, " - Error: ", err.Error())
+				zap.S().Fatal(
+					"Loader=Block",
+					" Number=", newBlock.Number,
+					" - Error: ", err.Error(),
+				)
 			}
 		}
 	}()

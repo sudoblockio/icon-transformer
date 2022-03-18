@@ -90,10 +90,20 @@ func StartTokenTransferLoader() {
 			// Load to postgres //
 			//////////////////////
 			err := GetTokenTransferCrud().UpsertOne(newTokenTransfer)
-			zap.S().Debug("Loader=TokenTransfer, Hash=", newTokenTransfer.TransactionHash, ", LogIndex=", newTokenTransfer.LogIndex, " - Upserted")
+			zap.S().Debug(
+				"Loader=TokenTransfer",
+				" TransactionHash=", newTokenTransfer.TransactionHash,
+				" LogIndex=", newTokenTransfer.LogIndex,
+				" - Upserted",
+			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal("Loader=TokenTransfer, Hash=", newTokenTransfer.TransactionHash, ", LogIndex=", newTokenTransfer.LogIndex, " - Error: ", err.Error())
+				zap.S().Fatal(
+					"Loader=TokenTransfer",
+					" TransactionHash=", newTokenTransfer.TransactionHash,
+					" LogIndex=", newTokenTransfer.LogIndex,
+					" - Error: ", err.Error(),
+				)
 			}
 		}
 	}()

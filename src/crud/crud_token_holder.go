@@ -90,10 +90,20 @@ func StartTokenHolderLoader() {
 			// Load to postgres //
 			//////////////////////
 			err := GetTokenHolderCrud().UpsertOne(newTokenHolder)
-			zap.S().Debug("Loader=TokenHolder, TokenContractAddress=", newTokenHolder.TokenContractAddress, ", HolderAddress=", newTokenHolder.HolderAddress, " - Upserted")
+			zap.S().Debug(
+				"Loader=TokenHolder",
+				" TokenContractAddress=", newTokenHolder.TokenContractAddress,
+				" HolderAddress=", newTokenHolder.HolderAddress,
+				" - Upserted",
+			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal("Loader=TokenHolder, TokenContractAddress=", newTokenHolder.TokenContractAddress, ", HolderAddress=", newTokenHolder.HolderAddress, " - Error: ", err.Error())
+				zap.S().Fatal(
+					"Loader=TokenHolder",
+					" TokenContractAddress=", newTokenHolder.TokenContractAddress,
+					" HolderAddress=", newTokenHolder.HolderAddress,
+					" - Error: ", err.Error(),
+				)
 			}
 		}
 	}()
