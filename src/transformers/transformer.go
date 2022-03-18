@@ -73,9 +73,8 @@ func start() {
 		// Token transfer loader
 		go transformToLoadTokenTransfers(blockETL)
 
-		// TODO
 		// Token transfer by address loader
-		// go transformToLoadTokenTransferByAddresses(blockETL)
+		go transformToLoadTokenTransferByAddresses(blockETL)
 
 		// Transaction create score loader
 		go transformToLoadTransactionCreateScores(blockETL)
@@ -196,13 +195,23 @@ func transformToLoadLogs(blockETL *models.BlockETL) {
 	}
 }
 
-// TokenTransfers loader
+// Token transfers loader
 func transformToLoadTokenTransfers(blockETL *models.BlockETL) {
 	loaderChannel := crud.GetTokenTransferCrud().LoaderChannel
 
 	tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
 	for _, tokenTransfer := range tokenTransfers {
 		loaderChannel <- tokenTransfer
+	}
+}
+
+// Token transfer by address loader
+func transformToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
+
+	tokenTransferByAddresses := transformBlockETLToTokenTransferByAddresses(blockETL)
+	for _, tokenTransferByAddress := range tokenTransferByAddresses {
+		loaderChannel <- tokenTransferByAddress
 	}
 }
 
