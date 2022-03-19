@@ -79,13 +79,11 @@ func start() {
 		// Transaction create score loader
 		go transformToLoadTransactionCreateScores(blockETL)
 
-		// TODO
 		// Address loader
-		// go transformToLoadAddresses(blockETL)
+		go transformToLoadAddresses(blockETL)
 
-		// TODO
 		// Address token loader
-		// go transformToLoadAddressTokens(blockETL)
+		go transformToLoadAddressTokens(blockETL)
 
 		/////////////////////
 		// Indexed loaders //
@@ -215,13 +213,33 @@ func transformToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
 	}
 }
 
-// TransactionCreateScores loader
+// Transaction create scores loader
 func transformToLoadTransactionCreateScores(blockETL *models.BlockETL) {
 	loaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
 
 	transactionCreateScores := transformBlockETLToTransactionCreateScores(blockETL)
 	for _, transactionCreateScore := range transactionCreateScores {
 		loaderChannel <- transactionCreateScore
+	}
+}
+
+// Address loader
+func transformToLoadAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetAddressCrud().LoaderChannel
+
+	addresses := transformBlockETLToAddresses(blockETL)
+	for _, address := range addresses {
+		loaderChannel <- address
+	}
+}
+
+// Address tokens loader
+func transformToLoadAddressTokens(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetAddressTokenCrud().LoaderChannel
+
+	addressTokens := transformBlockETLToAddressTokens(blockETL)
+	for _, addressToken := range addressTokens {
+		loaderChannel <- addressToken
 	}
 }
 

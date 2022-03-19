@@ -1,0 +1,25 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message Address {
+  option (gorm.opts) = {ormable: true};
+
+  // BlockETL
+  string address = 1 [(gorm.field).tag = {primary_key: true}];
+  bool is_contract = 2 [(gorm.field).tag = {index: "address_idx_is_contract"}];
+  double balance = 3 [(gorm.field).tag = {index: "address_idx_balance"}];
+  string type = 4;
+
+  // Contracts Proccessed
+  string name = 5;
+  string status = 6;
+  uint64 created_timestamp = 7 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
+  bool is_token = 8 [(gorm.field).tag = {index: "address_idx_is_token"}];
+
+  // Governance Prep Processed 
+  bool is_prep = 9 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
+
+}
