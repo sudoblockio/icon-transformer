@@ -4,9 +4,9 @@ import (
 	"github.com/sudoblockio/icon-go-worker/models"
 )
 
-func transformBlockETLToAddressTokens(blockETL *models.BlockETL) []*models.AddressToken {
+func transformBlockETLToTokenAddresses(blockETL *models.BlockETL) []*models.TokenAddress {
 
-	addressTokens := []*models.AddressToken{}
+	tokenAddresses := []*models.TokenAddress{}
 
 	//////////
 	// Logs //
@@ -21,26 +21,26 @@ func transformBlockETLToAddressTokens(blockETL *models.BlockETL) []*models.Addre
 				fromAddress := logETL.Indexed[1]
 				if fromAddress != "" {
 
-					addressToken := &models.AddressToken{
+					tokenAddress := &models.TokenAddress{
 						Address:              fromAddress,
 						TokenContractAddress: logETL.Address,
 					}
-					addressTokens = append(addressTokens, addressToken)
+					tokenAddresses = append(tokenAddresses, tokenAddress)
 				}
 
 				// To Address
 				toAddress := logETL.Indexed[2]
 				if toAddress != "" {
 
-					addressToken := &models.AddressToken{
+					tokenAddress := &models.TokenAddress{
 						Address:              toAddress,
 						TokenContractAddress: logETL.Address,
 					}
-					addressTokens = append(addressTokens, addressToken)
+					tokenAddresses = append(tokenAddresses, tokenAddress)
 				}
 			}
 		}
 	}
 
-	return addressTokens
+	return tokenAddresses
 }

@@ -77,7 +77,7 @@ func addressBalanceRoutine() {
 
 			skip += limit
 		}
-		zap.S().Info("Completed routine, sleeping...")
+		zap.S().Info("Routine=AddressBalance - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
 		time.Sleep(config.Config.RoutinesSleepDuration)
 	}
 }

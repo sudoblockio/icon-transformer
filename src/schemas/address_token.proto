@@ -4,9 +4,10 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
-message AddressToken {
+message TokenAddress {
   option (gorm.opts) = {ormable: true};
 
   string address = 1 [(gorm.field).tag = {primary_key: true}];
   string token_contract_address = 2 [(gorm.field).tag = {primary_key: true}]; 
+  double balance = 3 [(gorm.field).tag = {index: "token_address_idx_balance"}];
 }

@@ -83,7 +83,7 @@ func start() {
 		go transformToLoadAddresses(blockETL)
 
 		// Address token loader
-		go transformToLoadAddressTokens(blockETL)
+		go transformToLoadTokenAddresses(blockETL)
 
 		/////////////////////
 		// Indexed loaders //
@@ -234,12 +234,12 @@ func transformToLoadAddresses(blockETL *models.BlockETL) {
 }
 
 // Address tokens loader
-func transformToLoadAddressTokens(blockETL *models.BlockETL) {
-	loaderChannel := crud.GetAddressTokenCrud().LoaderChannel
+func transformToLoadTokenAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTokenAddressCrud().LoaderChannel
 
-	addressTokens := transformBlockETLToAddressTokens(blockETL)
-	for _, addressToken := range addressTokens {
-		loaderChannel <- addressToken
+	tokenAddresses := transformBlockETLToTokenAddresses(blockETL)
+	for _, tokenAddress := range tokenAddresses {
+		loaderChannel <- tokenAddress
 	}
 }
 
