@@ -40,3 +40,11 @@ services:
     environment:
       <<: *env
 
+  worker-routine:
+    build:
+      context: .
+      target: prod
+    environment:
+      <<: *env
+      ROUTINES_RUN_ONLY: "true"
+

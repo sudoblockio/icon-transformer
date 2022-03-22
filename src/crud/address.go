@@ -58,6 +58,30 @@ func (m *AddressCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+// SelectMany - select many from addreses table
+func (m *AddressCrud) SelectMany(
+	limit int,
+	skip int,
+) (*[]models.Address, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Limit
+	db = db.Limit(limit)
+
+	// Skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+
+	addresses := &[]models.Address{}
+	db = db.Find(addresses)
+
+	return addresses, db.Error
+}
+
 func (m *AddressCrud) UpsertOne(
 	address *models.Address,
 ) error {
