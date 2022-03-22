@@ -82,6 +82,33 @@ func (m *TokenAddressCrud) SelectMany(
 	return tokenAddresses, db.Error
 }
 
+// CountByTokenContractAddress - select many from addreses table
+func (m *TokenAddressCrud) CountByTokenContractAddress() (map[string]int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.TokenAddress{})
+
+	// Count
+	db = db.Raw("SELECT COUNT(address) as count, token_contract_address FROM token_addresses GROUP BY token_contract_address")
+
+	// Rows
+	rows, err := db.Rows()
+	if err != nil {
+		return nil, err
+	}
+	countByTokenContractAddress := map[string]int64{}
+	for rows.Next() {
+		count := int64(0)
+		tokenContractAddress := ""
+		rows.Scan(&count, &tokenContractAddress)
+
+		countByTokenContractAddress[tokenContractAddress] = count
+	}
+
+	return countByTokenContractAddress, nil
+}
+
 func (m *TokenAddressCrud) UpsertOne(
 	addressToken *models.TokenAddress,
 ) error {

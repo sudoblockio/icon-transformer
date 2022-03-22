@@ -7,4 +7,7 @@ func StartRoutines() {
 
 	// Address Token Balance
 	go tokenAddressBalanceRoutine()
+
+	// Address Token Count
+	go tokenAddressCountRoutine()
 }

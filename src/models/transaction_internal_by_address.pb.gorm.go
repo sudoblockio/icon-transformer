@@ -182,7 +182,7 @@ func DefaultListTransactionInternalByAddress(ctx context.Context, db *gorm1.DB) 
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("address")
+	db = db.Order("transaction_hash")
 	ormResponse := []TransactionInternalByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
