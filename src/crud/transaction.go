@@ -58,6 +58,28 @@ func (m *TransactionCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+// SelectOne - select from transactions table
+func (m *TransactionCrud) SelectOne(
+	hash string,
+	logIndex int32, // Used for internal transactions
+) (*models.Transaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&[]models.Transaction{})
+
+	// Hash
+	db = db.Where("hash = ?", hash)
+
+	// Log Index
+	db = db.Where("log_index = ?", logIndex)
+
+	transaction := &models.Transaction{}
+	db = db.First(transaction)
+
+	return transaction, db.Error
+}
+
 func (m *TransactionCrud) UpsertOne(
 	transaction *models.Transaction,
 ) error {

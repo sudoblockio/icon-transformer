@@ -58,6 +58,30 @@ func (m *TransactionCreateScoreCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+// SelectMany - select many from addreses table
+func (m *TransactionCreateScoreCrud) SelectMany(
+	limit int,
+	skip int,
+) (*[]models.TransactionCreateScore, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.TransactionCreateScore{})
+
+	// Limit
+	db = db.Limit(limit)
+
+	// Skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+
+	transactionCreateScores := &[]models.TransactionCreateScore{}
+	db = db.Find(transactionCreateScores)
+
+	return transactionCreateScores, db.Error
+}
+
 func (m *TransactionCreateScoreCrud) UpsertOne(
 	transactionCreateScore *models.TransactionCreateScore,
 ) error {
