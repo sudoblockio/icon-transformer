@@ -24,7 +24,7 @@ func tokenAddressCountRoutine() {
 			)
 		}
 
-		zap.S().Info("Routine=TokenAddressCount", " - Processing tokenAddressCounts...")
+		zap.S().Info("Routine=TokenAddressCountRoutine", " - Processing tokenAddressCounts...")
 		for tokenContractAddress, count := range tokenAddressCounts {
 			countKey := config.Config.RedisKeyPrefix + "token_address_count_by_token_contract_" + tokenContractAddress
 			err = redis.GetRedisClient().SetCount(countKey, count)
@@ -37,7 +37,7 @@ func tokenAddressCountRoutine() {
 			}
 		}
 
-		zap.S().Info("Routine=TokenAddressCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
+		zap.S().Info("Routine=TokenAddressCountRoutine - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
 		time.Sleep(config.Config.RoutinesSleepDuration)
 	}
 }

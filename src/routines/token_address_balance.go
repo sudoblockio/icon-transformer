@@ -36,7 +36,7 @@ func tokenAddressBalanceRoutine() {
 				break
 			}
 
-			zap.S().Info("Routine=TokenAddressBalance", " - Processing ", len(*tokenAddresses), " tokenAddresses...")
+			zap.S().Info("Routine=TokenAddressBalanceRoutine", " - Processing ", len(*tokenAddresses), " tokenAddresses...")
 			for _, tokenAddress := range *tokenAddresses {
 
 				/////////////
@@ -47,7 +47,7 @@ func tokenAddressBalanceRoutine() {
 				balance, err := service.IconNodeServiceGetTokenBalance(tokenAddress.TokenContractAddress, tokenAddress.Address)
 				if err != nil {
 					// Icon node error
-					zap.S().Warn("Routine=Balance, Address=", tokenAddress.Address, " - Error: ", err.Error())
+					zap.S().Warn("Routine=TokenAddressBalanceRoutine, Address=", tokenAddress.Address, " - Error: ", err.Error())
 					continue
 				}
 
@@ -55,7 +55,7 @@ func tokenAddressBalanceRoutine() {
 				decimalBase, err := service.IconNodeServiceGetTokenDecimalBase(tokenAddress.TokenContractAddress)
 				if err != nil {
 					// Icon node error
-					zap.S().Warn("Routine=TokenHolder - Error: ", err.Error())
+					zap.S().Warn("Routine=TokenAddressBalanceRoutine - Error: ", err.Error())
 					continue
 				}
 				tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
@@ -71,7 +71,7 @@ func tokenAddressBalanceRoutine() {
 			skip += limit
 		}
 
-		zap.S().Info("Routine=TokenAddressBalance - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
+		zap.S().Info("Routine=TokenAddressBalanceRoutine - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
 		time.Sleep(config.Config.RoutinesSleepDuration)
 	}
 }
