@@ -34,11 +34,11 @@ jobs:
       - name: Check stack
         run: make ps
 
-      - name: Go mod tidy
-        run: cd tests && go mod tidy
+#     - name: Go mod tidy
+#       run: cd tests && go mod tidy
 
-      - name: Run tests
-        run: cd tests && go test ./... -v
+#     - name: Run tests
+#       run: cd tests && go test ./... -v
 
       - name: Log in to Docker Hub
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9

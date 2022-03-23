@@ -36,11 +36,11 @@ jobs:
       - name: Check stack
         run: make ps
 
-      - name: Go mod tidy
-        run: cd tests && go mod tidy
+#     - name: Go mod tidy
+#       run: cd tests && go mod tidy
 
-      - name: Run tests
-        run: cd tests && go test ./... -v
+#     - name: Run tests
+#       run: cd tests && go test ./... -v
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
