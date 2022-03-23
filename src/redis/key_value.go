@@ -24,3 +24,11 @@ func (c *Client) SetValue(key string, value string) error {
 
 	return err
 }
+
+func (c *Client) GetAllKeys(pattern string) ([]string, error) {
+
+	keysStringCmd := c.client.Keys(context.Background(), pattern)
+	keys, err := keysStringCmd.Result()
+
+	return keys, err
+}

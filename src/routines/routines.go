@@ -16,4 +16,7 @@ func StartRoutines() {
 
 	// Transaction Create Score
 	go transactionCreateScoreRoutine()
+
+	// Redis Store Count Keys
+	go redisStoreKeysRoutine()
 }
