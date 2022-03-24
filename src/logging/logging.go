@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/global"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/global"
 )
 
 // Init - init logging config

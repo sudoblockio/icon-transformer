@@ -11,9 +11,9 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/crud"
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 type kafkaTopicConsumer struct {

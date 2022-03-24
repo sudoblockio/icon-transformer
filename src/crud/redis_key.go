@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 // RedisKeyCrud - type for redisKey table model

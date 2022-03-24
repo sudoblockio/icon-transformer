@@ -1,7 +1,7 @@
 package transformers
 
 import (
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 func transformBlockETLToTokenAddresses(blockETL *models.BlockETL) []*models.TokenAddress {

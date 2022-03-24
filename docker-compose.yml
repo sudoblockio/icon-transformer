@@ -1,7 +1,7 @@
 version: "3.7"
 
-x-env: &env
-  NAME: "blocks"
+x-transformer-env: &transformer-env
+  NAME: "icon-transformer"
   NETWORK_NAME: "mainnet"
 
   # Logging
@@ -33,18 +33,18 @@ x-env: &env
   REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
 services:
-  worker:
+  transformer:
     build:
       context: .
       target: prod
     environment:
-      <<: *env
+      <<: *transformer-env
 
-  worker-routine:
+  transformer-routine:
     build:
       context: .
       target: prod
     environment:
-      <<: *env
+      <<: *transformer-env
       ROUTINES_RUN_ONLY: "true"
 

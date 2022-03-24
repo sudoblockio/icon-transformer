@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 func transformBlockETLToBlock(blockETL *models.BlockETL) *models.Block {

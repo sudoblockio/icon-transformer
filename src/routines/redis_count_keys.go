@@ -5,10 +5,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/crud"
-	"github.com/sudoblockio/icon-go-worker/models"
-	"github.com/sudoblockio/icon-go-worker/redis"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/redis"
 )
 
 func redisStoreKeysRoutine() {

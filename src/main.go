@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/global"
-	"github.com/sudoblockio/icon-go-worker/kafka"
-	"github.com/sudoblockio/icon-go-worker/logging"
-	"github.com/sudoblockio/icon-go-worker/routines"
-	"github.com/sudoblockio/icon-go-worker/transformers"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/global"
+	"github.com/sudoblockio/icon-transformer/kafka"
+	"github.com/sudoblockio/icon-transformer/logging"
+	"github.com/sudoblockio/icon-transformer/routines"
+	"github.com/sudoblockio/icon-transformer/transformers"
 )
 
 func main() {

@@ -8,11 +8,11 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/jinzhu/copier"
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/crud"
-	"github.com/sudoblockio/icon-go-worker/models"
-	"github.com/sudoblockio/icon-go-worker/service"
-	"github.com/sudoblockio/icon-go-worker/utils"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/service"
+	"github.com/sudoblockio/icon-transformer/utils"
 )
 
 func tokenAddressBalanceRoutine() {

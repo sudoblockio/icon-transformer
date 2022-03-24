@@ -1,31 +1,42 @@
 version: "3.7"
 
-services:
+x-extractor-env: &extractor-env
+  # General
+  NAME: "icon-extractor"
+  NETWORK_NAME: "mainnet"
 
-  etl:
-    image: sudoblock/icon-go-etl:latest
+  # Extractors
+  START_CLAIM_EXTRACTORS: "false"
+  NUM_CLAIM_EXTRACTORS: "4"
+  MAX_CLAIM_SIZE: "1000"
+  START_HEAD_EXTRACTOR: "true"
+  HEAD_EXTRACTOR_START_BLOCK: "40000000"
+
+  # Logging
+  LOG_LEVEL: "DEBUG"
+  LOG_TO_FILE: "false"
+  LOG_FILE_NAME: ""
+  LOG_FORMAT: "console"
+  LOG_IS_DEVELOPMENT: "true"
+
+  # Kakfa
+  KAFKA_BROKER_URL: "kafka:9092"
+
+  # DB
+  DB_DRIVER: "postgres"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_PASSWORD: "changeme"
+  DB_DBNAME: "postgres"
+  DB_SSL_MODE: "disable"
+  DB_TIMEZONE: "UTC"
+
+services:
+  extractor:
+    image: sudoblock/icon-extractor:latest
     environment:
-      NAME: "blocks"
-      NETWORK_NAME: "mainnet"
-      LOG_LEVEL: "DEBUG"
-      LOG_TO_FILE: "false"
-      LOG_FILE_NAME: ""
-      LOG_FORMAT: "console"
-      LOG_IS_DEVELOPMENT: "true"
-      KAFKA_BROKER_URL: "kafka:9092"
-      DB_DRIVER: "postgres"
-      DB_HOST: "postgres"
-      DB_PORT: "5432"
-      DB_USER: "postgres"
-      DB_PASSWORD: "changeme"
-      DB_DBNAME: "postgres"
-      DB_SSL_MODE: "disable"
-      DB_TIMEZONE: "UTC"
-      START_CLAIM_EXTRACTORS: "false"
-      NUM_CLAIM_EXTRACTORS: "4"
-      MAX_CLAIM_SIZE: "1000"
-      START_HEAD_EXTRACTOR: "true"
-      HEAD_EXTRACTOR_START_BLOCK: "40000000"
+      <<: *extractor-env
 
   ############
   # Database #

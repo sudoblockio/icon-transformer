@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 func extractMethodFromTransactionETL(transactionETL *models.TransactionETL) string {

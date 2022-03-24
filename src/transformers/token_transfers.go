@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/sudoblockio/icon-go-worker/models"
-	"github.com/sudoblockio/icon-go-worker/service"
-	"github.com/sudoblockio/icon-go-worker/utils"
+	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/service"
+	"github.com/sudoblockio/icon-transformer/utils"
 	"go.uber.org/zap"
 )
 

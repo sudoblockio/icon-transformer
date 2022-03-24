@@ -1,4 +1,4 @@
-module github.com/sudoblockio/icon-go-worker
+module github.com/sudoblockio/icon-transformer
 
 go 1.16
 

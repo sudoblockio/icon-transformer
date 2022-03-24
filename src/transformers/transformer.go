@@ -8,11 +8,11 @@ import (
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/crud"
-	"github.com/sudoblockio/icon-go-worker/kafka"
-	"github.com/sudoblockio/icon-go-worker/models"
-	"github.com/sudoblockio/icon-go-worker/redis"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/kafka"
+	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/redis"
 )
 
 func Start() {

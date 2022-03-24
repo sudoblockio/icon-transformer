@@ -3,7 +3,7 @@ package transformers
 import (
 	"encoding/json"
 
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 )
 

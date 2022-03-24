@@ -3,8 +3,8 @@ package routines
 import (
 	"encoding/json"
 
-	"github.com/sudoblockio/icon-go-worker/crud"
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/models"
 )
 
 // NOTE this routine only runs once

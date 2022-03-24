@@ -8,7 +8,7 @@ import (
 )
 
 type configType struct {
-	Name        string `envconfig:"NAME" required:"false" default:"icon-go-worker"`
+	Name        string `envconfig:"NAME" required:"false" default:"icon-transformer"`
 	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
 	// Icon node service

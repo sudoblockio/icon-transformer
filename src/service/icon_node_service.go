@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/sudoblockio/icon-go-worker/config"
-	"github.com/sudoblockio/icon-go-worker/redis"
-	"github.com/sudoblockio/icon-go-worker/utils"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/redis"
+	"github.com/sudoblockio/icon-transformer/utils"
 	"go.uber.org/zap"
 )
 

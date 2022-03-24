@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/sudoblockio/icon-go-worker/utils"
-
-	"github.com/sudoblockio/icon-go-worker/models"
+	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/utils"
 )
 
 func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transaction {
