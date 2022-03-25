@@ -58,23 +58,6 @@ func GetRedisClient() *Client {
 				zap.S().Warn("RedisClient: Unable to connect to redis", err.Error())
 				return err
 			}
-
-			// Init pubsub
-			redisClient.pubsub = redisClient.client.Subscribe(
-				ctx,
-				config.Config.RedisBlocksChannel,
-				config.Config.RedisTransactionsChannel,
-				config.Config.RedisLogsChannel,
-				config.Config.RedisTokenTransfersChannel,
-			)
-
-			// Test pubsub
-			_, err = redisClient.pubsub.Receive(ctx)
-			if err != nil {
-				zap.S().Warn("RedisClient: Unable to create pubsub channel")
-				return err
-			}
-
 			return nil
 		}
 
