@@ -27,8 +27,10 @@ type AddressORM struct {
 	IsContract       bool    `gorm:"index:address_idx_is_contract"`
 	IsPrep           bool    `gorm:"index:address_idx_is_governance_prep"`
 	IsToken          bool    `gorm:"index:address_idx_is_token"`
+	LogCount         uint64  `gorm:"index:address_idx_log_count"`
 	Name             string
 	Status           string
+	TransactionCount uint64 `gorm:"index:address_idx_transaction_count"`
 	Type             string
 }
 
@@ -49,6 +51,8 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	}
 	to.Address = m.Address
 	to.IsContract = m.IsContract
+	to.TransactionCount = m.TransactionCount
+	to.LogCount = m.LogCount
 	to.Balance = m.Balance
 	to.Type = m.Type
 	to.Name = m.Name
@@ -74,6 +78,8 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	}
 	to.Address = m.Address
 	to.IsContract = m.IsContract
+	to.TransactionCount = m.TransactionCount
+	to.LogCount = m.LogCount
 	to.Balance = m.Balance
 	to.Type = m.Type
 	to.Name = m.Name
@@ -158,6 +164,14 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 		}
 		if f == prefix+"IsContract" {
 			patchee.IsContract = patcher.IsContract
+			continue
+		}
+		if f == prefix+"TransactionCount" {
+			patchee.TransactionCount = patcher.TransactionCount
+			continue
+		}
+		if f == prefix+"LogCount" {
+			patchee.LogCount = patcher.LogCount
 			continue
 		}
 		if f == prefix+"Balance" {
