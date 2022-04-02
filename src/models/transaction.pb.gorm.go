@@ -29,7 +29,8 @@ type TransactionORM struct {
 	DataType           string
 	FromAddress        string `gorm:"index:transaction_idx_from_address"`
 	Hash               string `gorm:"primary_key"`
-	LogIndex           int64  `gorm:"primary_key"`
+	LogCount           int64
+	LogIndex           int64 `gorm:"primary_key"`
 	LogsBloom          string
 	Method             string `gorm:"index:transaction_idx_method"`
 	Nid                string
@@ -72,6 +73,7 @@ func (m *Transaction) ToORM(ctx context.Context) (TransactionORM, error) {
 	to.FromAddress = m.FromAddress
 	to.ToAddress = m.ToAddress
 	to.BlockNumber = m.BlockNumber
+	to.LogCount = m.LogCount
 	to.Version = m.Version
 	to.Value = m.Value
 	to.ValueDecimal = m.ValueDecimal
@@ -115,6 +117,7 @@ func (m *TransactionORM) ToPB(ctx context.Context) (Transaction, error) {
 	to.FromAddress = m.FromAddress
 	to.ToAddress = m.ToAddress
 	to.BlockNumber = m.BlockNumber
+	to.LogCount = m.LogCount
 	to.Version = m.Version
 	to.Value = m.Value
 	to.ValueDecimal = m.ValueDecimal
@@ -232,6 +235,10 @@ func DefaultApplyFieldMaskTransaction(ctx context.Context, patchee *Transaction,
 		}
 		if f == prefix+"BlockNumber" {
 			patchee.BlockNumber = patcher.BlockNumber
+			continue
+		}
+		if f == prefix+"LogCount" {
+			patchee.LogCount = patcher.LogCount
 			continue
 		}
 		if f == prefix+"Version" {

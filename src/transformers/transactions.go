@@ -20,6 +20,9 @@ func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transa
 		// Method
 		method := extractMethodFromTransactionETL(transactionETL)
 
+		// Log Count
+		logCount := int64(len(transactionETL.Logs))
+
 		// Value Decimal
 		valueDecimal := float64(0)
 		if transactionETL.Value != "" {
@@ -46,6 +49,7 @@ func transformBlockETLToTransactions(blockETL *models.BlockETL) []*models.Transa
 			FromAddress:        transactionETL.FromAddress,
 			ToAddress:          transactionETL.ToAddress,
 			BlockNumber:        blockETL.Number,
+			LogCount:           logCount,
 			Version:            transactionETL.Version,
 			Value:              transactionETL.Value,
 			ValueDecimal:       valueDecimal,
