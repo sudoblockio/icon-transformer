@@ -82,6 +82,20 @@ func (m *AddressCrud) SelectMany(
 	return addresses, db.Error
 }
 
+// SelectCount - select from blockCounts table
+// NOTE very slow operation
+func (m *AddressCrud) Count() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	count := int64(0)
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
 func (m *AddressCrud) UpsertOne(
 	address *models.Address,
 ) error {

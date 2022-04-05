@@ -8,6 +8,9 @@ func StartRoutines() {
 	// Address Type
 	go addressTypeRoutine()
 
+	// Address Count
+	go addressCountRoutine()
+
 	// Address Token Balance
 	go tokenAddressBalanceRoutine()
 
