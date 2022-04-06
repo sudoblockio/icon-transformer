@@ -84,11 +84,28 @@ func (m *AddressCrud) SelectMany(
 
 // SelectCount - select from blockCounts table
 // NOTE very slow operation
-func (m *AddressCrud) Count() (int64, error) {
+func (m *AddressCrud) CountAll() (int64, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.Address{})
+
+	count := int64(0)
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
+// SelectCount - select from blockCounts table
+// NOTE very slow operation
+func (m *AddressCrud) CountContracts() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Is Contract
+	db = db.Where("is_contract = ?", true)
 
 	count := int64(0)
 	db = db.Count(&count)
