@@ -11,6 +11,18 @@ func StartRoutines() {
 	// Address Count
 	go addressCountRoutine()
 
+	// Address Transaction Count
+	go addressTransactionCountRoutine()
+
+	// Address Transaction Internal Count
+	go addressTransactionInternalCountRoutine()
+
+	// Address Log Count
+	go addressLogCountRoutine()
+
+	// Address Token Transfer Count
+	go addressTokenTransferCountRoutine()
+
 	// Address Token Balance
 	go tokenAddressBalanceRoutine()
 

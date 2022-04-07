@@ -10,18 +10,19 @@ message Address {
   // BlockETL
   string address = 1 [(gorm.field).tag = {primary_key: true}];
   bool is_contract = 2 [(gorm.field).tag = {index: "address_idx_is_contract"}];
-  uint64 transaction_count = 3 [(gorm.field).tag = {index: "address_idx_transaction_count"}];
-  uint64 log_count = 4 [(gorm.field).tag = {index: "address_idx_log_count"}];
-  double balance = 5 [(gorm.field).tag = {index: "address_idx_balance"}];
-  string type = 6;
+  int64 transaction_count = 3 [(gorm.field).tag = {index: "address_idx_transaction_count"}];
+  int64 transaction_internal_count = 4 [(gorm.field).tag = {index: "address_idx_transaction_internal_count"}];
+  int64 log_count = 5 [(gorm.field).tag = {index: "address_idx_log_count"}];
+  int64 token_transfer_count = 6 [(gorm.field).tag = {index: "address_idx_token_transfer_count"}];
+  double balance = 7 [(gorm.field).tag = {index: "address_idx_balance"}];
+  string type = 8;
 
   // Contracts Proccessed
-  string name = 7;
-  string status = 8;
-  uint64 created_timestamp = 9 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
-  bool is_token = 10 [(gorm.field).tag = {index: "address_idx_is_token"}];
+  string name = 9;
+  string status = 10;
+  int64 created_timestamp = 11 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
+  bool is_token = 12 [(gorm.field).tag = {index: "address_idx_is_token"}];
 
   // Governance Prep Processed 
-  bool is_prep = 11 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
-
+  bool is_prep = 13 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
 }
