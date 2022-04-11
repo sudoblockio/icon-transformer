@@ -21,7 +21,7 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type BlockCountORM struct {
-	Count uint64
+	Count int64
 	Type  string `gorm:"primary_key"`
 }
 

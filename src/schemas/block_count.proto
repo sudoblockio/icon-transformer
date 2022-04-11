@@ -8,5 +8,5 @@ message BlockCount {
   option (gorm.opts) = {ormable: true};
 
   string type = 1 [(gorm.field).tag = {primary_key: true}];
-  uint64 count = 2;
+  int64 count = 2;
 }
