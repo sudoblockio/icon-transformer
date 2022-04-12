@@ -35,15 +35,15 @@ x-transformer-env: &transformer-env
 services:
   transformer:
     build:
-      context: .
-      target: prod
+      context: ${TRANSFORMER_CONTEXT:-.}
+      target: ${TRANSFORMER_TARGET:-prod}
     environment:
       <<: *transformer-env
 
   transformer-routine:
     build:
-      context: .
-      target: prod
+      context: ${TRANSFORMER_CONTEXT:-.}
+      target: ${TRANSFORMER_TARGET:-prod}
     environment:
       <<: *transformer-env
       ROUTINES_RUN_ONLY: "true"
