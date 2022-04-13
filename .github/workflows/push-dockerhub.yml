@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  docker:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,34 +40,88 @@ jobs:
 #     - name: Run tests
 #       run: cd tests && go test ./... -v
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      tag: ${{ steps.source.outputs.TAG }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - id: last
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+
+      - name: Tag name
+        id: source
+        run: |
+          echo ::set-output name=TAG::${{ steps.last.outputs.release }}-${{ github.run_number }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: sudoblock/icon-transformer
-
-      - name: Build and push Docker image (latest)
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
           target: prod
           push: true
-          tags: sudoblock/icon-transformer:latest
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: sudoblock/icon-go-api:latest, sudoblock/icon-go-api:${{ steps.source.outputs.TAG }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+  push_refs:
+    runs-on: ubuntu-latest
+    needs: docker
+    strategy:
+      matrix:
+        include:
+          - cluster: dev-lax
+            network_name: mainnet
+            network_version: v2
+          - cluster: dev-lax
+            network_name: sejong
+            network_version: v2
+
+    steps:
+
+      - name: Checkout charts repo
+        uses: actions/checkout@v2
         with:
-          context: .
-          file: ./Dockerfile
-          target: prod
-          push: true
-          tags: sudoblock/icon-transformer:${{ github.run_number }}
-          labels: ${{ steps.meta.outputs.labels }}
+          repository: sudoblockio/icon-charts
+          ref: main
+          path: charts
+          token: ${{ secrets.ICON_CHARTS_PAT }}
+
+      - name: Update ${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }} deployment values file
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: sudoblockio/icon-charts
+          valueFile: 'deployments/${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }}/api/tags.yaml'
+          propertyPath: 'deployment.image.tag'
+          value: ${{needs.docker.outputs.tag}}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
+      - name: Configure credentials
+        uses: oleksiyrudenko/gha-git-credentials@v2-latest
+        with:
+          token: '${{ secrets.ICON_CHARTS_PAT }}'
+          global: true
+
+      - name: Commit all updates
+        run: |
+          git pull
+          git add -A
+          git commit -m "addresses ${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }} deployment image version to ${{needs.docker.outputs.tag}}"
+          git push origin
+        working-directory: charts
