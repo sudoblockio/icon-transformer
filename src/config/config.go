@@ -11,15 +11,15 @@ type configType struct {
 	Name        string `envconfig:"NAME" required:"false" default:"icon-transformer"`
 	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
-	// Icon node service
-	IconNodeServiceURL string `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
-
 	// Logging
 	LogLevel         string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
 	LogToFile        bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
 	LogFileName      string `envconfig:"LOG_FILE_NAME" required:"false" default:"etl.log"`
 	LogFormat        string `envconfig:"LOG_FORMAT" required:"false" default:"console"`
 	LogIsDevelopment bool   `envconfig:"LOG_IS_DEVELOPMENT" required:"false" default:"true"`
+
+	// Icon node service
+	IconNodeServiceURL string `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
 
 	// Kafka
 	KafkaBrokerURL   string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"localhost:29092"`
@@ -72,7 +72,7 @@ type configType struct {
 
 	// Routines
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
-	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_SECONDS" required:"false" default:"1m"`
+	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
 }
 
