@@ -56,34 +56,34 @@ func start() {
 		// NOTE blocks may be passed multiple times, loaders use upserts
 
 		// Block loader
-		go transformToLoadBlock(blockETL)
+		transformToLoadBlock(blockETL)
 
 		// Transaction loader
-		go transformToLoadTransactions(blockETL)
+		transformToLoadTransactions(blockETL)
 
 		// Transaction by address loader
-		go transformToLoadTransactionByAddresses(blockETL)
+		transformToLoadTransactionByAddresses(blockETL)
 
 		// Transaction internal by address loader
-		go transformToLoadTransactionInternalByAddresses(blockETL)
+		transformToLoadTransactionInternalByAddresses(blockETL)
 
 		// Log loader
-		go transformToLoadLogs(blockETL)
+		transformToLoadLogs(blockETL)
 
 		// Token transfer loader
-		go transformToLoadTokenTransfers(blockETL)
+		transformToLoadTokenTransfers(blockETL)
 
 		// Token transfer by address loader
-		go transformToLoadTokenTransferByAddresses(blockETL)
+		transformToLoadTokenTransferByAddresses(blockETL)
 
 		// Transaction create score loader
-		go transformToLoadTransactionCreateScores(blockETL)
+		transformToLoadTransactionCreateScores(blockETL)
 
 		// Address loader
-		go transformToLoadAddresses(blockETL)
+		transformToLoadAddresses(blockETL)
 
 		// Address token loader
-		go transformToLoadTokenAddresses(blockETL)
+		transformToLoadTokenAddresses(blockETL)
 
 		/////////////////////
 		// Indexed loaders //
@@ -100,32 +100,32 @@ func start() {
 			////////////////////
 
 			// Blocks channel
-			go transformToChannelBlocks(blockETL)
+			transformToChannelBlocks(blockETL)
 
 			// Transactions channel
-			go transformToChannelTransactions(blockETL)
+			transformToChannelTransactions(blockETL)
 
 			// Logs channel
-			go transformToChannelLogs(blockETL)
+			transformToChannelLogs(blockETL)
 
 			// Token transfers channel
-			go transformToChannelTokenTransfers(blockETL)
+			transformToChannelTokenTransfers(blockETL)
 
 			//////////////
 			// Counters //
 			//////////////
 
 			// Block count
-			go transformToCountBlocks(blockETL)
+			transformToCountBlocks(blockETL)
 
 			// Transactions count
-			go transformToCountTransactions(blockETL)
+			transformToCountTransactions(blockETL)
 
 			// Logs count
-			go transformToCountLogs(blockETL)
+			transformToCountLogs(blockETL)
 
 			// Token transfers count
-			go transformToCountTokenTransfers(blockETL)
+			transformToCountTokenTransfers(blockETL)
 
 			//////////////////
 			// Commit block //
