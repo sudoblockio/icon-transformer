@@ -10,6 +10,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/infobloxopen/atlas-app-toolkit v0.25.1
 	github.com/infobloxopen/protoc-gen-gorm v0.20.1
+	github.com/jinzhu/copier v0.3.5
 	github.com/jinzhu/gorm v1.9.16
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mwitkow/go-proto-validators v0.3.2
