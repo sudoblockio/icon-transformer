@@ -635,7 +635,7 @@ func transformToServiceTokenAddressBalance(blockETL *models.BlockETL) {
 
 		tokenAddresses := transformBlockETLToTokenAddresses(blockETL)
 
-		for _, tokenAddress := range *tokenAddresses {
+		for _, tokenAddress := range tokenAddresses {
 
 			/////////////
 			// Balance //
