@@ -3,16 +3,20 @@ package transformers
 import (
 	"encoding/json"
 	"errors"
+	"time"
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 
+	"github.com/jinzhu/copier"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/kafka"
 	"github.com/sudoblockio/icon-transformer/models"
 	"github.com/sudoblockio/icon-transformer/redis"
+	"github.com/sudoblockio/icon-transformer/service"
+	"github.com/sudoblockio/icon-transformer/utils"
 )
 
 func Start() {
@@ -126,6 +130,16 @@ func start() {
 
 			// Token transfers count
 			transformToCountTokenTransfers(blockETL)
+
+			///////////////////
+			// Service Calls //
+			///////////////////
+
+			// Address Balance
+			transformToServiceAddressBalance(blockETL)
+
+			// Token Address Balance
+			transformToServiceTokenAddressBalance(blockETL)
 
 			//////////////////
 			// Commit block //
@@ -561,6 +575,95 @@ func transformToCountTokenTransfers(blockETL *models.BlockETL) {
 				" Step=", "Inc count token transfer by token contract",
 				" Error=", err.Error(),
 			)
+		}
+	}
+}
+
+// Address Balance
+func transformToServiceAddressBalance(blockETL *models.BlockETL) {
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerServiceCallThreshold {
+		// block is recent enough, calculate balances
+
+		addresses := transformBlockETLToAddresses(blockETL)
+
+		for _, address := range addresses {
+
+			// Node call
+			balance, err := service.IconNodeServiceGetBalance(address.Address)
+			if err != nil {
+				// Icon node error
+				zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
+				continue
+			}
+
+			// Hex -> float64
+			address.Balance = utils.StringHexToFloat64(balance, 18)
+
+			////////////////////
+			// Staked Balance //
+			////////////////////
+			stakedBalance, err := service.IconNodeServiceGetStakedBalance(address.Address)
+			if err != nil {
+				// Icon node error
+				zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
+				continue
+			}
+
+			// Hex -> float64
+			address.Balance += utils.StringHexToFloat64(stakedBalance, 18)
+
+			// Copy struct for pointer conflicts
+			addressCopy := &models.Address{}
+			copier.Copy(addressCopy, &address)
+
+			// Insert to database
+			crud.GetAddressCrud().LoaderChannel <- addressCopy
+		}
+	}
+}
+
+// Token Address Balance
+func transformToServiceTokenAddressBalance(blockETL *models.BlockETL) {
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerServiceCallThreshold {
+		// block is recent enough, calculate balances
+
+		tokenAddresses := transformBlockETLToTokenAddresses(blockETL)
+
+		for _, tokenAddress := range tokenAddresses {
+
+			/////////////
+			// Balance //
+			/////////////
+
+			// Node call
+			balance, err := service.IconNodeServiceGetTokenBalance(tokenAddress.TokenContractAddress, tokenAddress.Address)
+			if err != nil {
+				// Icon node error
+				zap.S().Warn("Routine=TokenAddressBalanceRoutine, Address=", tokenAddress.Address, " - Error: ", err.Error())
+				continue
+			}
+
+			// Hex -> float64
+			decimalBase, err := service.IconNodeServiceGetTokenDecimalBase(tokenAddress.TokenContractAddress)
+			if err != nil {
+				// Icon node error
+				zap.S().Warn("Routine=TokenAddressBalanceRoutine - Error: ", err.Error())
+				continue
+			}
+			tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
+
+			// Copy struct for pointer conflicts
+			tokenAddressCopy := &models.TokenAddress{}
+			copier.Copy(tokenAddressCopy, &tokenAddress)
+
+			// Insert to database
+			crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
 		}
 	}
 }
