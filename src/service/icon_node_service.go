@@ -1,14 +1,8 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/redis"
 	"github.com/sudoblockio/icon-transformer/utils"
@@ -18,8 +12,6 @@ import (
 func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
 
 	// Request icon contract
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "method": "icx_getBlockByHeight",
@@ -29,41 +21,9 @@ func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
     }
 	}`, height)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return nil, err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return nil, errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return nil, err
+		zap.S().Fatal(err)
 	}
 
 	// Extract result
@@ -120,8 +80,6 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 	}
 
 	// Request icon contract
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "id": 1234,
@@ -136,41 +94,9 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
     }
 	}`, tokenContractAddress)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return 0, err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return 0, err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return 0, err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return 0, errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return 0, err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance
@@ -191,7 +117,6 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 }
 
 func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, error) {
-
 	// Redis cache
 	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_name_" + tokenContractAddress
 	tokenContractName, err := redis.GetRedisClient().GetValue(redisCacheKey)
@@ -202,8 +127,6 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 	}
 
 	// Request icon contract
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "id": 1234,
@@ -218,41 +141,9 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
     }
 	}`, tokenContractAddress)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return "", err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return "", errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return "", err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance
@@ -272,7 +163,6 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 }
 
 func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string, error) {
-
 	// Redis cache
 	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_symbol_" + tokenContractAddress
 	tokenContractSymbol, err := redis.GetRedisClient().GetValue(redisCacheKey)
@@ -283,8 +173,6 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 	}
 
 	// Request icon contract
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "id": 1234,
@@ -299,41 +187,9 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
     }
 	}`, tokenContractAddress)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return "", err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return "", errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return "", err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance
@@ -353,9 +209,6 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 }
 
 func IconNodeServiceGetBalance(publicKey string) (string, error) {
-
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "method": "icx_getBalance",
@@ -365,41 +218,9 @@ func IconNodeServiceGetBalance(publicKey string) (string, error) {
     }
 	}`, publicKey)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return "0x0", err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return "0x0", err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "0x0", err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return "0x0", errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return "0x0", err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance
@@ -412,9 +233,6 @@ func IconNodeServiceGetBalance(publicKey string) (string, error) {
 }
 
 func IconNodeServiceGetStakedBalance(publicKey string) (string, error) {
-
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "id": 1234,
@@ -431,41 +249,9 @@ func IconNodeServiceGetStakedBalance(publicKey string) (string, error) {
     }
 	}`, publicKey)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return "0x0", err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return "0x0", err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "0x0", err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return "0x0", errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return "0x0", err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance
@@ -483,10 +269,7 @@ func IconNodeServiceGetStakedBalance(publicKey string) (string, error) {
 }
 
 func IconNodeServiceGetTokenBalance(tokenContractAddress string, tokenHolderAddress string) (string, error) {
-
 	// Request icon contract
-	url := config.Config.IconNodeServiceURL
-	method := "POST"
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "id": 1234,
@@ -501,41 +284,9 @@ func IconNodeServiceGetTokenBalance(tokenContractAddress string, tokenHolderAddr
     }
 	}`, tokenContractAddress, tokenHolderAddress)
 
-	// Create http client
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		return "", err
-	}
-
-	// Execute request
-	req.Header.Add("Content-Type", "application/json")
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-
-	// Read body
-	bodyString, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	// Check status code
-	if res.StatusCode != 200 {
-		return "", errors.New(
-			"StatusCode=" + strconv.Itoa(res.StatusCode) +
-				",Request=" + payload +
-				",Response=" + string(bodyString),
-		)
-	}
-
-	// Parse body
-	body := map[string]interface{}{}
-	err = json.Unmarshal(bodyString, &body)
-	if err != nil {
-		return "", err
+		zap.S().Fatal(err)
 	}
 
 	// Extract balance

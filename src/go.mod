@@ -15,6 +15,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mwitkow/go-proto-validators v0.3.2
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.18.1
 	google.golang.org/genproto v0.0.0-20210719143636-1d5a45f8e492
 	google.golang.org/protobuf v1.27.1
