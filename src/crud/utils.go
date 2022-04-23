@@ -3,7 +3,9 @@ package crud
 import "reflect"
 
 func extractFilledFieldsFromModel(modelValueOf reflect.Value, modelTypeOf reflect.Type) map[string]interface{} {
-
+	// Helper for combining structs by giving a struct that represents what is in the DB and another struct that is
+	//  partially instantiated.  Uses reflection to check if field is non-nill.  Purpose is to make sure you don't
+	//  overwrite existing data with new data. Used everywhere an upsert is called.
 	fields := map[string]interface{}{}
 
 	for i := 0; i < modelValueOf.NumField(); i++ {

@@ -82,6 +82,22 @@ func (m *AddressCrud) SelectMany(
 	return addresses, db.Error
 }
 
+// SelectMany - select many from addreses table
+func (m *AddressCrud) SelectPReps() (*[]models.Address, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Get preps
+	db = db.Where("is_prep=true")
+
+	addresses := &[]models.Address{}
+	db = db.Find(addresses)
+
+	return addresses, db.Error
+}
+
 // SelectCount - select from blockCounts table
 // NOTE very slow operation
 func (m *AddressCrud) CountAll() (int64, error) {

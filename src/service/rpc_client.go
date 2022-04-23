@@ -60,21 +60,31 @@ func JsonRpcRequest(payload string, url string) (map[string]interface{}, error) 
 }
 
 func JsonRpcRequestWithBackup(payload string) (map[string]interface{}, error) {
-	resp, err := JsonRpcRequest(payload, config.Config.IconNodeServiceURL)
-	if err == nil {
-		return resp, err
-	}
+	var err error
+	for _, icon_node_url := range config.Config.IconNodeServiceURL {
+		resp, err := JsonRpcRequest(payload, icon_node_url)
+		if err == nil {
+			return resp, err
+		}
 
-	if err != nil {
-		log.Println("primary icon node rpc err:", err)
+		if err != nil {
+			log.Println("primary icon node rpc err:", err)
+		}
 	}
-
-	resp, err = JsonRpcRequest(payload, config.Config.IconNodeServiceURLBackup)
-	if err == nil {
-		return resp, err
-	}
-
-	return resp, err
+	//resp, err := JsonRpcRequest(payload, config.Config.IconNodeServiceURL)
+	//if err == nil {
+	//	return resp, err
+	//}
+	//
+	//if err != nil {
+	//	log.Println("primary icon node rpc err:", err)
+	//}
+	//
+	//resp, err = JsonRpcRequest(payload, config.Config.IconNodeServiceURLBackup)
+	//if err == nil {
+	//	return resp, err
+	//}
+	return nil, err
 }
 
 func JsonRpcRequestWithRetry(payload string) (map[string]interface{}, error) {

@@ -297,3 +297,57 @@ func IconNodeServiceGetTokenBalance(tokenContractAddress string, tokenHolderAddr
 
 	return tokenBalance, nil
 }
+
+func IconNodeServiceGetPreps() ([]string, error) {
+	// Request icon contract
+	payload := fmt.Sprintf(`{
+    "jsonrpc": "2.0",
+    "id": 1234,
+    "method": "icx_call",
+    "params": {
+        "to": "cx0000000000000000000000000000000000000000",
+        "dataType": "call",
+        "data": {
+            "method": "getPReps",
+            "params": {
+                "startRanking" : "0x1",
+                "endRanking": "0xff"
+            }
+        }
+    }
+}`)
+
+	body, err := JsonRpcRequestWithRetry(payload)
+	pRepNames := []string{}
+
+	if err != nil {
+		zap.S().Fatal(err)
+	}
+
+	var pReps []interface{}
+	result, ok := body["result"].(map[string]interface{})
+	if ok == false {
+		return pRepNames, errors.New("Invalid response")
+	}
+
+	pReps, ok = result["preps"].([]interface{})
+	if ok == false {
+		return pRepNames, errors.New("Invalid response")
+	}
+
+	for _, pRepInterface := range pReps {
+		pRep, ok := pRepInterface.(map[string]interface{})
+		if ok == false {
+			return pRepNames, errors.New("Invalid p-rep")
+		}
+
+		pRepName, ok := pRep["address"].(string)
+		if ok == false {
+			return pRepNames, errors.New("Invalid p-rep address")
+		}
+
+		pRepNames = append(pRepNames, pRepName)
+	}
+
+	return pRepNames, nil
+}

@@ -5,6 +5,9 @@ func StartRoutines() {
 	// Address Balance
 	go addressBalanceRoutine()
 
+	// Governance add preps
+	go addressIsPrep()
+
 	// Address Type
 	go addressTypeRoutine()
 

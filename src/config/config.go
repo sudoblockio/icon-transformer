@@ -19,10 +19,9 @@ type configType struct {
 	LogIsDevelopment bool   `envconfig:"LOG_IS_DEVELOPMENT" required:"false" default:"true"`
 
 	// Icon node service
-	IconNodeServiceURL           string        `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
-	IconNodeServiceURLBackup     string        `envconfig:"ICON_NODE_SERVICE_URL_BACKUP" required:"false" default:"bar"`
+	IconNodeServiceURL           []string      `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
 	IconNodeRpcRetrySleepSeconds time.Duration `envconfig:"ICON_NODE_RPC_SLEEP_SECONDS" required:"false" default:"1s"`
-	IconNodeRpcRetryAttempts     int           `envconfig:"ICON_NODE_RPC_SLEEP_SECONDS" required:"false" default:"20"`
+	IconNodeRpcRetryAttempts     int           `envconfig:"ICON_NODE_RPC_RETRY_ATTEMPTS" required:"false" default:"20"`
 
 	// Kafka
 	KafkaBrokerURL   string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"localhost:29092"`
