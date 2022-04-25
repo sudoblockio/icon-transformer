@@ -175,7 +175,7 @@ func DefaultListTokenAddress(ctx context.Context, db *gorm1.DB) ([]*TokenAddress
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("token_contract_address")
+	db = db.Order("address")
 	ormResponse := []TokenAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
