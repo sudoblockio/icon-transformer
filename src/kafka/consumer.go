@@ -21,8 +21,10 @@ var KafkaTopicConsumer *kafkaTopicConsumer
 func StartConsumers() {
 
 	// Init topic names
+	// NOTE add new kafka topics here
 	topicNames := []string{
 		config.Config.KafkaBlocksTopic,
+		config.Config.KafkaContractsTopic,
 	}
 
 	// Init topic channels

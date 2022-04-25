@@ -115,3 +115,15 @@ func transformBlockETLToAddresses(blockETL *models.BlockETL) []*models.Address {
 
 	return addresses
 }
+
+func transformContractToAddress(contract *models.ContractProcessed) *models.Address {
+
+	address := &models.Address{
+		Address:          contract.Address,
+		Name:             contract.Name,
+		CreatedTimestamp: contract.CreatedTimestamp,
+		IsToken:          contract.IsToken,
+	}
+
+	return address
+}

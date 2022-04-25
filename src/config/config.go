@@ -24,8 +24,12 @@ type configType struct {
 	IconNodeRpcRetryAttempts     int           `envconfig:"ICON_NODE_RPC_RETRY_ATTEMPTS" required:"false" default:"20"`
 
 	// Kafka
-	KafkaBrokerURL   string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"localhost:29092"`
-	KafkaBlocksTopic string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
+	KafkaBrokerURL string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"localhost:29092"`
+
+	// Kafka Topics
+	// NOTE add to string array in kafka/consumer.go
+	KafkaBlocksTopic    string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
+	KafkaContractsTopic string `envconfig:"KAFKA_CONTRACTS_TOPIC" required:"false" default:"icon-contracts"`
 
 	// Consumer Group
 	ConsumerGroup                string `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`

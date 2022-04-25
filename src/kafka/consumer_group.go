@@ -3,80 +3,16 @@ package kafka
 import (
 	"context"
 	"errors"
+	"os"
+	"time"
+
 	"github.com/Shopify/sarama"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"os"
-	"time"
 )
-
-type ClaimConsumer struct {
-	topicNames []string
-	topicChans map[string]chan *sarama.ConsumerMessage
-	group      string
-	kafkaJobs  []models.KafkaJob
-}
-
-func (c *ClaimConsumer) Setup(_ sarama.ConsumerGroupSession) error { return nil }
-func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-
-	topicName := claim.Topic()
-	partition := uint64(claim.Partition())
-
-	// find kafka job
-	var kafkaJob *models.KafkaJob = nil
-	for i, k := range c.kafkaJobs {
-		if k.Partition == partition && k.Topic == topicName {
-			kafkaJob = &(c.kafkaJobs[i])
-			break
-		}
-	}
-
-	for {
-		var topicMsg *sarama.ConsumerMessage
-		select {
-		case msg := <-claim.Messages():
-			if msg == nil {
-				zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
-				return nil
-			}
-
-			topicMsg = msg
-		case <-time.After(5 * time.Second):
-			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - No new kafka messages, waited 5 secs...")
-			continue
-		case <-sess.Context().Done():
-			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Session is done, exiting ConsumeClaim loop...")
-			return nil
-		}
-
-		zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, ",PARTITION=", partition, ",OFFSET=", topicMsg.Offset, " - New message")
-		sess.MarkMessage(topicMsg, "")
-
-		// Broadcast
-		c.topicChans[topicName] <- topicMsg
-
-		// Check if kafka job is done
-		// NOTE only applicable if ConsumerKafkaJobID is given
-		if kafkaJob != nil &&
-			uint64(topicMsg.Offset) >= kafkaJob.StopOffset+1000 {
-			// Job done
-			zap.S().Info(
-				"JOBID=", config.Config.ConsumerJobID,
-				"GROUP=", c.group,
-				",TOPIC=", topicName,
-				",PARTITION=", partition,
-				" - Kafka Job done...exiting",
-			)
-			os.Exit(0)
-		}
-	}
-	return nil
-}
 
 ////////////////////
 // Group Consumer //
@@ -208,4 +144,69 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	ch := make(chan int, 1)
 	<-ch
 	cancel()
+}
+
+type ClaimConsumer struct {
+	topicNames []string
+	topicChans map[string]chan *sarama.ConsumerMessage
+	group      string
+	kafkaJobs  []models.KafkaJob
+}
+
+func (c *ClaimConsumer) Setup(_ sarama.ConsumerGroupSession) error { return nil }
+func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+	topicName := claim.Topic()
+	partition := uint64(claim.Partition())
+
+	// find kafka job
+	var kafkaJob *models.KafkaJob = nil
+	for i, k := range c.kafkaJobs {
+		if k.Partition == partition && k.Topic == topicName {
+			kafkaJob = &(c.kafkaJobs[i])
+			break
+		}
+	}
+
+	for {
+		var topicMsg *sarama.ConsumerMessage
+		select {
+		case msg := <-claim.Messages():
+			if msg == nil {
+				zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
+				return nil
+			}
+
+			topicMsg = msg
+		case <-time.After(5 * time.Second):
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - No new kafka messages, waited 5 secs...")
+			continue
+		case <-sess.Context().Done():
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, " - Session is done, exiting ConsumeClaim loop...")
+			return nil
+		}
+
+		zap.S().Info("GROUP=", c.group, ",TOPIC=", topicName, ",PARTITION=", partition, ",OFFSET=", topicMsg.Offset, " - New message")
+		sess.MarkMessage(topicMsg, "")
+
+		// Broadcast
+		c.topicChans[topicName] <- topicMsg
+
+		// Check if kafka job is done
+		// NOTE only applicable if ConsumerKafkaJobID is given
+		if kafkaJob != nil &&
+			uint64(topicMsg.Offset) >= kafkaJob.StopOffset+1000 {
+			// Job done
+			zap.S().Info(
+				"JOBID=", config.Config.ConsumerJobID,
+				"GROUP=", c.group,
+				",TOPIC=", topicName,
+				",PARTITION=", partition,
+				" - Kafka Job done...exiting",
+			)
+			os.Exit(0)
+		}
+	}
+	return nil
 }
