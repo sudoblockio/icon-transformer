@@ -13,6 +13,8 @@ x-transformer-env: &transformer-env
 
   # Kakfa
   KAFKA_BROKER_URL: "kafka:9092"
+  KAFKA_BLOCKS_TOPIC: "icon-blocks"
+  KAFKA_CONTRACTS_TOPIC: "icon-contracts"
 
   # DB
   DB_DRIVER: "postgres"
