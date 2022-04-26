@@ -83,7 +83,8 @@ type configType struct {
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
 
 	// Transformer
-	TransformerServiceCallThreshold time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
+	TransformerServiceCallThreshold  time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
+	TransformerRedisChannelThreshold time.Duration `envconfig:"TRANSFORMER_REDIS_CHANNEL_THRESHOLD" required:"false" default:"15s"`
 }
 
 // Config - runtime config struct

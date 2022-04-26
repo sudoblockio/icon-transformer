@@ -254,35 +254,60 @@ func transformBlocksToLoadTokenAddresses(blockETL *models.BlockETL) {
 
 // Blocks channel
 func transformBlocksToChannelBlocks(blockETL *models.BlockETL) {
-	block := transformBlockETLToBlock(blockETL)
-	blockJSON, _ := json.Marshal(block)
-	redis.GetRedisClient().Publish(config.Config.RedisBlocksChannel, blockJSON)
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+		// block is recent enough, calculate balances
+		block := transformBlockETLToBlock(blockETL)
+		blockJSON, _ := json.Marshal(block)
+		redis.GetRedisClient().Publish(config.Config.RedisBlocksChannel, blockJSON)
+	}
 }
 
 // Transactions channel
 func transformBlocksToChannelTransactions(blockETL *models.BlockETL) {
-	transactions := transformBlockETLToTransactions(blockETL)
-	for _, transaction := range transactions {
-		transactionJSON, _ := json.Marshal(transaction)
-		redis.GetRedisClient().Publish(config.Config.RedisTransactionsChannel, transactionJSON)
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+		transactions := transformBlockETLToTransactions(blockETL)
+		for _, transaction := range transactions {
+			transactionJSON, _ := json.Marshal(transaction)
+			redis.GetRedisClient().Publish(config.Config.RedisTransactionsChannel, transactionJSON)
+		}
 	}
 }
 
 // Logs channel
 func transformBlocksToChannelLogs(blockETL *models.BlockETL) {
-	logs := transformBlockETLToLogs(blockETL)
-	for _, log := range logs {
-		logJSON, _ := json.Marshal(log)
-		redis.GetRedisClient().Publish(config.Config.RedisLogsChannel, logJSON)
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+		logs := transformBlockETLToLogs(blockETL)
+		for _, log := range logs {
+			logJSON, _ := json.Marshal(log)
+			redis.GetRedisClient().Publish(config.Config.RedisLogsChannel, logJSON)
+		}
 	}
 }
 
 // Token Transfers channel
 func transformBlocksToChannelTokenTransfers(blockETL *models.BlockETL) {
-	tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
-	for _, tokenTransfer := range tokenTransfers {
-		tokenTransferJSON, _ := json.Marshal(tokenTransfer)
-		redis.GetRedisClient().Publish(config.Config.RedisTokenTransfersChannel, tokenTransferJSON)
+
+	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+
+	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+		tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
+		for _, tokenTransfer := range tokenTransfers {
+			tokenTransferJSON, _ := json.Marshal(tokenTransfer)
+			redis.GetRedisClient().Publish(config.Config.RedisTokenTransfersChannel, tokenTransferJSON)
+		}
 	}
 }
 
