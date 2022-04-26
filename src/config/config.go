@@ -29,8 +29,9 @@ type configType struct {
 
 	// Kafka Topics
 	// NOTE add to string array in kafka/consumer.go
-	KafkaBlocksTopic    string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
-	KafkaContractsTopic string `envconfig:"KAFKA_CONTRACTS_TOPIC" required:"false" default:"icon-contracts"`
+	KafkaBlocksTopic      string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
+	KafkaContractsTopic   string `envconfig:"KAFKA_CONTRACTS_TOPIC" required:"false" default:"icon-contracts"`
+	KafkaDeadMessageTopic string `envconfig:"KAFKA_DEAD_MESSAGE_TOPIC" required:"false" default:"icon-blocks-dead"`
 
 	// Consumer Group
 	ConsumerGroup                string `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`

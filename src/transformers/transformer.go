@@ -7,4 +7,7 @@ func Start() {
 
 	// Contracts Topic
 	go startContracts()
+
+	// Dead Message Topic
+	go startDeadMessages()
 }

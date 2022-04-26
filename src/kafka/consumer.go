@@ -25,6 +25,7 @@ func StartConsumers() {
 	topicNames := []string{
 		config.Config.KafkaBlocksTopic,
 		config.Config.KafkaContractsTopic,
+		config.Config.KafkaDeadMessageTopic,
 	}
 
 	// Init topic channels
