@@ -32,11 +32,19 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	for {
 		allTopicsCreated := true
 		topics, _ := admin.ListTopics()
+		missingTopics := []string{}
 
 		for _, topicName := range k.topicNames {
+
+			// NOTE remove when contracts service is fixed
+			if topicName == config.Config.KafkaContractsTopic {
+				continue
+			}
+
 			if _, ok := topics[topicName]; ok == false {
 				// Topic not created
 				allTopicsCreated = false
+				missingTopics = append(missingTopics, topicName)
 				break
 			}
 		}
@@ -45,7 +53,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			break
 		}
 
-		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...")
+		zap.S().Info("KAFKA ADMIN WARN: topics not created yet, topics=", missingTopics)
 		time.Sleep(1 * time.Second)
 	}
 
