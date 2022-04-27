@@ -44,7 +44,7 @@ func GetLogCrud() *LogCrud {
 
 		err = logCrud.CreateIndices()
 		if err != nil {
-			zap.S().Fatal("LogCrud: Unable migrate postgres table: ", err.Error())
+			zap.S().Warn("LogCrud: Unable migrate postgres table: ", err.Error())
 		}
 
 		StartLogLoader()
@@ -68,7 +68,7 @@ func (m *LogCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db.Exec("CREATE INDEX log_idx_address_block_number ON public.logs USING btree (address, block_number)")
+	db = db.Exec("CREATE INDEX log_idx_address_block_number ON public.logs USING btree (address, block_number)")
 
 	return db.Error
 }

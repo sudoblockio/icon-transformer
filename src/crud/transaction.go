@@ -44,7 +44,7 @@ func GetTransactionCrud() *TransactionCrud {
 
 		err = transactionCrud.CreateIndices()
 		if err != nil {
-			zap.S().Fatal("TransactionCrud: Unable to create indices: ", err.Error())
+			zap.S().Warn("TransactionCrud: Unable to create indices: ", err.Error())
 		}
 
 		StartTransactionLoader()
@@ -68,7 +68,7 @@ func (m *TransactionCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db.Exec("CREATE INDEX transaction_idx_block_number_type_hash ON public.transactions USING btree (block_number, type, hash)")
+	db = db.Exec("CREATE INDEX transaction_idx_block_number_type_hash ON public.transactions USING btree (block_number, type, hash)")
 
 	return db.Error
 }
