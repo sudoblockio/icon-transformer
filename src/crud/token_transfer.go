@@ -67,7 +67,7 @@ func (m *TokenTransferCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db = db.Exec("CREATE INDEX token_transfer_idx_token_contract_address_block_number ON public.token_transfers USING btree (token_contract_address, block_number)")
+	db = db.Exec("CREATE INDEX IF NOT EXISTS token_transfer_idx_token_contract_address_block_number ON public.token_transfers USING btree (token_contract_address, block_number)")
 
 	return db.Error
 }

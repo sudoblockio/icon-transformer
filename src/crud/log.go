@@ -68,7 +68,7 @@ func (m *LogCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db = db.Exec("CREATE INDEX log_idx_address_block_number ON public.logs USING btree (address, block_number)")
+	db = db.Exec("CREATE INDEX IF NOT EXISTS log_idx_address_block_number ON public.logs USING btree (address, block_number)")
 
 	return db.Error
 }

@@ -68,7 +68,7 @@ func (m *TransactionCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db = db.Exec("CREATE INDEX transaction_idx_block_number_type_hash ON public.transactions USING btree (block_number, type, hash)")
+	db = db.Exec("CREATE INDEX IF NOT EXISTS transaction_idx_block_number_type_hash ON public.transactions USING btree (block_number, type, hash)")
 
 	return db.Error
 }
