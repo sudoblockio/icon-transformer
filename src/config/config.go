@@ -35,7 +35,7 @@ type configType struct {
 
 	// Consumer Group
 	ConsumerGroup                string `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
+	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategyRange"`
 
 	// Consumer Tail
 	ConsumerIsTail bool   `envconfig:"CONSUMER_IS_TAIL" required:"false" default:"false"`
