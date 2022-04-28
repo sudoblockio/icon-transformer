@@ -44,7 +44,7 @@ func GetTokenTransferCrud() *TokenTransferCrud {
 
 		err = tokenTransferCrud.CreateIndices()
 		if err != nil {
-			zap.S().Fatal("TokenTransferCrud: Unable migrate postgres table: ", err.Error())
+			zap.S().Warn("TokenTransferCrud: Unable migrate postgres table: ", err.Error())
 		}
 
 		StartTokenTransferLoader()
@@ -67,7 +67,7 @@ func (m *TokenTransferCrud) CreateIndices() error {
 	db := m.db
 
 	// Create indices
-	db.Exec("CREATE INDEX token_transfer_idx_token_contract_address_block_number ON public.token_transfers USING btree (token_contract_address, block_number)")
+	db = db.Exec("CREATE INDEX IF NOT EXISTS token_transfer_idx_token_contract_address_block_number ON public.token_transfers USING btree (token_contract_address, block_number)")
 
 	return db.Error
 }

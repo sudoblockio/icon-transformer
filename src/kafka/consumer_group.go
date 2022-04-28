@@ -32,11 +32,19 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	for {
 		allTopicsCreated := true
 		topics, _ := admin.ListTopics()
+		missingTopics := []string{}
 
 		for _, topicName := range k.topicNames {
+
+			// NOTE remove when contracts service is fixed
+			if topicName == config.Config.KafkaContractsTopic {
+				continue
+			}
+
 			if _, ok := topics[topicName]; ok == false {
 				// Topic not created
 				allTopicsCreated = false
+				missingTopics = append(missingTopics, topicName)
 				break
 			}
 		}
@@ -45,7 +53,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 			break
 		}
 
-		zap.S().Info("KAFKA ADMIN WARN: topics not created yet...")
+		zap.S().Info("KAFKA ADMIN WARN: topics not created yet, topics=", missingTopics)
 		time.Sleep(1 * time.Second)
 	}
 
@@ -116,29 +124,27 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 
 	// From example: /sarama/blob/master/examples/consumergroup/main.go
 	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		claimConsumer := &ClaimConsumer{
-			topicNames: k.topicNames,
-			topicChans: k.TopicChannels,
-			group:      group,
-			kafkaJobs:  *kafkaJobs,
-		}
+	claimConsumer := &ClaimConsumer{
+		topicNames: k.topicNames,
+		topicChans: k.TopicChannels,
+		group:      group,
+		kafkaJobs:  *kafkaJobs,
+	}
 
-		for {
-			// `Consume` should be called inside an infinite loop, when a
-			// server-side rebalance happens, the consumer session will need to be
-			// recreated to get the new claims
-			err := consumerGroup.Consume(ctx, k.topicNames, claimConsumer)
-			if err != nil {
-				zap.S().Info("CONSUME GROUP ERROR: from consumer: ", err.Error())
-			}
-			// check if context was cancelled, signaling that the consumer should stop
-			if ctx.Err() != nil {
-				zap.S().Warn("CONSUME GROUP WARN: from context: ", ctx.Err().Error())
-				return
-			}
+	for {
+		// `Consume` should be called inside an infinite loop, when a
+		// server-side rebalance happens, the consumer session will need to be
+		// recreated to get the new claims
+		err := consumerGroup.Consume(ctx, k.topicNames, claimConsumer)
+		if err != nil {
+			zap.S().Info("CONSUME GROUP ERROR: from consumer: ", err.Error())
 		}
-	}()
+		// check if context was cancelled, signaling that the consumer should stop
+		if ctx.Err() != nil {
+			zap.S().Warn("CONSUME GROUP WARN: from context: ", ctx.Err().Error())
+			return
+		}
+	}
 
 	// Waiting, so that consumerGroup remains alive
 	ch := make(chan int, 1)

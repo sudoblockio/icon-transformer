@@ -54,6 +54,7 @@ func (m *BlockCrud) Migrate() error {
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
 	return err
 }
+
 func (m *BlockCrud) TableName() string {
 	return m.modelORM.TableName()
 }

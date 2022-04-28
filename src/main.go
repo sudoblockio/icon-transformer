@@ -19,6 +19,11 @@ func main() {
 		routines.StartRoutines()
 
 		global.WaitShutdownSig()
+	} else if config.Config.FindMissingRunOnly == true {
+		// Start find only
+		routines.StartFindMissing()
+
+		global.WaitShutdownSig()
 	}
 
 	kafka.StartConsumers()

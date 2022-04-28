@@ -28,12 +28,13 @@ type configType struct {
 
 	// Kafka Topics
 	// NOTE add to string array in kafka/consumer.go
-	KafkaBlocksTopic    string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
-	KafkaContractsTopic string `envconfig:"KAFKA_CONTRACTS_TOPIC" required:"false" default:"icon-contracts"`
+	KafkaBlocksTopic      string `envconfig:"KAFKA_BLOCKS_TOPIC" required:"false" default:"icon-blocks"`
+	KafkaContractsTopic   string `envconfig:"KAFKA_CONTRACTS_TOPIC" required:"false" default:"icon-contracts"`
+	KafkaDeadMessageTopic string `envconfig:"KAFKA_DEAD_MESSAGE_TOPIC" required:"false" default:"icon-blocks-dead"`
 
 	// Consumer Group
 	ConsumerGroup                string `envconfig:"CONSUMER_GROUP" required:"false" default:"blocks-consumer-group"`
-	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
+	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategyRange"`
 
 	// Consumer Tail
 	ConsumerIsTail bool   `envconfig:"CONSUMER_IS_TAIL" required:"false" default:"false"`
@@ -76,13 +77,17 @@ type configType struct {
 	RedisLogsChannel           string `envconfig:"REDIS_LOGS_CHANNEL" required:"false" default:"logs"`
 	RedisTokenTransfersChannel string `envconfig:"REDIS_TOKEN_TRANSFERS_CHANNEL" required:"false" default:"token_transfers"`
 
+	// Transformer
+	TransformerServiceCallThreshold  time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
+	TransformerRedisChannelThreshold time.Duration `envconfig:"TRANSFORMER_REDIS_CHANNEL_THRESHOLD" required:"false" default:"15s"`
+
 	// Routines
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
 	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
 
-	// Transformer
-	TransformerServiceCallThreshold time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
+	// FindMissing
+	FindMissingRunOnly bool `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
 }
 
 // Config - runtime config struct
