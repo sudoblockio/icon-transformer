@@ -15,7 +15,7 @@ func StartFindMissing() {
 
 func findMissingBlocks() {
 
-	missingBlockNumbers, err := crud.GetBlockCrud().FindMissing()
+	missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing()
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
