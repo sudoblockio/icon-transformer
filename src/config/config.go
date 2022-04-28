@@ -78,14 +78,17 @@ type configType struct {
 	RedisLogsChannel           string `envconfig:"REDIS_LOGS_CHANNEL" required:"false" default:"logs"`
 	RedisTokenTransfersChannel string `envconfig:"REDIS_TOKEN_TRANSFERS_CHANNEL" required:"false" default:"token_transfers"`
 
+	// Transformer
+	TransformerServiceCallThreshold  time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
+	TransformerRedisChannelThreshold time.Duration `envconfig:"TRANSFORMER_REDIS_CHANNEL_THRESHOLD" required:"false" default:"15s"`
+
 	// Routines
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
 	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
 
-	// Transformer
-	TransformerServiceCallThreshold  time.Duration `envconfig:"TRANSFORMER_SERVICE_CALL_THRESHOLD" required:"false" default:"1h"`
-	TransformerRedisChannelThreshold time.Duration `envconfig:"TRANSFORMER_REDIS_CHANNEL_THRESHOLD" required:"false" default:"15s"`
+	// FindMissing
+	FindMissingRunOnly bool `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
 }
 
 // Config - runtime config struct

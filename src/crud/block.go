@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"errors"
 	"reflect"
 	"sync"
 
@@ -54,8 +55,80 @@ func (m *BlockCrud) Migrate() error {
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
 	return err
 }
+
 func (m *BlockCrud) TableName() string {
 	return m.modelORM.TableName()
+}
+
+func (m *BlockCrud) FindMissing() ([]int64, error) {
+	db := m.db
+
+	highestNumber, err := m.SelectHighestNumber()
+	if err != nil {
+		return []int64{}, err
+	}
+
+	lowestNumber, err := m.SelectLowestNumber()
+	if err != nil {
+		return []int64{}, err
+	}
+
+	// https://stackoverflow.com/a/12444165
+	// https://stackoverflow.com/a/32072586
+	responseInterface := []interface{}{}
+	db = db.Raw(
+		`SELECT s.i AS missing_numbers
+		FROM generate_series(?::int,?::int) s(i)
+		WHERE NOT EXISTS (SELECT 1 FROM blocks WHERE number = s.i);`,
+		lowestNumber,
+		highestNumber,
+	).Scan(&responseInterface)
+	if db.Error != nil {
+		return []int64{}, db.Error
+	}
+
+	numbers := []int64{}
+
+	for _, r := range responseInterface {
+		number, ok := r.(int64)
+		if ok == false {
+			return []int64{}, errors.New("Could not cast int64")
+		}
+
+		numbers = append(numbers, number)
+	}
+
+	return numbers, nil
+}
+
+func (m *BlockCrud) SelectHighestNumber() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&[]models.Block{})
+
+	// Latest blocks first
+	db = db.Order("number desc")
+
+	block := &models.Block{}
+	db = db.First(block)
+
+	return block.Number, db.Error
+}
+
+func (m *BlockCrud) SelectLowestNumber() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&[]models.Block{})
+
+	// Latest blocks first
+	db = db.Order("number asc")
+
+	block := &models.Block{}
+	db = db.First(block)
+
+	return block.Number, db.Error
 }
 
 func (m *BlockCrud) UpsertOne(

@@ -50,3 +50,10 @@ services:
       <<: *transformer-env
       ROUTINES_RUN_ONLY: "true"
 
+  transformer-missing:
+    build:
+      context: ${TRANSFORMER_CONTEXT:-.}
+      target: ${TRANSFORMER_TARGET:-prod}
+    environment:
+      <<: *transformer-env
+      FIND_MISSING_RUN_ONLY: "true"
