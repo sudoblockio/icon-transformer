@@ -25,4 +25,6 @@ func findMissingBlocks() {
 			Number: missingBlockNumber,
 		}
 	}
+
+	zap.S().Info("Routine=FindMissingBlocks - Completed routine")
 }
