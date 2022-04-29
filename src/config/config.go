@@ -88,6 +88,9 @@ type configType struct {
 
 	// FindMissing
 	FindMissingRunOnly bool `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
+
+	// Redis Recovery
+	RedisRecoveryRunOnly bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`
 }
 
 // Config - runtime config struct

@@ -58,6 +58,18 @@ func (m *RedisKeyCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+func (m *RedisKeyCrud) SelectAll() (*[]models.RedisKey, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.RedisKey{})
+
+	redisKeys := &[]models.RedisKey{}
+	db = db.Find(redisKeys)
+
+	return redisKeys, db.Error
+}
+
 func (m *RedisKeyCrud) UpsertOne(
 	redisKey *models.RedisKey,
 ) error {

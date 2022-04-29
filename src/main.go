@@ -24,6 +24,11 @@ func main() {
 		routines.StartFindMissing()
 
 		global.WaitShutdownSig()
+	} else if config.Config.RedisRecoveryRunOnly == true {
+		// Start redis recovery
+		routines.StartRedisRecovery()
+
+		global.WaitShutdownSig()
 	}
 
 	kafka.StartConsumers()
