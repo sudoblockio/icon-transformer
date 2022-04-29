@@ -58,6 +58,18 @@ func (m *MissingBlockCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+func (m *MissingBlockCrud) DeleteAll() error {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.MissingBlock{})
+
+	// Delete
+	db = db.Delete(&models.MissingBlock{})
+
+	return db.Error
+}
+
 func (m *MissingBlockCrud) UpsertOne(
 	missingBlock *models.MissingBlock,
 ) error {
