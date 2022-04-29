@@ -25,8 +25,11 @@ func findMissingBlocks() {
 		zap.S().Fatal(err.Error())
 	}
 
-	// Remove old database rows
+	// Delete old rows
 	err = crud.GetMissingBlockCrud().DeleteAll()
+	if err != nil {
+		zap.S().Fatal(err.Error())
+	}
 
 	// Insert new rows
 	for _, missingBlockNumber := range missingBlockNumbers {

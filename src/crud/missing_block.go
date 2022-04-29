@@ -64,6 +64,10 @@ func (m *MissingBlockCrud) DeleteAll() error {
 	// Set table
 	db = db.Model(&models.MissingBlock{})
 
+	// Number
+	// NOTE delete needs a WHERE clause
+	db = db.Where("number > 0")
+
 	// Delete
 	db = db.Delete(&models.MissingBlock{})
 
