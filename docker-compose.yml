@@ -57,3 +57,4 @@ services:
     environment:
       <<: *transformer-env
       FIND_MISSING_RUN_ONLY: "true"
+      FIND_MISSING_EXTRACTOR_API_LOCATION: "http://extractor:8000/api/v1"

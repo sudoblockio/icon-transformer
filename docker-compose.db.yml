@@ -81,6 +81,10 @@ x-contracts-worker-env: &contracts-worker-env
 services:
   extractor:
     image: sudoblock/icon-extractor:latest
+    ports:
+      - "8000:8000"
+    expose:
+      - 8000
     restart: always
     environment:
       <<: *extractor-env

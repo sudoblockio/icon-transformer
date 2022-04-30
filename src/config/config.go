@@ -88,7 +88,7 @@ type configType struct {
 
 	// FindMissing
 	FindMissingRunOnly              bool   `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
-	FindMissingExtractorAPILocation string `envconfig:"FIND_MISSING_EXTRACTOR_API_LOCATION" required:"false" default:"http://localhost:8080/api/v1"`
+	FindMissingExtractorAPILocation string `envconfig:"FIND_MISSING_EXTRACTOR_API_LOCATION" required:"false" default:"http://localhost:8000/api/v1"`
 
 	// Redis Recovery
 	RedisRecoveryRunOnly bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`

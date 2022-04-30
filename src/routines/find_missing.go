@@ -1,7 +1,9 @@
 package routines
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -44,18 +46,15 @@ func findMissingBlocks() {
   		"start_block_number": %d,
   		"end_block_number": %d
 		}`, missingBlockNumber, missingBlockNumber+1))
-		req, err := http.NewRequest("POST", config.Config.FindMissingExtractorAPILocation+"/create-job", body)
-		if err != nil {
-			zap.S().Fatal("Routine=FindMissingBlocks - Error making job ", err.Error())
-		}
-		req.Header.Set("Accept", "application/json")
-		req.Header.Set("Content-Type", "*/*")
 
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := http.Post(config.Config.FindMissingExtractorAPILocation+"/create-job", "application/json", body)
 		if err != nil {
-			zap.S().Fatal("Routine=FindMissingBlocks - Error making job ", err.Error())
+			log.Fatal(err)
 		}
-		defer resp.Body.Close()
+
+		var res map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&res)
+		fmt.Println(res["json"])
 	}
 
 	zap.S().Info("Routine=FindMissingBlocks - Completed routine")
