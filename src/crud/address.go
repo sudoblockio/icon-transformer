@@ -82,6 +82,25 @@ func (m *AddressCrud) SelectMany(
 	return addresses, db.Error
 }
 
+// SelectAllAddresses - select all addresses from addreses table - Only for routine / recovery
+func (m *AddressCrud) SelectAllAddresses() (*[]models.Address, error) {
+	db := m.db
+	db = db.Model(&models.Address{})
+	addresses := &[]models.Address{}
+	db = db.Find(addresses)
+	return addresses, db.Error
+}
+
+// SelectAllAddresses - select all addresses from addreses table - Only for routine / recovery
+func (m *AddressCrud) SelectAllTokenContracts() (*[]models.Address, error) {
+	db := m.db
+	db = db.Model(&models.Address{})
+	addresses := &[]models.Address{}
+	db = db.Where("is_token=true")
+	db = db.Find(addresses)
+	return addresses, db.Error
+}
+
 // SelectMany - select many from addreses table
 func (m *AddressCrud) SelectPReps() (*[]models.Address, error) {
 	db := m.db

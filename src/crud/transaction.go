@@ -73,6 +73,36 @@ func (m *TransactionCrud) CreateIndices() error {
 	return db.Error
 }
 
+// Count all entries in transactions table both internal and regular. See CountInternal and CountRegular for those types.
+// NOTE this function will take a long time
+func (m *TransactionCrud) Count() (int64, error) {
+	db := m.db
+	db = db.Model(&models.Transaction{})
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
+// Count for regular transactions.
+// NOTE this function will take a long time
+func (m *TransactionCrud) CountRegular() (int64, error) {
+	db := m.db
+	db = db.Model(&models.Transaction{}).Where("type='transaction'")
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
+// Count for internal transactions.
+// NOTE this function will take a long time
+func (m *TransactionCrud) CountInternal() (int64, error) {
+	db := m.db
+	db = db.Model(&models.Transaction{}).Where("type=log")
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 // SelectOne - select from transactions table
 func (m *TransactionCrud) SelectOne(
 	hash string,

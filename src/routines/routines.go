@@ -37,4 +37,13 @@ func StartRoutines() {
 
 	// Redis Store Count Keys
 	go redisStoreKeysRoutine()
+
+	// Block count
+	go blockCountRoutine()
+
+	// Transaction regular count
+	go transactionRegularCountRoutine()
+
+	// Token transfer count
+	go tokenTransferCountRoutine()
 }

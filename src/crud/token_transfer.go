@@ -53,6 +53,41 @@ func GetTokenTransferCrud() *TokenTransferCrud {
 	return tokenTransferCrud
 }
 
+// Count - count all entries in token_transfers table
+// NOTE this function will take a long time
+func (m *TokenTransferCrud) Count() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.TokenTransfer{})
+
+	// Count
+	var count int64
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
+// CountByAddress - count all entries in token_transfers table
+func (m *TokenTransferCrud) CountByToAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.TokenTransfer{})
+	db = db.Where("to_address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
+// Count all entries in token_transfers table by token contract
+func (m *TokenTransferCrud) CountByTokenContract(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.TokenTransfer{})
+	db = db.Where("token_contract_address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 // Migrate - migrate tokenTransfers table
 func (m *TokenTransferCrud) Migrate() error {
 	// Only using TokenTransferRawORM (ORM version of the proto generated struct) to create the TABLE

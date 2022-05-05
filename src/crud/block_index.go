@@ -43,6 +43,20 @@ func GetBlockIndexCrud() *BlockIndexCrud {
 	return blockIndexCrud
 }
 
+// Count - count all entries in blocks table
+func (m *BlockIndexCrud) Count() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.BlockIndex{})
+
+	// Count
+	var count int64
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
 // Migrate - migrate blockIndexs table
 func (m *BlockIndexCrud) Migrate() error {
 	// Only using BlockIndexRawORM (ORM version of the proto generated struct) to create the TABLE
