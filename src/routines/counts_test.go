@@ -7,38 +7,38 @@ import (
 )
 
 func TestBlockCount(t *testing.T) {
-	config.ReadEnvironment()
+	config.ReadTestEnvironment()
 	err := blockCountExec()
 	require.Nil(t, err)
 }
 
 func TestTransactionRegularCount(t *testing.T) {
-	config.ReadEnvironment()
+	config.ReadTestEnvironment()
 	err := transactionRegularCountExec()
 	require.Nil(t, err)
 }
 
 // TODO: Currently not used
 //func TestTransactionInternalCount(t *testing.T) {
-//	config.ReadEnvironment()
+//	config.ReadTestEnvironment()
 //	err := transactionRegularCountExec()
 //	require.Nil(t, err)
 //}
 
 func TestTokenTransferCount(t *testing.T) {
-	config.ReadEnvironment()
+	config.ReadTestEnvironment()
 	err := tokenTransferCountExec()
 	require.Nil(t, err)
 }
 
 //func TestCountByAddress(t *testing.T) {
-//	config.ReadEnvironment()
+//	config.ReadTestEnvironment()
 //	err := byAddressCountExec()
 //	require.Nil(t, err)
 //}
 
 //func TestCountByTokenContract(t *testing.T) {
-//	config.ReadEnvironment()
+//	config.ReadTestEnvironment()
 //	err := byTokenContractCountExec()
 //	require.Nil(t, err)
 //}
