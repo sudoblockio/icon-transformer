@@ -35,6 +35,7 @@ func findMissingBlocks() {
 
 	// Insert new rows
 	for _, missingBlockNumber := range missingBlockNumbers {
+		zap.S().Warn(fmt.Sprintf("Found missing block %d", missingBlockNumber))
 		crud.GetMissingBlockCrud().LoaderChannel <- &models.MissingBlock{
 			Number: missingBlockNumber,
 		}
