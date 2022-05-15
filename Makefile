@@ -1,6 +1,6 @@
 .PHONY: test help
 
-test: up-dbs test-unit test-integration
+test: up-dbs test-unit
 
 up-dbs:  ## Bring up the DBs
 	docker-compose -f docker-compose.db.yml up -d
@@ -12,6 +12,7 @@ test-unit:  ## Run unit tests - Need DB compose up
 	cd src && go test ./... -v --tags=unit
 	#ginkgo -r -tags unit --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress -v
 
+# TODO: Update tags #23
 test-integration:  ## Run integration tests - Need DB compose up
 	cd src && go test ./... -v --tags=integration
 	#ginkgo -r -tags integration --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress -v

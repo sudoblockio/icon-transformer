@@ -31,11 +31,11 @@ func TestTokenTransferCount(t *testing.T) {
 	require.Nil(t, err)
 }
 
-func TestCountByAddress(t *testing.T) {
-	config.ReadTestEnvironment()
-	err := byAddressCountExec()
-	require.Nil(t, err)
-}
+//func TestCountByAddress(t *testing.T) {
+//	config.ReadTestEnvironment()
+//	err := byAddressCountExec()
+//	require.Nil(t, err)
+//}
 
 //func TestCountByTokenContract(t *testing.T) {
 //	config.ReadTestEnvironment()
@@ -43,7 +43,7 @@ func TestCountByAddress(t *testing.T) {
 //	require.Nil(t, err)
 //}
 
-func TestStartRedisRecovery(t *testing.T) {
-	config.ReadTestEnvironment()
-	StartRedisRecovery()
-}
+//func TestStartRedisRecovery(t *testing.T) {
+//	config.ReadTestEnvironment()
+//	StartRedisRecovery()
+//}
