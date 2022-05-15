@@ -60,7 +60,9 @@ coverage.xml
 .hypothesis/
 
 # dotenv
-.env
+.env.test
+.env.local
+.env.test
 
 # virtualenv
 .venv
