@@ -112,65 +112,65 @@ func tokenTransferCountExec() error {
 // TODO: Mistake / didn't realize this is already done in another routine
 //  https://github.com/sudoblockio/icon-transformer/issues/22
 // Takes a crud count method, calls it, takes the count and puts it into a redis countKey.
-//func crudCountSetRedisByAddress(addresses []string, c func(a string) (int64, error), countKey string) error {
-//	for _, address := range addresses {
-//		count, err := c(address)
-//		if err != nil {
-//			// Postgres error
-//			zap.S().Warn(err)
-//			return err
-//		}
-//		err = redis.GetRedisClient().SetCount(countKey, count)
-//		if err != nil {
-//			// Redis error
-//			zap.S().Warn(err)
-//			return err
-//		}
-//	}
-//	return nil
-//}
+func crudCountSetRedisByAddress(addresses []string, c func(a string) (int64, error), countKey string) error {
+	for _, address := range addresses {
+		count, err := c(address)
+		if err != nil {
+			// Postgres error
+			zap.S().Warn(err)
+			return err
+		}
+		err = redis.GetRedisClient().SetCount(countKey, count)
+		if err != nil {
+			// Redis error
+			zap.S().Warn(err)
+			return err
+		}
+	}
+	return nil
+}
 
-//func byAddressCountRoutine() {
-//	countRoutineCron(byAddressCountExec)
-//}
+func byAddressCountRoutine() {
+	countRoutineCron(byAddressCountExec)
+}
 
-//// Count by address from PG and set in redis
-//func byAddressCountExec() error {
-//	addresses, err := crud.GetAddressCrud().SelectAllAddresses()
-//	if err != nil {
-//		// Redis error
-//		zap.S().Warn(err)
-//		return err
-//	}
-//	for _, address := range *addresses {
-//		// Regular transfers
-//		err = redis.GetRedisClient().SetCount(
-//			config.Config.RedisKeyPrefix+"transaction_regular_count_by_address_"+address.Address,
-//			address.TransactionCount,
-//		)
-//		// Internal transfers
-//		err = redis.GetRedisClient().SetCount(
-//			config.Config.RedisKeyPrefix+"transaction_internal_count_by_address_"+address.Address,
-//			address.TransactionInternalCount,
-//		)
-//		// Token transfers
-//		err = redis.GetRedisClient().SetCount(
-//			config.Config.RedisKeyPrefix+"token_transfer_count_by_address_"+address.Address,
-//			address.TokenTransferCount,
-//		)
-//		// Log count
-//		err = redis.GetRedisClient().SetCount(
-//			config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
-//			address.LogCount,
-//		)
-//		if err != nil {
-//			// Redis error
-//			zap.S().Warn(err)
-//			return err
-//		}
-//	}
-//	return nil
-//}
+// Count by address from PG and set in redis
+func byAddressCountExec() error {
+	addresses, err := crud.GetAddressCrud().SelectAllAddresses()
+	if err != nil {
+		// Redis error
+		zap.S().Warn(err)
+		return err
+	}
+	for _, address := range *addresses {
+		// Regular transfers
+		err = redis.GetRedisClient().SetCount(
+			config.Config.RedisKeyPrefix+"transaction_regular_count_by_address_"+address.Address,
+			address.TransactionCount,
+		)
+		// Internal transfers
+		err = redis.GetRedisClient().SetCount(
+			config.Config.RedisKeyPrefix+"transaction_internal_count_by_address_"+address.Address,
+			address.TransactionInternalCount,
+		)
+		// Token transfers
+		err = redis.GetRedisClient().SetCount(
+			config.Config.RedisKeyPrefix+"token_transfer_count_by_address_"+address.Address,
+			address.TokenTransferCount,
+		)
+		// Log count
+		err = redis.GetRedisClient().SetCount(
+			config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
+			address.LogCount,
+		)
+		if err != nil {
+			// Redis error
+			zap.S().Warn(err)
+			return err
+		}
+	}
+	return nil
+}
 
 //func byTokenContractCountRoutine() {
 //	countRoutineCron(byAddressCountExec)
