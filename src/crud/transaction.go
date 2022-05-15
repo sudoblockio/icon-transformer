@@ -103,6 +103,17 @@ func (m *TransactionCrud) CountInternal() (int64, error) {
 	return count, db.Error
 }
 
+// Count for regular transactions.
+// NOTE this function will take a long time
+func (m *TransactionCrud) CountRegularByAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.Transaction{}).Where("type='transaction'")
+	db = db.Model(&models.Transaction{}).Where("to_address = ? or from_address = ?", address, address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 // SelectOne - select from transactions table
 func (m *TransactionCrud) SelectOne(
 	hash string,
