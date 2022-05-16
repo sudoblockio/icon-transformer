@@ -8,9 +8,10 @@ func StartRedisRecovery() {
 
 	// Missing Keys
 	//go redisRecovery()
-	zap.S().Info("Starting redis recovery...")
+	zap.S().Warn("Starting redis recovery...")
 	// Block count
 	go func() {
+		zap.S().Info("Running block count...")
 		err := blockCountExec()
 		if err != nil {
 			zap.S().Panic("Block count: ", err.Error())
@@ -19,6 +20,7 @@ func StartRedisRecovery() {
 
 	// Transaction regular count
 	go func() {
+		zap.S().Info("Running tx count...")
 		err := transactionRegularCountExec()
 		if err != nil {
 			zap.S().Panic("Transaction count: ", err.Error())
@@ -27,6 +29,7 @@ func StartRedisRecovery() {
 
 	// Token transfer count
 	go func() {
+		zap.S().Info("Running token transfer count...")
 		err := tokenTransferCountExec()
 		if err != nil {
 			zap.S().Panic("Token transfer count: ", err.Error())
@@ -35,6 +38,7 @@ func StartRedisRecovery() {
 
 	// By address transaction
 	go func() {
+		zap.S().Info("Running address count...")
 		err := byAddressCountExec()
 		if err != nil {
 			zap.S().Panic("By address counts: ", err.Error())
