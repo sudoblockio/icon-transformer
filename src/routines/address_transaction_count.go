@@ -45,7 +45,7 @@ func addressTransactionCountExec() error {
 			TransactionCount: count,
 		}
 
-		crud.GetAddressCrud().LoaderChannel <- address
+		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "transaction_count"})
 	}
 	return nil
 }

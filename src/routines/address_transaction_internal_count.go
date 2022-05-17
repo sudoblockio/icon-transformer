@@ -49,7 +49,7 @@ func addressTransactionInternalCountRoutine() {
 				TransactionInternalCount: int64(valueInt),
 			}
 
-			crud.GetAddressCrud().LoaderChannel <- address
+			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "transaction_internal_count"})
 		}
 
 		zap.S().Info("Routine=AddressTransactionInternalCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")

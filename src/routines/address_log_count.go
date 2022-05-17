@@ -49,7 +49,7 @@ func addressLogCountRoutine() {
 				LogCount: int64(valueInt),
 			}
 
-			crud.GetAddressCrud().LoaderChannel <- address
+			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "log_count"})
 		}
 
 		zap.S().Info("Routine=AddressLogCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")

@@ -168,6 +168,36 @@ func (m *AddressCrud) UpsertOne(
 	return db.Error
 }
 
+func (m *AddressCrud) UpsertOneColsE(
+	address *models.Address, cols []string,
+) error {
+	db := m.db
+
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "address"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.AssignmentColumns(cols),
+	}).Create(address)
+
+	return db.Error
+}
+
+func (m *AddressCrud) UpsertOneCols(address *models.Address, cols []string) {
+	err := GetAddressCrud().UpsertOneColsE(address, cols)
+	zap.S().Debug(
+		"Loader=Address",
+		" Address=", address.Address,
+		" - Upserted",
+	)
+	if err != nil {
+		// Postgres error
+		zap.S().Fatal(
+			"Loader=Address",
+			" Address=", address.Address,
+			" - Error: ", err.Error(),
+		)
+	}
+}
+
 // StartAddressLoader starts loader
 func StartAddressLoader() {
 	go func() {

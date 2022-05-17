@@ -7,10 +7,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/jinzhu/copier"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
-	"github.com/sudoblockio/icon-transformer/models"
 	"github.com/sudoblockio/icon-transformer/service"
 	"github.com/sudoblockio/icon-transformer/utils"
 )
@@ -68,11 +66,12 @@ func addressBalanceRoutine() {
 				address.Balance += utils.StringHexToFloat64(stakedBalance, 18)
 
 				// Copy struct for pointer conflicts
-				addressCopy := &models.Address{}
-				copier.Copy(addressCopy, &address)
-
+				//addressCopy := &models.Address{}
+				//copier.Copy(addressCopy, &address)
 				// Insert to database
-				crud.GetAddressCrud().LoaderChannel <- addressCopy
+				//crud.GetAddressCrud().LoaderChannel <- addressCopy
+
+				crud.GetAddressCrud().UpsertOneCols(&address, []string{"address", "balance"})
 			}
 
 			skip += limit

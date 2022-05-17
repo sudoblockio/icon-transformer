@@ -7,10 +7,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/jinzhu/copier"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
-	"github.com/sudoblockio/icon-transformer/models"
 	"github.com/sudoblockio/icon-transformer/service"
 	"github.com/sudoblockio/icon-transformer/utils"
 )
@@ -61,11 +59,12 @@ func tokenAddressBalanceRoutine() {
 				tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
 
 				// Copy struct for pointer conflicts
-				tokenAddressCopy := &models.TokenAddress{}
-				copier.Copy(tokenAddressCopy, &tokenAddress)
+				//tokenAddressCopy := &models.TokenAddress{}
+				//copier.Copy(tokenAddressCopy, &tokenAddress)
 
 				// Insert to database
-				crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
+				//crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
+				crud.GetTokenAddressCrud().UpsertOneCols(&tokenAddress, []string{"address", "balance"})
 			}
 
 			skip += limit

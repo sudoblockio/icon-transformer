@@ -40,7 +40,8 @@ func addressIsPrep() {
 					Address: pRepAddressRpc,
 					IsPrep:  true,
 				}
-				crud.GetAddressCrud().LoaderChannel <- address
+
+				crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "is_prep"})
 			}
 		}
 
@@ -62,7 +63,8 @@ func addressIsPrep() {
 					Address: pRepAddressDb.Address,
 					IsPrep:  false,
 				}
-				crud.GetAddressCrud().LoaderChannel <- address
+				//crud.GetAddressCrud().LoaderChannel <- address
+				crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "is_prep"})
 			}
 		}
 

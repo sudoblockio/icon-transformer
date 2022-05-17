@@ -26,7 +26,8 @@ func addressTypeRoutine() {
 			Address: address,
 			Type:    _type,
 		}
-		crud.GetAddressCrud().LoaderChannel <- newAddress
+		//crud.GetAddressCrud().LoaderChannel <- newAddress
+		crud.GetAddressCrud().UpsertOneCols(newAddress, []string{"address", "type"})
 	}
 }
 

@@ -129,6 +129,37 @@ func (m *TokenAddressCrud) UpsertOne(
 	return db.Error
 }
 
+func (m *TokenAddressCrud) UpsertOneColsE(
+	addressToken *models.TokenAddress, cols []string,
+) error {
+	db := m.db
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "address"}, {Name: "token_contract_address"}},
+		DoUpdates: clause.AssignmentColumns(cols),
+	}).Create(addressToken)
+
+	return db.Error
+}
+
+func (m *TokenAddressCrud) UpsertOneCols(addressToken *models.TokenAddress, cols []string) {
+	err := GetTokenAddressCrud().UpsertOneColsE(addressToken, cols)
+	zap.S().Debug(
+		"Loader=Address",
+		" Address=", addressToken.Address,
+		" - Upserted",
+	)
+	if err != nil {
+		// Postgres error
+		zap.S().Fatal(
+			"Loader=Address",
+			" Address=", addressToken.Address,
+			" - Error: ", err.Error(),
+		)
+	}
+}
+
 // StartTokenAddressLoader starts loader
 func StartTokenAddressLoader() {
 	go func() {

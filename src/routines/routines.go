@@ -2,8 +2,8 @@ package routines
 
 func StartRoutines() {
 
-	// Address Balance
-	go addressBalanceRoutine()
+	//// Address Balance
+	//go addressBalanceRoutine()
 
 	// Governance add preps
 	go addressIsPrep()

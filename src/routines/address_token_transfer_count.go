@@ -49,7 +49,7 @@ func addressTokenTransferCountRoutine() {
 				TokenTransferCount: int64(valueInt),
 			}
 
-			crud.GetAddressCrud().LoaderChannel <- address
+			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "token_transfer_count"})
 		}
 
 		zap.S().Info("Routine=AddressTokenTransferCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
