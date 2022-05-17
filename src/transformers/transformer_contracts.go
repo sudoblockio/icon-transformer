@@ -52,8 +52,10 @@ func startContracts() {
 
 // Address loader
 func transformContractsToLoadAddress(contract *models.ContractProcessed) {
-	loaderChannel := crud.GetAddressCrud().LoaderChannel
 
 	address := transformContractToAddress(contract)
-	loaderChannel <- address
+
+	crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "name", "created_timestamp", "status", "is_token", "is_contract"})
+	//loaderChannel := crud.GetAddressCrud().LoaderChannel
+	//loaderChannel <- address
 }

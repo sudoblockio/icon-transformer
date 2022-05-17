@@ -123,6 +123,7 @@ func transformContractToAddress(contract *models.ContractProcessed) *models.Addr
 		Name:             contract.Name,
 		CreatedTimestamp: contract.CreatedTimestamp,
 		IsToken:          contract.IsToken,
+		IsContract:       true,
 	}
 
 	return address

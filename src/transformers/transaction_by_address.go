@@ -13,6 +13,7 @@ func transformBlockETLToTransactionByAddresses(blockETL *models.BlockETL) []*mod
 	//////////////////
 	for _, transactionETL := range blockETL.Transactions {
 
+		// This is for speeding up queries for single page views so that not many where conditions need to be used.
 		// From address
 		if transactionETL.FromAddress != "" {
 			transactionByFromAddress := &models.TransactionByAddress{

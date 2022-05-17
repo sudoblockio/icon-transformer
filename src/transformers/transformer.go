@@ -1,7 +1,6 @@
 package transformers
 
 func Start() {
-
 	// Blocks Topic
 	go startBlocks()
 

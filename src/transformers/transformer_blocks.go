@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jinzhu/copier"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/kafka"
@@ -46,111 +45,115 @@ func startBlocks() {
 			)
 			continue
 		}
+
 		zap.S().Info("Transformer: Processing block #", blockETL.Number)
+		processBlocks(blockETL)
+	}
+}
 
-		/////////////
-		// Loaders //
-		/////////////
-		// NOTE transform blockETL to various database views
-		// NOTE blocks may be passed multiple times, loaders use upserts
+func processBlocks(blockETL *models.BlockETL) {
+	/////////////
+	// Loaders //
+	/////////////
+	// NOTE transform blockETL to various database views
+	// NOTE blocks may be passed multiple times, loaders use upserts
 
-		// Block loader
-		transformBlocksToLoadBlock(blockETL)
+	// Block loader
+	transformBlocksToLoadBlock(blockETL)
 
-		// Transaction loader
-		transformBlocksToLoadTransactions(blockETL)
+	// Transaction loader
+	transformBlocksToLoadTransactions(blockETL)
 
-		// Transaction by address loader
-		transformBlocksToLoadTransactionByAddresses(blockETL)
+	// Transaction by address loader
+	transformBlocksToLoadTransactionByAddresses(blockETL)
 
-		// Transaction internal by address loader
-		transformBlocksToLoadTransactionInternalByAddresses(blockETL)
+	// Transaction internal by address loader
+	transformBlocksToLoadTransactionInternalByAddresses(blockETL)
 
-		// Log loader
-		transformBlocksToLoadLogs(blockETL)
+	// Log loader
+	transformBlocksToLoadLogs(blockETL)
 
-		// Token transfer loader
-		transformBlocksToLoadTokenTransfers(blockETL)
+	// Token transfer loader
+	transformBlocksToLoadTokenTransfers(blockETL)
 
-		// Token transfer by address loader
-		transformBlocksToLoadTokenTransferByAddresses(blockETL)
+	// Token transfer by address loader
+	transformBlocksToLoadTokenTransferByAddresses(blockETL)
 
-		// Transaction create score loader
-		transformBlocksToLoadTransactionCreateScores(blockETL)
+	// Transaction create score loader
+	transformBlocksToLoadTransactionCreateScores(blockETL)
 
-		// Address loader
-		transformBlocksToLoadAddresses(blockETL)
+	// Address loader
+	transformBlocksToLoadAddresses(blockETL)
 
-		// Address token loader
-		transformBlocksToLoadTokenAddresses(blockETL)
+	// Address token loader
+	transformBlocksToLoadTokenAddresses(blockETL)
 
-		/////////////////////
-		// Indexed loaders //
-		/////////////////////
-		// NOTE indexed loaders index messages by block number
-		// NOTE each block number can only pass through once
+	/////////////////////
+	// Indexed loaders //
+	/////////////////////
+	// NOTE indexed loaders index messages by block number
+	// NOTE each block number can only pass through once
 
-		_, err = crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Block not seen yet, proceed
+	_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Block not seen yet, proceed
 
-			////////////////////
-			// Redis channels //
-			////////////////////
+		////////////////////
+		// Redis channels //
+		////////////////////
 
-			// Blocks channel
-			transformBlocksToChannelBlocks(blockETL)
+		// Blocks channel
+		transformBlocksToChannelBlocks(blockETL)
 
-			// Transactions channel
-			transformBlocksToChannelTransactions(blockETL)
+		// Transactions channel
+		transformBlocksToChannelTransactions(blockETL)
 
-			// Logs channel
-			transformBlocksToChannelLogs(blockETL)
+		// Logs channel
+		transformBlocksToChannelLogs(blockETL)
 
-			// Token transfers channel
-			transformBlocksToChannelTokenTransfers(blockETL)
+		// Token transfers channel
+		transformBlocksToChannelTokenTransfers(blockETL)
 
-			//////////////
-			// Counters //
-			//////////////
+		//////////////
+		// Counters //
+		//////////////
 
-			// Block count
-			transformBlocksToCountBlocks(blockETL)
+		// Block count
+		transformBlocksToCountBlocks(blockETL)
 
-			// Transactions count
-			transformBlocksToCountTransactions(blockETL)
+		// Transactions count
+		transformBlocksToCountTransactions(blockETL)
 
-			// Logs count
-			transformBlocksToCountLogs(blockETL)
+		// Logs count
+		transformBlocksToCountLogs(blockETL)
 
-			// Token transfers count
-			transformBlocksToCountTokenTransfers(blockETL)
+		// Token transfers count
+		transformBlocksToCountTokenTransfers(blockETL)
 
-			///////////////////
-			// Service Calls //
-			///////////////////
+		///////////////////
+		// Service Calls //
+		///////////////////
 
-			// Address Balance
-			transformBlocksToServiceAddressBalance(blockETL)
+		// Address Balance
+		transformBlocksToServiceAddressBalance(blockETL)
 
-			// Token Address Balance
-			transformBlocksToServiceTokenAddressBalance(blockETL)
+		// Token Address Balance
+		transformBlocksToServiceTokenAddressBalance(blockETL)
 
-			//////////////////
-			// Commit block //
-			//////////////////
-			blockIndex := &models.BlockIndex{Number: blockETL.Number}
-			err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
+		//////////////////
+		// Commit block //
+		//////////////////
+		blockIndex := &models.BlockIndex{Number: blockETL.Number}
+		err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
 
-		} else if err != nil {
-			// ERROR inserting block index
-			zap.S().Warn(
-				"Routine=Transformer,",
-				" BlockNumber=", blockETL.Number,
-				" Step=", "Insert block index into postgres",
-				" Error=", err.Error(),
-			)
-		}
+	} else if err != nil {
+		// ERROR inserting block index
+		zap.S().Warn(
+			"Routine=Transformer,",
+			" BlockNumber=", blockETL.Number,
+			" Step=", "Insert block index into postgres",
+			" Error=", err.Error(),
+		)
 	}
 }
 
@@ -636,11 +639,12 @@ func transformBlocksToServiceAddressBalance(blockETL *models.BlockETL) {
 			address.Balance += utils.StringHexToFloat64(stakedBalance, 18)
 
 			// Copy struct for pointer conflicts
-			addressCopy := &models.Address{}
-			copier.Copy(addressCopy, &address)
+			//addressCopy := &models.Address{}
+			//copier.Copy(addressCopy, &address)
 
 			// Insert to database
-			crud.GetAddressCrud().LoaderChannel <- addressCopy
+			//crud.GetAddressCrud().LoaderChannel <- addressCopy
+			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "balance"})
 		}
 	}
 }
@@ -678,12 +682,13 @@ func transformBlocksToServiceTokenAddressBalance(blockETL *models.BlockETL) {
 			}
 			tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
 
-			// Copy struct for pointer conflicts
-			tokenAddressCopy := &models.TokenAddress{}
-			copier.Copy(tokenAddressCopy, &tokenAddress)
+			//// Copy struct for pointer conflicts
+			//tokenAddressCopy := &models.TokenAddress{}
+			//copier.Copy(tokenAddressCopy, &tokenAddress)
 
 			// Insert to database
-			crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
+			//crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
+			crud.GetTokenAddressCrud().UpsertOneCols(tokenAddress, []string{"address", "balance", "token_contract_address"})
 		}
 	}
 }
