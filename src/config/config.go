@@ -88,6 +88,8 @@ type configType struct {
 
 	// FindMissing
 	FindMissingRunOnly              bool   `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
+	FindMissingStartBlock           int64  `envconfig:"FIND_MISSING_START_BLOCK" required:"false" default:"0"`
+	FindMissingEndBlock             int64  `envconfig:"FIND_MISSING_END_BLOCK" required:"false" default:"0"`
 	FindMissingExtractorAPILocation string `envconfig:"FIND_MISSING_EXTRACTOR_API_LOCATION" required:"false" default:"http://localhost:8000/api/v1"`
 
 	// Redis Recovery

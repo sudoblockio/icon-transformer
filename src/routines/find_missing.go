@@ -20,15 +20,44 @@ func StartFindMissing() {
 
 }
 
+func getStartBlock() int64 {
+	if config.Config.FindMissingStartBlock == 0 {
+		startBlock, err := crud.GetBlockIndexCrud().SelectLowestNumber()
+		if err != nil {
+			zap.S().Fatal(err.Error())
+		}
+		return startBlock
+	} else {
+		return config.Config.FindMissingStartBlock
+	}
+}
+
+func getEndBlock() int64 {
+	if config.Config.FindMissingEndBlock == 0 {
+		endBlock, err := crud.GetBlockIndexCrud().SelectHighestNumber()
+		if err != nil {
+			zap.S().Fatal(err.Error())
+		}
+		return endBlock
+	} else {
+		return config.Config.FindMissingEndBlock
+	}
+}
+
 func findMissingBlocks() {
 
 	zap.S().Info("Starting finding missing...")
 
-	missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing()
+	startBlock := getStartBlock()
+	endBlock := getEndBlock()
+
+	missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing(startBlock, endBlock)
+	//missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing()
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
 
+	zap.S().Info("Found missing blocks. Now deleting old entries.")
 	// Delete old rows
 	err = crud.GetMissingBlockCrud().DeleteAll()
 	if err != nil {
@@ -43,6 +72,7 @@ func findMissingBlocks() {
 		}
 	}
 
+	zap.S().Info("Creating new jobs.")
 	// Create extractor jobs
 	for _, missingBlockNumber := range missingBlockNumbers {
 		body := strings.NewReader(fmt.Sprintf(`{

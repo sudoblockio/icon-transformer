@@ -96,18 +96,8 @@ func (m *BlockIndexCrud) InsertOne(blockIndex *models.BlockIndex) error {
 	return db.Error
 }
 
-func (m *BlockIndexCrud) FindMissing() ([]int64, error) {
+func (m *BlockIndexCrud) FindMissing(lowestNumber int64, highestNumber int64) ([]int64, error) {
 	db := m.db
-
-	highestNumber, err := m.SelectHighestNumber()
-	if err != nil {
-		return []int64{}, err
-	}
-
-	lowestNumber, err := m.SelectLowestNumber()
-	if err != nil {
-		return []int64{}, err
-	}
 
 	// https://stackoverflow.com/a/12444165
 	// https://stackoverflow.com/a/32072586
