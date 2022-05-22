@@ -8,5 +8,5 @@ func Start() {
 	go startContracts()
 
 	// Dead Message Topic
-	go startDeadMessages()
+	//go startDeadMessages()
 }
