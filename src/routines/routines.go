@@ -1,5 +1,7 @@
 package routines
 
+import "time"
+
 func StartRoutines() {
 
 	////// Address Balance
@@ -47,19 +49,33 @@ func StartRoutines() {
 	//// Token transfer count
 	//go tokenTransferCountRoutine()
 
-	go addressBalanceRoutine()
 	go addressIsPrep()
+	time.Sleep(30 * time.Second)
 	go addressTypeRoutine()
+	time.Sleep(30 * time.Second)
 	go addressCountRoutine()
+	time.Sleep(30 * time.Second)
 	go addressTransactionCountRoutine()
+	time.Sleep(30 * time.Second)
 	go addressTransactionInternalCountRoutine()
+	time.Sleep(30 * time.Second)
 	go addressLogCountRoutine()
+	time.Sleep(30 * time.Second)
 	go addressTokenTransferCountRoutine()
+	time.Sleep(30 * time.Second)
 	go tokenAddressBalanceRoutine()
+	time.Sleep(30 * time.Second)
 	go tokenAddressCountRoutine()
+	time.Sleep(30 * time.Second)
 	go transactionCreateScoreRoutine()
+	time.Sleep(30 * time.Second)
 	go redisStoreKeysRoutine()
+	time.Sleep(30 * time.Second)
 	go blockCountRoutine()
+	time.Sleep(30 * time.Second)
 	go transactionRegularCountRoutine()
+	time.Sleep(30 * time.Second)
 	go tokenTransferCountRoutine()
+	time.Sleep(30 * time.Second)
+	go addressBalanceRoutine()
 }
