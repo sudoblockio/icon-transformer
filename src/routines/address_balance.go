@@ -14,12 +14,19 @@ import (
 )
 
 func addressBalanceRoutine() {
+	for i := 0; i <= config.Config.RoutinesNumWorkers; i++ {
+		go getAddressBalances(i)
+	}
+}
+
+func getAddressBalances(worker_id int) {
 
 	// Loop every duration
 	for {
 
 		// Loop through all addresses
-		skip := 0
+		//skip := 0
+		skip := worker_id * config.Config.RoutinesBatchSize
 		limit := config.Config.RoutinesBatchSize
 		for {
 			addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
@@ -74,7 +81,7 @@ func addressBalanceRoutine() {
 				crud.GetAddressCrud().UpsertOneCols(&address, []string{"address", "balance"})
 			}
 
-			skip += limit
+			skip += skip + config.Config.RoutinesBatchSize*config.Config.RoutinesNumWorkers
 		}
 		zap.S().Info("Routine=AddressBalance - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
 		time.Sleep(config.Config.RoutinesSleepDuration)
