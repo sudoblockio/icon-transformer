@@ -6,7 +6,6 @@ import (
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/redis"
 	"github.com/sudoblockio/icon-transformer/utils"
-	"go.uber.org/zap"
 )
 
 func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
@@ -23,7 +22,7 @@ func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return nil, err
 	}
 
 	// Extract result
@@ -69,12 +68,10 @@ func IconNodeServiceGetBlockTransactionHashes(height int) (*[]string, error) {
 }
 
 func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error) {
-
-	// Redis cache
 	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_decimals_" + tokenContractAddress
 	decimals, err := redis.GetRedisClient().GetCount(redisCacheKey)
 	if err != nil {
-		zap.S().Fatal(err)
+		return 0, err
 	} else if decimals != -1 {
 		return int(decimals), nil
 	}
@@ -96,7 +93,7 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return 0, err
 	}
 
 	// Extract balance
@@ -110,7 +107,7 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 	err = redis.GetRedisClient().SetCount(redisCacheKey, decimals)
 	if err != nil {
 		// Redis error
-		zap.S().Fatal(err)
+		return 0, err
 	}
 
 	return int(decimals), nil
@@ -121,7 +118,7 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_name_" + tokenContractAddress
 	tokenContractName, err := redis.GetRedisClient().GetValue(redisCacheKey)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	} else if tokenContractName != "" {
 		return tokenContractName, nil
 	}
@@ -143,7 +140,7 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	// Extract balance
@@ -156,7 +153,7 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 	err = redis.GetRedisClient().SetValue(redisCacheKey, tokenContractName)
 	if err != nil {
 		// Redis error
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	return tokenContractName, nil
@@ -167,7 +164,7 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_symbol_" + tokenContractAddress
 	tokenContractSymbol, err := redis.GetRedisClient().GetValue(redisCacheKey)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	} else if tokenContractSymbol != "" {
 		return tokenContractSymbol, nil
 	}
@@ -189,7 +186,7 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	// Extract balance
@@ -202,7 +199,7 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 	err = redis.GetRedisClient().SetValue(redisCacheKey, tokenContractSymbol)
 	if err != nil {
 		// Redis error
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	return tokenContractSymbol, nil
@@ -220,7 +217,7 @@ func IconNodeServiceGetBalance(publicKey string) (string, error) {
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	// Extract balance
@@ -251,7 +248,7 @@ func IconNodeServiceGetStakedBalance(publicKey string) (string, error) {
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	// Extract balance
@@ -286,7 +283,7 @@ func IconNodeServiceGetTokenBalance(tokenContractAddress string, tokenHolderAddr
 
 	body, err := JsonRpcRequestWithRetry(payload)
 	if err != nil {
-		zap.S().Fatal(err)
+		return "", err
 	}
 
 	// Extract balance
@@ -321,7 +318,7 @@ func IconNodeServiceGetPreps() ([]string, error) {
 	pRepNames := []string{}
 
 	if err != nil {
-		zap.S().Fatal(err)
+		return nil, err
 	}
 
 	var pReps []interface{}
