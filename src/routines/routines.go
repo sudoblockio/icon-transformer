@@ -47,28 +47,19 @@ func StartRoutines() {
 	//// Token transfer count
 	//go tokenTransferCountRoutine()
 
-	addressBalanceRoutine()
-	addressIsPrep()
-	addressTypeRoutine()
-	addressCountRoutine()
-	addressTransactionCountRoutine()
-	addressTransactionInternalCountRoutine()
-	addressLogCountRoutine()
-	addressTokenTransferCountRoutine()
-	tokenAddressBalanceRoutine()
-	tokenAddressCountRoutine()
-	// Transaction Create Score
-	transactionCreateScoreRoutine()
-
-	// Redis Store Count Keys
-	redisStoreKeysRoutine()
-
-	// Block count
-	blockCountRoutine()
-
-	// Transaction regular count
-	transactionRegularCountRoutine()
-
-	// Token transfer count
-	tokenTransferCountRoutine()
+	go addressBalanceRoutine()
+	go addressIsPrep()
+	go addressTypeRoutine()
+	go addressCountRoutine()
+	go addressTransactionCountRoutine()
+	go addressTransactionInternalCountRoutine()
+	go addressLogCountRoutine()
+	go addressTokenTransferCountRoutine()
+	go tokenAddressBalanceRoutine()
+	go tokenAddressCountRoutine()
+	go transactionCreateScoreRoutine()
+	go redisStoreKeysRoutine()
+	go blockCountRoutine()
+	go transactionRegularCountRoutine()
+	go tokenTransferCountRoutine()
 }
