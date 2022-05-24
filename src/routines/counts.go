@@ -1,9 +1,11 @@
 package routines
 
 import (
+	"errors"
 	"time"
 
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
@@ -63,6 +65,7 @@ func transactionRegularCountRoutine() {
 
 // Count transactions from PG and set in redis
 func transactionRegularCountExec() error {
+	zap.S().Info("Starting transaction_regular_count routine...")
 	err := crudCountSetRedis(
 		crud.GetTransactionCrud().CountRegular,
 		config.Config.RedisKeyPrefix+"transaction_regular_count",
@@ -98,6 +101,7 @@ func tokenTransferCountRoutine() {
 
 // Count token_transfers from PG and set in redis
 func tokenTransferCountExec() error {
+	zap.S().Info("Starting transaction_regular_count routine...")
 	err := crudCountSetRedis(
 		crud.GetTokenTransferCrud().Count,
 		config.Config.RedisKeyPrefix+"token_transfer_count",
@@ -136,38 +140,48 @@ func byAddressCountRoutine() {
 
 // Count by address from PG and set in redis
 func byAddressCountExec() error {
-	addresses, err := crud.GetAddressCrud().SelectAllAddresses()
-	if err != nil {
-		// Redis error
-		zap.S().Warn(err)
-		return err
-	}
-	for _, address := range *addresses {
-		// Regular transfers
-		err = redis.GetRedisClient().SetCount(
-			config.Config.RedisKeyPrefix+"transaction_regular_count_by_address_"+address.Address,
-			address.TransactionCount,
-		)
-		// Internal transfers
-		err = redis.GetRedisClient().SetCount(
-			config.Config.RedisKeyPrefix+"transaction_internal_count_by_address_"+address.Address,
-			address.TransactionInternalCount,
-		)
-		// Token transfers
-		err = redis.GetRedisClient().SetCount(
-			config.Config.RedisKeyPrefix+"token_transfer_count_by_address_"+address.Address,
-			address.TokenTransferCount,
-		)
-		// Log count
-		err = redis.GetRedisClient().SetCount(
-			config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
-			address.LogCount,
-		)
-		if err != nil {
-			// Redis error
-			zap.S().Warn(err)
-			return err
+	zap.S().Info("Starting transaction_regular_count_by_address_* routine...")
+
+	skip := 0
+	limit := config.Config.RoutinesBatchSize
+	for {
+		addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			break
+		} else if err != nil {
+			zap.S().Fatal(err.Error())
 		}
+		if len(*addresses) == 0 {
+			break
+		}
+		zap.S().Info("Routine=AddressBalance", " - Processing ", len(*addresses), " addresses...")
+		for _, address := range *addresses {
+			err = redis.GetRedisClient().SetCount(
+				config.Config.RedisKeyPrefix+"transaction_regular_count_by_address_"+address.Address,
+				address.TransactionCount,
+			)
+			// Internal transfers
+			err = redis.GetRedisClient().SetCount(
+				config.Config.RedisKeyPrefix+"transaction_internal_count_by_address_"+address.Address,
+				address.TransactionInternalCount,
+			)
+			// Token transfers
+			err = redis.GetRedisClient().SetCount(
+				config.Config.RedisKeyPrefix+"token_transfer_count_by_address_"+address.Address,
+				address.TokenTransferCount,
+			)
+			// Log count
+			err = redis.GetRedisClient().SetCount(
+				config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
+				address.LogCount,
+			)
+			if err != nil {
+				// Redis error
+				zap.S().Warn(err)
+				return err
+			}
+		}
+		skip += limit
 	}
 	return nil
 }
