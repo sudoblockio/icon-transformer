@@ -3,8 +3,6 @@ package routines
 import (
 	"errors"
 	"github.com/sudoblockio/icon-transformer/redis"
-	"time"
-
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -25,17 +23,15 @@ func initAddressCounts(worker_id int) {
 	for {
 		addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Sleep
 			break
 		} else if err != nil {
 			zap.S().Fatal(err.Error())
 		}
 		if len(*addresses) == 0 {
-			// Sleep
 			break
 		}
 
-		zap.S().Info("Routine=AddressBalance", " - Processing ", len(*addresses), " addresses...")
+		zap.S().Info("Routine=AddressCount", " - Processing ", len(*addresses), " addresses...")
 		for _, address := range *addresses {
 
 			// Regular Transaction Count //
@@ -105,8 +101,7 @@ func initAddressCounts(worker_id int) {
 			crud.GetAddressCrud().UpsertOneCols(&address, []string{"address", "transaction_count", "transaction_internal_count", "log_count", "token_transfer_count"})
 		}
 
-		skip += skip + config.Config.RoutinesBatchSize*config.Config.RoutinesNumWorkers
+		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 	}
-	zap.S().Info("Routine=AddressBalance - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
-	time.Sleep(config.Config.RoutinesSleepDuration)
+	zap.S().Info("Routine=AddressCount - Completed routine", config.Config.RoutinesSleepDuration.String(), "...")
 }
