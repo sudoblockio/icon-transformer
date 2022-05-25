@@ -68,11 +68,21 @@ func (m *TokenTransferCrud) Count() (int64, error) {
 	return count, db.Error
 }
 
-// CountByAddress - count all entries in token_transfers table
+// CountByToAddress - count all entries in token_transfers table to address
 func (m *TokenTransferCrud) CountByToAddress(address string) (int64, error) {
 	db := m.db
 	db = db.Model(&models.TokenTransfer{})
 	db = db.Where("to_address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
+// CountByAddress - count all entries in token_transfers table
+func (m *TokenTransferCrud) CountByAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.TokenTransfer{})
+	db = db.Where("to_address = ? or from_address = ?", address, address)
 	var count int64
 	db = db.Count(&count)
 	return count, db.Error

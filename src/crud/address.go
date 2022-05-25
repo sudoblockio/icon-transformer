@@ -226,3 +226,13 @@ func StartAddressLoader() {
 		}
 	}()
 }
+
+// StartAddressBalanceLoader starts loader
+func StartAddressBalanceLoader() {
+	go func() {
+		for {
+			newAddress := <-GetAddressCrud().LoaderChannel
+			GetAddressCrud().UpsertOneCols(newAddress, []string{"address", "balance"})
+		}
+	}()
+}

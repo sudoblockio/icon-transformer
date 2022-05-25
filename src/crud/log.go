@@ -53,6 +53,15 @@ func GetLogCrud() *LogCrud {
 	return logCrud
 }
 
+// NOTE this function will take a long time
+func (m *LogCrud) CountLogsByAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.Log{}).Where("address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 // Migrate - migrate logs table
 func (m *LogCrud) Migrate() error {
 	// Only using LogRawORM (ORM version of the proto generated struct) to create the TABLE
