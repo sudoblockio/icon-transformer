@@ -122,6 +122,7 @@ func transformContractToAddress(contract *models.ContractProcessed) *models.Addr
 		Address:          contract.Address,
 		Name:             contract.Name,
 		CreatedTimestamp: contract.CreatedTimestamp,
+		Status:           contract.Status,
 		IsToken:          contract.IsToken,
 		IsContract:       true,
 	}

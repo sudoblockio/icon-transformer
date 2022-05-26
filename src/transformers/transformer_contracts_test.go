@@ -8,13 +8,14 @@ import (
 )
 
 func TestProcessContracts(t *testing.T) {
-	config.ReadTestEnvironment()
+	//config.ReadTestEnvironment()
+	config.ReadEnvironment()
 
 	contract := models.ContractProcessed{
 		Address:          "testing",
 		Name:             "testing",
-		CreatedTimestamp: 1,
 		Status:           "testing",
+		CreatedTimestamp: 1,
 		IsToken:          true,
 	}
 
