@@ -2,7 +2,7 @@ syntax = "proto3";
 package models;
 option go_package = "./models";
 
-import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+import "gorm.proto";
 
 message Block {
   option (gorm.opts) = {ormable: true};
@@ -15,7 +15,7 @@ message Block {
   string merkle_root_hash = 6;
   string hash = 7;
   string parent_hash = 8;
-  int64 timestamp = 9;
+  int64 timestamp = 9 [(gorm.field).tag = {index: "block_idx_timestamp"}];
   int64 transaction_count = 10;
   int64 log_count = 11;
   string transaction_amount = 12;
