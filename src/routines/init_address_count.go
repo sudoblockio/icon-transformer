@@ -31,7 +31,7 @@ func initAddressCounts(worker_id int) {
 			break
 		}
 
-		zap.S().Info("Routine=AddressCount", " - Processing ", len(*addresses), " addresses...")
+		zap.S().Info("Routine=AddressCount", " - Processing ", skip, " addresses...")
 		for _, address := range *addresses {
 
 			// Regular Transaction Count //
