@@ -125,7 +125,7 @@ func DefaultReadTokenTransferByAddress(ctx context.Context, in *TokenTransferByA
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeReadApplyQuery); ok {

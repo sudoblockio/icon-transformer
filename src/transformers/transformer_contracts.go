@@ -52,10 +52,13 @@ func startContracts() {
 
 // Address loader
 func transformContractsToLoadAddress(contract *models.ContractProcessed) {
-
 	address := transformContractToAddress(contract)
+	db_address, err := crud.GetAddressCrud().SelectOneAddress(address.Address)
+	if err != nil {
+		zap.S().Info(err.Error())
+	}
 
-	crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "name", "created_timestamp", "status", "is_token", "is_contract"})
-	//loaderChannel := crud.GetAddressCrud().LoaderChannel
-	//loaderChannel <- address
+	if db_address.ContractUpdatedBlock <= address.ContractUpdatedBlock {
+		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "name", "created_timestamp", "status", "is_token", "is_contract", "contract_updated_block"})
+	}
 }

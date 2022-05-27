@@ -248,7 +248,7 @@ func DefaultStrictUpdateKafkaJob(ctx context.Context, in *KafkaJob, db *gorm.DB)
 		return nil, err
 	}
 	lockedRow := &KafkaJobORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("job_id=?", ormObj.JobId).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("worker_group=?", ormObj.WorkerGroup).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(KafkaJobORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -411,7 +411,7 @@ func DefaultListKafkaJob(ctx context.Context, db *gorm.DB) ([]*KafkaJob, error) 
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("job_id")
+	db = db.Order("worker_group")
 	ormResponse := []KafkaJobORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

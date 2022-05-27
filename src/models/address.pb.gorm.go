@@ -12,11 +12,12 @@ import (
 type AddressORM struct {
 	Address                  string  `gorm:"primary_key"`
 	Balance                  float64 `gorm:"index:address_idx_balance"`
-	CreatedTimestamp         int64   `gorm:"index:address_idx_created_timestamp"`
-	IsContract               bool    `gorm:"index:address_idx_is_contract"`
-	IsPrep                   bool    `gorm:"index:address_idx_is_governance_prep"`
-	IsToken                  bool    `gorm:"index:address_idx_is_token"`
-	LogCount                 int64   `gorm:"index:address_idx_log_count"`
+	ContractUpdatedBlock     int64
+	CreatedTimestamp         int64 `gorm:"index:address_idx_created_timestamp"`
+	IsContract               bool  `gorm:"index:address_idx_is_contract"`
+	IsPrep                   bool  `gorm:"index:address_idx_is_governance_prep"`
+	IsToken                  bool  `gorm:"index:address_idx_is_token"`
+	LogCount                 int64 `gorm:"index:address_idx_log_count"`
 	Name                     string
 	Status                   string
 	TokenTransferCount       int64 `gorm:"index:address_idx_token_transfer_count"`
@@ -52,6 +53,7 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
+	to.ContractUpdatedBlock = m.ContractUpdatedBlock
 	to.IsPrep = m.IsPrep
 	if posthook, ok := interface{}(m).(AddressWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
@@ -81,6 +83,7 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
+	to.ContractUpdatedBlock = m.ContractUpdatedBlock
 	to.IsPrep = m.IsPrep
 	if posthook, ok := interface{}(m).(AddressWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
@@ -432,6 +435,10 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 		}
 		if f == prefix+"IsToken" {
 			patchee.IsToken = patcher.IsToken
+			continue
+		}
+		if f == prefix+"ContractUpdatedBlock" {
+			patchee.ContractUpdatedBlock = patcher.ContractUpdatedBlock
 			continue
 		}
 		if f == prefix+"IsPrep" {

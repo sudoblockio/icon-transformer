@@ -244,7 +244,7 @@ func DefaultDeleteTransaction(ctx context.Context, in *Transaction, db *gorm.DB)
 	if err != nil {
 		return err
 	}
-	if ormObj.Hash == "" {
+	if ormObj.LogIndex == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeDelete_); ok {
@@ -274,23 +274,23 @@ func DefaultDeleteTransactionSet(ctx context.Context, in []*Transaction, db *gor
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []string{}
+	keys := []int64{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.Hash == "" {
+		if ormObj.LogIndex == 0 {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.Hash)
+		keys = append(keys, ormObj.LogIndex)
 	}
 	if hook, ok := (interface{}(&TransactionORM{})).(TransactionORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("hash in (?)", keys).Delete(&TransactionORM{}).Error
+	err = db.Where("log_index in (?)", keys).Delete(&TransactionORM{}).Error
 	if err != nil {
 		return err
 	}

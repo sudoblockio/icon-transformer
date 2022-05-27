@@ -175,7 +175,7 @@ func DefaultDeleteDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) err
 	if err != nil {
 		return err
 	}
-	if ormObj.Topic == "" {
+	if ormObj.Offset == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeDelete_); ok {
@@ -205,23 +205,23 @@ func DefaultDeleteDeadBlockSet(ctx context.Context, in []*DeadBlock, db *gorm.DB
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []string{}
+	keys := []int64{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.Topic == "" {
+		if ormObj.Offset == 0 {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.Topic)
+		keys = append(keys, ormObj.Offset)
 	}
 	if hook, ok := (interface{}(&DeadBlockORM{})).(DeadBlockORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("topic in (?)", keys).Delete(&DeadBlockORM{}).Error
+	err = db.Where("offset in (?)", keys).Delete(&DeadBlockORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -411,7 +411,7 @@ func DefaultListDeadBlock(ctx context.Context, db *gorm.DB) ([]*DeadBlock, error
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("topic")
+	db = db.Order("partition")
 	ormResponse := []DeadBlockORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

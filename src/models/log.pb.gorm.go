@@ -214,23 +214,23 @@ func DefaultDeleteLogSet(ctx context.Context, in []*Log, db *gorm.DB) error {
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.TransactionHash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.TransactionHash)
 	}
 	if hook, ok := (interface{}(&LogORM{})).(LogORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&LogORM{}).Error
+	err = db.Where("transaction_hash in (?)", keys).Delete(&LogORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -432,7 +432,7 @@ func DefaultListLog(ctx context.Context, db *gorm.DB) ([]*Log, error) {
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("transaction_hash")
 	ormResponse := []LogORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

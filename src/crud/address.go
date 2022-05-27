@@ -91,6 +91,19 @@ func (m *AddressCrud) SelectAllAddresses() (*[]models.Address, error) {
 	return addresses, db.Error
 }
 
+// SelectOneAddress - select one address from addresses table
+func (m *AddressCrud) SelectOneAddress(_address string) (*models.Address, error) {
+	db := m.db
+	db = db.Model(&models.Address{})
+	db = db.Where("address = ?", _address)
+
+	address := &models.Address{}
+
+	db = db.First(address)
+
+	return address, db.Error
+}
+
 // SelectAllAddresses - select all addresses from addreses table - Only for routine / recovery
 func (m *AddressCrud) SelectAllTokenContracts() (*[]models.Address, error) {
 	db := m.db

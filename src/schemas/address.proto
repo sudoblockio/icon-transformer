@@ -17,11 +17,12 @@ message Address {
   double balance = 7 [(gorm.field).tag = {index: "address_idx_balance"}];
   string type = 8;
 
-  // Contracts Proccessed
+  // Contracts Processed
   string name = 9;
   string status = 10;
   int64 created_timestamp = 11 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
   bool is_token = 12 [(gorm.field).tag = {index: "address_idx_is_token"}];
+  int64 contract_updated_block = 14;
 
   // Governance Prep Processed 
   bool is_prep = 13 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
