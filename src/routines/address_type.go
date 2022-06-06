@@ -2,6 +2,7 @@ package routines
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
@@ -9,7 +10,7 @@ import (
 
 // NOTE this routine only runs once
 func addressTypeRoutine() {
-
+	zap.S().Info("Starting address type routine.")
 	var addressListRaw interface{}
 	json.Unmarshal([]byte(ADDRESS_LIST), &addressListRaw)
 
@@ -29,6 +30,7 @@ func addressTypeRoutine() {
 		//crud.GetAddressCrud().LoaderChannel <- newAddress
 		crud.GetAddressCrud().UpsertOneCols(newAddress, []string{"address", "type"})
 	}
+	zap.S().Info("Finished address type routine.")
 }
 
 const ADDRESS_LIST = `[
