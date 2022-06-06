@@ -14,6 +14,7 @@ type kafkaTopicConsumer struct {
 	brokerURL     string
 	topicNames    []string
 	TopicChannels map[string]chan *sarama.ConsumerMessage
+	//BlocksTopicChannel chan *sarama.ConsumerMessage
 }
 
 var KafkaTopicConsumer *kafkaTopicConsumer
@@ -25,7 +26,7 @@ func StartConsumers() {
 	topicNames := []string{
 		config.Config.KafkaBlocksTopic,
 		config.Config.KafkaContractsTopic,
-		config.Config.KafkaDeadMessageTopic,
+		//config.Config.KafkaDeadMessageTopic,
 	}
 
 	// Init topic channels
@@ -39,6 +40,7 @@ func StartConsumers() {
 		brokerURL:     config.Config.KafkaBrokerURL,
 		topicNames:    topicNames,
 		TopicChannels: topicChannels,
+		//BlocksTopicChannel: make(chan *sarama.ConsumerMessage),
 	}
 
 	////////////////////
