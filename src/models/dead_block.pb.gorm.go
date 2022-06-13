@@ -128,7 +128,7 @@ func DefaultReadDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*Dea
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.Topic == "" {
+	if ormObj.Offset == 0 {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeReadApplyQuery); ok {
@@ -175,7 +175,7 @@ func DefaultDeleteDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) err
 	if err != nil {
 		return err
 	}
-	if ormObj.Offset == 0 {
+	if ormObj.Topic == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeDelete_); ok {
@@ -211,17 +211,17 @@ func DefaultDeleteDeadBlockSet(ctx context.Context, in []*DeadBlock, db *gorm.DB
 		if err != nil {
 			return err
 		}
-		if ormObj.Offset == 0 {
+		if ormObj.Partition == 0 {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.Offset)
+		keys = append(keys, ormObj.Partition)
 	}
 	if hook, ok := (interface{}(&DeadBlockORM{})).(DeadBlockORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("offset in (?)", keys).Delete(&DeadBlockORM{}).Error
+	err = db.Where("partition in (?)", keys).Delete(&DeadBlockORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -411,7 +411,7 @@ func DefaultListDeadBlock(ctx context.Context, db *gorm.DB) ([]*DeadBlock, error
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("partition")
+	db = db.Order("topic")
 	ormResponse := []DeadBlockORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

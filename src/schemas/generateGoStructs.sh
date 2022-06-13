@@ -1,6 +1,9 @@
 echo "Remove old models..."
 set -e
 
+# For compiling issues
+# https://www.notion.so/Protobuf-d5efc374891a452798e3f3a414722eec
+
 #rm ../models/*
 cd "$(dirname "$0")"
 

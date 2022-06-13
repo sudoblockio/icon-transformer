@@ -172,7 +172,7 @@ func DefaultDeleteTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.Address == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeDelete_); ok {
@@ -245,7 +245,7 @@ func DefaultStrictUpdateTokenTransferByAddress(ctx context.Context, in *TokenTra
 		return nil, err
 	}
 	lockedRow := &TokenTransferByAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err

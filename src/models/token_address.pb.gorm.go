@@ -122,7 +122,7 @@ func DefaultReadTokenAddress(ctx context.Context, in *TokenAddress, db *gorm.DB)
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.TokenContractAddress == "" {
+	if ormObj.Address == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenAddressORMWithBeforeReadApplyQuery); ok {
@@ -242,7 +242,7 @@ func DefaultStrictUpdateTokenAddress(ctx context.Context, in *TokenAddress, db *
 		return nil, err
 	}
 	lockedRow := &TokenAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("token_contract_address=?", ormObj.TokenContractAddress).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("address=?", ormObj.Address).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TokenAddressORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err

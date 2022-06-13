@@ -13,12 +13,12 @@ type AddressORM struct {
 	Address                  string  `gorm:"primary_key"`
 	Balance                  float64 `gorm:"index:address_idx_balance"`
 	ContractUpdatedBlock     int64
-	CreatedTimestamp         int64 `gorm:"index:address_idx_created_timestamp"`
-	IsContract               bool  `gorm:"index:address_idx_is_contract"`
-	IsPrep                   bool  `gorm:"index:address_idx_is_governance_prep"`
-	IsToken                  bool  `gorm:"index:address_idx_is_token"`
-	LogCount                 int64 `gorm:"index:address_idx_log_count"`
-	Name                     string
+	CreatedTimestamp         int64  `gorm:"index:address_idx_created_timestamp"`
+	IsContract               bool   `gorm:"index:address_idx_is_contract"`
+	IsPrep                   bool   `gorm:"index:address_idx_is_governance_prep"`
+	IsToken                  bool   `gorm:"index:address_idx_is_token"`
+	LogCount                 int64  `gorm:"index:address_idx_log_count"`
+	Name                     string `gorm:"index:address_idx_contract_name"`
 	Status                   string
 	TokenTransferCount       int64 `gorm:"index:address_idx_token_transfer_count"`
 	TransactionCount         int64 `gorm:"index:address_idx_transaction_count"`

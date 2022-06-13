@@ -172,7 +172,7 @@ func DefaultDeleteTransactionInternalByAddress(ctx context.Context, in *Transact
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.Address == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeDelete_); ok {
@@ -202,23 +202,23 @@ func DefaultDeleteTransactionInternalByAddressSet(ctx context.Context, in []*Tra
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.TransactionHash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.TransactionHash)
 	}
 	if hook, ok := (interface{}(&TransactionInternalByAddressORM{})).(TransactionInternalByAddressORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&TransactionInternalByAddressORM{}).Error
+	err = db.Where("transaction_hash in (?)", keys).Delete(&TransactionInternalByAddressORM{}).Error
 	if err != nil {
 		return err
 	}

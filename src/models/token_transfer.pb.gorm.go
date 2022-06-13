@@ -226,23 +226,23 @@ func DefaultDeleteTokenTransferSet(ctx context.Context, in []*TokenTransfer, db 
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []string{}
+	keys := []int64{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.TransactionHash == "" {
+		if ormObj.LogIndex == 0 {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.TransactionHash)
+		keys = append(keys, ormObj.LogIndex)
 	}
 	if hook, ok := (interface{}(&TokenTransferORM{})).(TokenTransferORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferORM{}).Error
+	err = db.Where("log_index in (?)", keys).Delete(&TokenTransferORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -269,7 +269,7 @@ func DefaultStrictUpdateTokenTransfer(ctx context.Context, in *TokenTransfer, db
 		return nil, err
 	}
 	lockedRow := &TokenTransferORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
