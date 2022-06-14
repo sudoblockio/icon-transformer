@@ -128,7 +128,7 @@ func DefaultReadDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*Dea
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.Offset == 0 {
+	if ormObj.Topic == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeReadApplyQuery); ok {

@@ -196,7 +196,7 @@ func DefaultDeleteTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.LogIndex == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeDelete_); ok {

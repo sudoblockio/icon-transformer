@@ -172,7 +172,7 @@ func DefaultDeleteTransactionInternalByAddress(ctx context.Context, in *Transact
 	if err != nil {
 		return err
 	}
-	if ormObj.Address == "" {
+	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeDelete_); ok {
@@ -404,7 +404,7 @@ func DefaultListTransactionInternalByAddress(ctx context.Context, db *gorm.DB) (
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("address")
 	ormResponse := []TransactionInternalByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
