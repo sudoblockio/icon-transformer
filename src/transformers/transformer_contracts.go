@@ -50,6 +50,23 @@ func startContracts() {
 	}
 }
 
+func transformContractToAddress(contract *models.ContractProcessed) *models.Address {
+
+	address := &models.Address{
+		Address:              contract.Address,
+		Name:                 contract.Name,
+		CreatedTimestamp:     contract.CreatedTimestamp,
+		Status:               contract.Status,
+		IsToken:              contract.IsToken,
+		IsContract:           true,
+		ContractUpdatedBlock: contract.ContractUpdatedBlock,
+		TokenStandard:        contract.TokenStandard,
+		ContractType:         contract.ContractType,
+	}
+
+	return address
+}
+
 // Address loader
 func transformContractsToLoadAddress(contract *models.ContractProcessed) {
 	address := transformContractToAddress(contract)
@@ -59,6 +76,16 @@ func transformContractsToLoadAddress(contract *models.ContractProcessed) {
 	}
 
 	if db_address.ContractUpdatedBlock <= address.ContractUpdatedBlock {
-		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "name", "created_timestamp", "status", "is_token", "is_contract", "contract_updated_block"})
+		crud.GetAddressCrud().UpsertOneCols(address, []string{
+			"address",
+			"name",
+			"created_timestamp",
+			"status",
+			"is_token",
+			"is_contract",
+			"contract_updated_block",
+			"contract_type",
+			"token_standard",
+		})
 	}
 }

@@ -115,18 +115,3 @@ func transformBlockETLToAddresses(blockETL *models.BlockETL) []*models.Address {
 
 	return addresses
 }
-
-func transformContractToAddress(contract *models.ContractProcessed) *models.Address {
-
-	address := &models.Address{
-		Address:              contract.Address,
-		Name:                 contract.Name,
-		CreatedTimestamp:     contract.CreatedTimestamp,
-		Status:               contract.Status,
-		IsToken:              contract.IsToken,
-		IsContract:           true,
-		ContractUpdatedBlock: contract.ContractUpdatedBlock,
-	}
-
-	return address
-}
