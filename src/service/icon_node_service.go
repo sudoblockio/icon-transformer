@@ -348,3 +348,27 @@ func IconNodeServiceGetPreps() ([]string, error) {
 
 	return pRepNames, nil
 }
+
+func IconNodeServiceGetTransactionResult(hash string) (map[string]interface{}, error) {
+	// Request icon contract
+	payload := fmt.Sprintf(`{
+    "jsonrpc": "2.0",
+    "method": "icx_getTransactionResult",
+    "id": 1234,
+    "params": {
+        "txHash": "%s"
+    }
+	}`, hash)
+
+	body, err := JsonRpcRequestWithRetry(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	result, ok := body["result"].(map[string]interface{})
+	if ok == false {
+		return nil, errors.New("Invalid response")
+	}
+
+	return result, nil
+}

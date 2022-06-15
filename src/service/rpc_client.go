@@ -69,21 +69,9 @@ func JsonRpcRequestWithBackup(payload string) (map[string]interface{}, error) {
 
 		if err != nil {
 			log.Println("primary icon node rpc err:", err)
+			return nil, err
 		}
 	}
-	//resp, err := JsonRpcRequest(payload, config.Config.IconNodeServiceURL)
-	//if err == nil {
-	//	return resp, err
-	//}
-	//
-	//if err != nil {
-	//	log.Println("primary icon node rpc err:", err)
-	//}
-	//
-	//resp, err = JsonRpcRequest(payload, config.Config.IconNodeServiceURLBackup)
-	//if err == nil {
-	//	return resp, err
-	//}
 	return nil, err
 }
 

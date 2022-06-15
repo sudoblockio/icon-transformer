@@ -61,7 +61,10 @@ func TestIconNodeServiceGetStakedBalance(t *testing.T) {
 
 func TestIconNodeServiceGetTokenBalance(t *testing.T) {
 	config.ReadEnvironment()
-	body, err := IconNodeServiceGetTokenBalance("cx993810b4523ab6b1658925d8d6c234f286adbdba", "hx79dec003161ca695637d7d02143c07ac72cd3018")
+	body, err := IconNodeServiceGetTokenBalance(
+		"cx993810b4523ab6b1658925d8d6c234f286adbdba",
+		"hx79dec003161ca695637d7d02143c07ac72cd3018",
+	)
 
 	require.Nil(t, err)
 	require.NotEmpty(t, body)
@@ -73,4 +76,25 @@ func TestIconNodeServiceGetPreps(t *testing.T) {
 
 	require.Nil(t, err)
 	require.NotEmpty(t, body)
+}
+
+func TestIconNodeServiceGetTransactionResult(t *testing.T) {
+	config.ReadEnvironment()
+	result, err := IconNodeServiceGetTransactionResult("0x362b4a1f81d3b3f505ba93a4dbd65527d8ba21938d864fa377a07d3de8460401")
+
+	scoreAddress, ok := result["scoreAddress"].(string)
+
+	require.Equal(t, ok, true)
+	assert.Equal(t, scoreAddress, "cxf81989e82ebfc3b69c758f8f3017822d5dc6ab46")
+	require.Nil(t, err)
+	require.NotEmpty(t, result)
+}
+
+func TestIconNodeServiceGetScoreAddressFromTransactionResult(t *testing.T) {
+	config.ReadEnvironment()
+	result, err := IconNodeServiceGetTransactionResult(
+		"0x85fff93f669f778254d8a4e484683ccb457b0e0c0d6ec61e410401c13bb0c162",
+	)
+	require.Nil(t, err)
+	require.NotEmpty(t, result)
 }
