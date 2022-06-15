@@ -1,4 +1,4 @@
-package routines
+package _old
 
 import (
 	"errors"
@@ -25,37 +25,20 @@ func countRoutineCron(routine func() error) {
 	}
 }
 
-// Takes a crud count method, calls it, takes the count and puts it into a redis countKey.
-func crudCountSetRedis(c func() (int64, error), countKey string) error {
-	count, err := c()
-	if err != nil {
-		// Postgres error
-		zap.S().Warn(err)
-		return err
-	}
-	err = redis.GetRedisClient().SetCount(countKey, count)
-	if err != nil {
-		// Redis error
-		zap.S().Warn(err)
-		return err
-	}
-	return nil
-}
-
 func blockCountRoutine() {
 	countRoutineCron(blockCountExec)
 }
 
 // Count blocks from PG and set in redis
 func blockCountExec() error {
-	err := crudCountSetRedis(
-		crud.GetBlockIndexCrud().Count,
-		config.Config.RedisKeyPrefix+"block_count",
-	)
-	if err != nil {
-		zap.S().Warn(err.Error())
-		return err
-	}
+	//err := utils.crudCountSetRedis(
+	//	crud.GetBlockIndexCrud().Count,
+	//	config.Config.RedisKeyPrefix+"block_count",
+	//)
+	//if err != nil {
+	//	zap.S().Warn(err.Error())
+	//	return err
+	//}
 	return nil
 }
 
@@ -66,14 +49,14 @@ func transactionRegularCountRoutine() {
 // Count transactions from PG and set in redis
 func transactionRegularCountExec() error {
 	zap.S().Info("Starting transaction_regular_count routine...")
-	err := crudCountSetRedis(
-		crud.GetTransactionCrud().CountRegular,
-		config.Config.RedisKeyPrefix+"transaction_regular_count",
-	)
-	if err != nil {
-		zap.S().Warn(err.Error())
-		return err
-	}
+	//err := utils.crudCountSetRedis(
+	//	crud.GetTransactionCrud().CountRegular,
+	//	config.Config.RedisKeyPrefix+"transaction_regular_count",
+	//)
+	//if err != nil {
+	//	zap.S().Warn(err.Error())
+	//	return err
+	//}
 	return nil
 }
 
@@ -102,14 +85,14 @@ func tokenTransferCountRoutine() {
 // Count token_transfers from PG and set in redis
 func tokenTransferCountExec() error {
 	zap.S().Info("Starting transaction_regular_count routine...")
-	err := crudCountSetRedis(
-		crud.GetTokenTransferCrud().Count,
-		config.Config.RedisKeyPrefix+"token_transfer_count",
-	)
-	if err != nil {
-		zap.S().Warn(err.Error())
-		return err
-	}
+	//err := utils.crudCountSetRedis(
+	//	crud.GetTokenTransferCrud().Count,
+	//	config.Config.RedisKeyPrefix+"token_transfer_count",
+	//)
+	//if err != nil {
+	//	zap.S().Warn(err.Error())
+	//	return err
+	//}
 	return nil
 }
 

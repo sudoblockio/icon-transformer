@@ -1,4 +1,4 @@
-package routines
+package _old
 
 import (
 	"go.uber.org/zap"
@@ -24,11 +24,13 @@ func StartRedisRecovery() {
 		zap.S().Panic("Token transfer count: ", err.Error())
 	}
 
-	//zap.S().Info("Running address count...")
-	//err = byAddressCountExec()
-	//if err != nil {
-	//	zap.S().Panic("By address counts: ", err.Error())
-	//}
+	addressDBRecovery()
+
+	zap.S().Info("Running address count...")
+	err = byAddressCountExec()
+	if err != nil {
+		zap.S().Panic("By address counts: ", err.Error())
+	}
 
 	zap.S().Info("Running address count...")
 	initAddressCount()

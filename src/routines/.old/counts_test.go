@@ -1,20 +1,21 @@
-package routines
+package _old
 
 import (
 	"github.com/stretchr/testify/require"
 	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/routines"
 	"testing"
 )
 
 func TestBlockCount(t *testing.T) {
 	config.ReadTestEnvironment()
-	err := blockCountExec()
+	err := routines.blockCountExec()
 	require.Nil(t, err)
 }
 
 func TestTransactionRegularCount(t *testing.T) {
 	config.ReadTestEnvironment()
-	err := transactionRegularCountExec()
+	err := routines.transactionRegularCountExec()
 	require.Nil(t, err)
 }
 
@@ -27,7 +28,7 @@ func TestTransactionRegularCount(t *testing.T) {
 
 func TestTokenTransferCount(t *testing.T) {
 	config.ReadTestEnvironment()
-	err := tokenTransferCountExec()
+	err := routines.tokenTransferCountExec()
 	require.Nil(t, err)
 }
 

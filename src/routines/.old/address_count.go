@@ -1,4 +1,4 @@
-package routines
+package _old
 
 import (
 	"time"
@@ -10,15 +10,10 @@ import (
 	"github.com/sudoblockio/icon-transformer/redis"
 )
 
+// TODO: rm
+
 func addressCountRoutine() {
-
-	// Loop every duration
 	for {
-
-		///////////////
-		// Get count //
-		///////////////
-
 		// All
 		countAll, err := crud.GetAddressCrud().CountAll()
 		if err != nil {

@@ -1,8 +1,6 @@
 package routines
 
 import (
-	"time"
-
 	"go.uber.org/zap"
 
 	"github.com/sudoblockio/icon-transformer/config"
@@ -10,34 +8,31 @@ import (
 	"github.com/sudoblockio/icon-transformer/redis"
 )
 
+// TODO: RM? This sets a key that isn't used in API
+
+// Sets a redis key for the number
 func tokenAddressCountRoutine() {
+	tokenAddressCounts, err := crud.GetTokenAddressCrud().CountByTokenContractAddress()
+	if err != nil {
+		zap.S().Fatal(
+			"Routine=TokenAddressCount,",
+			" Step=", "Get count from db",
+			" Error=", err.Error(),
+		)
+	}
 
-	// Loop every duration
-	for {
-
-		tokenAddressCounts, err := crud.GetTokenAddressCrud().CountByTokenContractAddress()
+	zap.S().Info("Routine=TokenAddressCountRoutine", " - Processing tokenAddressCounts...")
+	for tokenContractAddress, count := range tokenAddressCounts {
+		countKey := config.Config.RedisKeyPrefix + "token_address_count_by_token_contract_" + tokenContractAddress
+		err = redis.GetRedisClient().SetCount(countKey, count)
 		if err != nil {
-			zap.S().Fatal(
+			zap.S().Warn(
 				"Routine=TokenAddressCount,",
-				" Step=", "Get count from db",
+				" Step=", "Set count in redis",
 				" Error=", err.Error(),
 			)
 		}
-
-		zap.S().Info("Routine=TokenAddressCountRoutine", " - Processing tokenAddressCounts...")
-		for tokenContractAddress, count := range tokenAddressCounts {
-			countKey := config.Config.RedisKeyPrefix + "token_address_count_by_token_contract_" + tokenContractAddress
-			err = redis.GetRedisClient().SetCount(countKey, count)
-			if err != nil {
-				zap.S().Warn(
-					"Routine=TokenAddressCount,",
-					" Step=", "Set count in redis",
-					" Error=", err.Error(),
-				)
-			}
-		}
-
-		zap.S().Info("Routine=TokenAddressCountRoutine - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
-		time.Sleep(config.Config.RoutinesSleepDuration)
 	}
+
+	zap.S().Info("Routine=TokenAddressCountRoutine - Completed routine...")
 }

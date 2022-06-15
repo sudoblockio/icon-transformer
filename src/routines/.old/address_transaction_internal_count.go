@@ -1,4 +1,4 @@
-package routines
+package _old
 
 import (
 	"strconv"
@@ -12,16 +12,16 @@ import (
 	"github.com/sudoblockio/icon-transformer/redis"
 )
 
-func addressLogCountRoutine() {
+func addressTransactionInternalCountRoutine() {
 
 	// Loop every duration
 	for {
 
 		// Get all keys
-		keys, err := redis.GetRedisClient().GetAllKeys(config.Config.RedisKeyPrefix + "log_count_by_address_*")
+		keys, err := redis.GetRedisClient().GetAllKeys(config.Config.RedisKeyPrefix + "transaction_internal_count_by_address_*")
 		if err != nil {
 			zap.S().Warn(
-				"Routine=AddressLogCount",
+				"Routine=AddressTransactionInternalCount",
 				" Step=", "get redis keys",
 				" Error=", err.Error(),
 			)
@@ -33,7 +33,7 @@ func addressLogCountRoutine() {
 			valueString, err := redis.GetRedisClient().GetValue(key)
 			if err != nil {
 				zap.S().Warn(
-					"Routine=AddressLogCount",
+					"Routine=AddressTransactionInternalCount",
 					" Step=", "get redis value",
 					" Key=", key,
 					" Error=", err.Error(),
@@ -41,18 +41,18 @@ func addressLogCountRoutine() {
 				continue
 			}
 
-			addressString := key[len(config.Config.RedisKeyPrefix+"log_count_by_address_"):]
+			addressString := key[len(config.Config.RedisKeyPrefix+"transaction_internal_count_by_address_"):]
 			valueInt, _ := strconv.Atoi(valueString)
 
 			address := &models.Address{
-				Address:  addressString,
-				LogCount: int64(valueInt),
+				Address:                  addressString,
+				TransactionInternalCount: int64(valueInt),
 			}
 
-			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "log_count"})
+			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "transaction_internal_count"})
 		}
 
-		zap.S().Info("Routine=AddressLogCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
+		zap.S().Info("Routine=AddressTransactionInternalCount - Completed routine, sleeping ", config.Config.RoutinesSleepDuration.String(), "...")
 		time.Sleep(config.Config.RoutinesSleepDuration)
 	}
 }
