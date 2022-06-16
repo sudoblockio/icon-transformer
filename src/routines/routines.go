@@ -41,13 +41,13 @@ func CronStart() {
 
 	zap.S().Warn("Init cron...")
 	// Init - Jobs that run once on startup
-	addressTypeRoutine()
+	//addressTypeRoutine()
 
 	// Short
-	RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
+	go RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
 
 	// Long
-	AddressRoutinesCron(addressRoutines, 6*time.Hour)
+	go AddressRoutinesCron(addressRoutines, 6*time.Hour)
 }
 
 // Wrapper for generic routines
@@ -94,11 +94,12 @@ func AddressGoRoutines(routines []func(address *models.Address)) {
 	}
 }
 
-func AddressSetRoutine(routines []func(address *models.Address), worker_id int) {
+func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
 	// Loop through all addresses
-	skip := worker_id * config.Config.RoutinesBatchSize
+	skip := workerId * config.Config.RoutinesBatchSize
 	limit := config.Config.RoutinesBatchSize
 
+	zap.S().Info("Starting AddressSetRoutine with workerId=", workerId)
 	// Run loop until addresses have all been iterated over
 	for {
 		addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
@@ -106,19 +107,21 @@ func AddressSetRoutine(routines []func(address *models.Address), worker_id int) 
 			// Sleep
 			break
 		} else if err != nil {
-			zap.S().Fatal(err.Error())
+			zap.S().Warn("Ending address routing with error=", err.Error())
+			break
 		}
 		if len(*addresses) == 0 {
 			// Sleep
 			break
 		}
 
-		zap.S().Info("Routine=AddressBalance", " - Processing ", len(*addresses), " addresses...")
+		zap.S().Info("Routine=Address - Processing ", len(*addresses), " addresses, workerId=", workerId)
 		for _, address := range *addresses {
 			for _, r := range routines {
 				r(&address)
 			}
 		}
+		zap.S().Info("Finished skip=", skip, " limit=", limit)
 
 		skip += skip + config.Config.RoutinesBatchSize*config.Config.RoutinesNumWorkers
 	}
@@ -130,9 +133,9 @@ func TokenAddressGoRoutines(routines []func(address *models.TokenAddress)) {
 	}
 }
 
-func TokenAddressSetRoutine(routines []func(tokenAddress *models.TokenAddress), worker_id int) {
+func TokenAddressSetRoutine(routines []func(tokenAddress *models.TokenAddress), workerId int) {
 	// Loop through all addresses
-	skip := worker_id * config.Config.RoutinesBatchSize
+	skip := workerId * config.Config.RoutinesBatchSize
 	limit := config.Config.RoutinesBatchSize
 
 	// Run loop until addresses have all been iterated over
