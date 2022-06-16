@@ -11,12 +11,13 @@ import (
 
 func main() {
 	config.ReadEnvironment()
+	//config.ReadTestEnvironment()
 	logging.Init()
 
 	// Feature flags
 	if config.Config.RoutinesRunOnly == true {
-		// Start routines
-		routines.StartRoutines()
+		// Start cron
+		routines.CronStart()
 
 		global.WaitShutdownSig()
 	} else if config.Config.FindMissingRunOnly == true {
@@ -26,7 +27,7 @@ func main() {
 		global.WaitShutdownSig()
 	} else if config.Config.RedisRecoveryRunOnly == true {
 		// Start redis recovery
-		routines.StartRedisRecovery()
+		routines.StartRecovery()
 
 		global.WaitShutdownSig()
 	}
