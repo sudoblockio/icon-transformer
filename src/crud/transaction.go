@@ -67,8 +67,10 @@ func (m *TransactionCrud) TableName() string {
 func (m *TransactionCrud) CreateIndices() error {
 	db := m.db
 
+	zap.S().Info("Creating transaction_idx_block_number_type_hash index")
 	// Create indices
 	db = db.Exec("CREATE INDEX IF NOT EXISTS transaction_idx_block_number_type_hash ON public.transactions USING btree (block_number, type, hash)")
+	zap.S().Info("Finished creating transaction_idx_block_number_type_hash index")
 
 	return db.Error
 }
