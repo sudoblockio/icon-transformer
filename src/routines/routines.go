@@ -41,7 +41,7 @@ func CronStart() {
 
 	zap.S().Warn("Init cron...")
 	// Init - Jobs that run once on startup
-	//addressTypeRoutine()
+	addressTypeRoutine()
 
 	// Short
 	go RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
@@ -104,14 +104,14 @@ func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
 	for {
 		addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Sleep
+			zap.S().Warn("Ending address routing with error=", err.Error())
 			break
 		} else if err != nil {
 			zap.S().Warn("Ending address routing with error=", err.Error())
 			break
 		}
 		if len(*addresses) == 0 {
-			// Sleep
+			zap.S().Warn("Ending address routing, no more addresses")
 			break
 		}
 
@@ -123,7 +123,7 @@ func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
 		}
 		zap.S().Info("Finished skip=", skip, " limit=", limit)
 
-		skip += skip + config.Config.RoutinesBatchSize*config.Config.RoutinesNumWorkers
+		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 	}
 }
 
@@ -152,13 +152,13 @@ func TokenAddressSetRoutine(routines []func(tokenAddress *models.TokenAddress), 
 			break
 		}
 
-		zap.S().Info("Routine=AddressBalance", " - Processing ", len(*tokenAddresses), " addresses...")
+		zap.S().Info("Routine=AddressBalance", " - Processing ", skip, " addresses...")
 		for _, tokenAddress := range *tokenAddresses {
 			for _, r := range routines {
 				r(&tokenAddress)
 			}
 		}
 
-		skip += skip + config.Config.RoutinesBatchSize*config.Config.RoutinesNumWorkers
+		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 	}
 }
