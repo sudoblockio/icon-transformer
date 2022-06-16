@@ -25,5 +25,5 @@ func setTokenAddressBalances(tokenAddress *models.TokenAddress) {
 	// Hex -> float64
 	tokenAddress.Balance = utils.StringHexToFloat64(balance, 18)
 
-	crud.GetTokenAddressCrud().UpsertOneCols(tokenAddress, []string{"address", "balance", "token_address"})
+	crud.GetTokenAddressCrud().UpsertOneCols(tokenAddress, []string{"address", "balance", "token_contract_address"})
 }
