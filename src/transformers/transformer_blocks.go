@@ -79,8 +79,12 @@ func processBlocks(blockETL *models.BlockETL) {
 	// Token transfer by address loader
 	transformBlocksToLoadTokenTransferByAddresses(blockETL)
 
+	// Deprecated
 	// Transaction create score loader
-	transformBlocksToLoadTransactionCreateScores(blockETL)
+	//transformBlocksToLoadTransactionCreateScores(blockETL)
+
+	// Transaction create score loader
+	transformBlocksToLoadTransactionByAddressCreateScores(blockETL)
 
 	// Address loader
 	transformBlocksToLoadAddresses(blockETL)
@@ -225,11 +229,23 @@ func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
 	}
 }
 
-// Transaction create scores loader
-func transformBlocksToLoadTransactionCreateScores(blockETL *models.BlockETL) {
-	loaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
+// Deprecated because this additionally needs a routine to be able to get the Tx to show up
+//// Transaction create scores loader
+//func transformBlocksToLoadTransactionCreateScores(blockETL *models.BlockETL) {
+//	loaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
+//
+//	transactionCreateScores := transformBlockETLToTransactionCreateScores(blockETL)
+//	for _, transactionCreateScore := range transactionCreateScores {
+//		loaderChannel <- transactionCreateScore
+//	}
+//}
 
-	transactionCreateScores := transformBlockETLToTransactionCreateScores(blockETL)
+// Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
+//  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
+func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
+
+	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
 	for _, transactionCreateScore := range transactionCreateScores {
 		loaderChannel <- transactionCreateScore
 	}

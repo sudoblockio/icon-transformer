@@ -19,7 +19,7 @@ type configType struct {
 	LogIsDevelopment bool   `envconfig:"LOG_IS_DEVELOPMENT" required:"false" default:"true"`
 
 	// Icon node service
-	IconNodeServiceURL           []string      `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
+	IconNodeServiceURL           []string      `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://api.icon.community/api/v3"`
 	IconNodeRpcRetrySleepSeconds time.Duration `envconfig:"ICON_NODE_RPC_SLEEP_SECONDS" required:"false" default:"1s"`
 	IconNodeRpcRetryAttempts     int           `envconfig:"ICON_NODE_RPC_RETRY_ATTEMPTS" required:"false" default:"20"`
 
@@ -85,7 +85,7 @@ type configType struct {
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
 	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
-	RoutinesNumWorkers    int           `envconfig:"ROUTINES_NUM_WORKERS" required:"false" default:"10"`
+	RoutinesNumWorkers    int           `envconfig:"ROUTINES_NUM_WORKERS" required:"false" default:"1"`
 
 	// FindMissing
 	FindMissingRunOnly              bool   `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
