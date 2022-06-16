@@ -42,6 +42,11 @@ func GetTransactionByAddressCrud() *TransactionByAddressCrud {
 			zap.S().Fatal("TransactionByAddressCrud: Unable migrate postgres table: ", err.Error())
 		}
 
+		err = transactionByAddressCrud.CreateIndices()
+		if err != nil {
+			zap.S().Warn("TransactionByAddressCrud: Unable to create indices: ", err.Error())
+		}
+
 		StartTransactionByAddressLoader()
 	})
 
@@ -54,8 +59,18 @@ func (m *TransactionByAddressCrud) Migrate() error {
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
 	return err
 }
+
 func (m *TransactionByAddressCrud) TableName() string {
 	return m.modelORM.TableName()
+}
+
+func (m *TransactionByAddressCrud) CreateIndices() error {
+	db := m.db
+
+	// Create indices
+	db = db.Exec("CREATE INDEX IF NOT EXISTS transaction_by_addresses_idx_address_block_number_index ON public.transaction_by_addresses (address asc, block_number desc)")
+
+	return db.Error
 }
 
 func (m *TransactionByAddressCrud) UpsertOne(
