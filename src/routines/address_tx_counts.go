@@ -69,7 +69,7 @@ func getAddressTxCounts(address *models.Address) *models.Address {
 	}
 	address.TransactionInternalCount = countLog
 	err = redis.GetRedisClient().SetCount(
-		config.Config.RedisKeyPrefix+"transaction_regular_count_by_address_"+address.Address,
+		config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
 		countLog,
 	)
 	if err != nil {
