@@ -8,8 +8,10 @@ import (
 	"github.com/sudoblockio/icon-transformer/redis"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"sync"
 	"time"
 )
+
 
 var addressRoutines = []func(a *models.Address){
 	setAddressBalances,
@@ -89,9 +91,18 @@ func CrudCountSetRedis(c func() (int64, error), countKey string) error {
 }
 
 func AddressGoRoutines(routines []func(address *models.Address)) {
+	var wg sync.WaitGroup
 	for i := 0; i <= config.Config.RoutinesNumWorkers; i++ {
-		go AddressSetRoutine(routines, i)
+		wg.Add(1)
+
+		i := i
+		go func() {
+			defer wg.Done()
+			AddressSetRoutine(routines, i)
+		}()
 	}
+
+	wg.Wait()
 }
 
 func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
@@ -128,9 +139,18 @@ func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
 }
 
 func TokenAddressGoRoutines(routines []func(address *models.TokenAddress)) {
+	var wg sync.WaitGroup
+
 	for i := 0; i <= config.Config.RoutinesNumWorkers; i++ {
-		go TokenAddressSetRoutine(routines, i)
+		wg.Add(1)
+
+		i := i
+		go func() {
+			defer wg.Done()
+			TokenAddressSetRoutine(routines, i)
+		}()
 	}
+	wg.Wait()
 }
 
 func TokenAddressSetRoutine(routines []func(tokenAddress *models.TokenAddress), workerId int) {
