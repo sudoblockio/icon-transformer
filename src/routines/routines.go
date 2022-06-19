@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-
 var addressRoutines = []func(a *models.Address){
 	setAddressBalances,
 	setAddressTxCounts,

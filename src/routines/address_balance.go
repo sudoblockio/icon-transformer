@@ -8,14 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func setAddressBalances(address *models.Address) {
+func getAddressBalances(address *models.Address) *models.Address {
 
 	// Balance //
 	balance, err := service.IconNodeServiceGetBalance(address.Address)
 	if err != nil {
 		// Icon node error
 		zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 	// Hex -> float64
 	address.Balance = utils.StringHexToFloat64(balance, 18)
@@ -25,11 +25,17 @@ func setAddressBalances(address *models.Address) {
 	if err != nil {
 		// Icon node error
 		zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 
 	// Hex -> float64
 	address.Balance += utils.StringHexToFloat64(stakedBalance, 18)
+	return address
+}
 
-	crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "balance"})
+func setAddressBalances(address *models.Address) {
+	address = getAddressTxCounts(address)
+	if address != nil {
+		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "balance"})
+	}
 }

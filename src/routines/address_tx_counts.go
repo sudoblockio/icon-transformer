@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func setAddressTxCounts(address *models.Address) {
+func getAddressTxCounts(address *models.Address) *models.Address {
 	// Regular Tx Count
 	countRegular, err := crud.GetTransactionCrud().CountRegularByAddress(address.Address)
 	if err != nil {
 		// Try again
 		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())
 		time.Sleep(1 * time.Second)
-		return
+		return nil
 	}
 	address.TransactionCount = countRegular
 	err = redis.GetRedisClient().SetCount(
@@ -26,14 +26,14 @@ func setAddressTxCounts(address *models.Address) {
 	if err != nil {
 		zap.S().Warn("Routine=TxCount, Address=", address.Address, " - Error: ", err.Error())
 		time.Sleep(1 * time.Second)
-		return
+		return nil
 	}
 
 	// Internal Tx Count
 	countInternal, err := crud.GetTransactionCrud().CountInternalByAddress(address.Address)
 	if err != nil {
 		zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 	address.TransactionInternalCount = countInternal
 	err = redis.GetRedisClient().SetCount(
@@ -42,14 +42,14 @@ func setAddressTxCounts(address *models.Address) {
 	)
 	if err != nil {
 		zap.S().Warn("Routine=TxInternalCount, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 
 	// Token Transfer Count
 	countTokenTx, err := crud.GetTokenTransferCrud().CountByAddress(address.Address)
 	if err != nil {
 		zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 	address.TokenTransferCount = countTokenTx
 	err = redis.GetRedisClient().SetCount(
@@ -58,14 +58,14 @@ func setAddressTxCounts(address *models.Address) {
 	)
 	if err != nil {
 		zap.S().Warn("Routine=TokenTransfer, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 
 	// Log Count
 	countLog, err := crud.GetLogCrud().CountLogsByAddress(address.Address)
 	if err != nil {
 		zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 	address.TransactionInternalCount = countLog
 	err = redis.GetRedisClient().SetCount(
@@ -74,14 +74,21 @@ func setAddressTxCounts(address *models.Address) {
 	)
 	if err != nil {
 		zap.S().Warn("Routine=LogCount, Address=", address.Address, " - Error: ", err.Error())
-		return
+		return nil
 	}
 
-	crud.GetAddressCrud().UpsertOneCols(address, []string{
-		"address",
-		"transaction_count",
-		"transaction_internal_count",
-		"token_transfer_count",
-		"log_count",
-	})
+	return address
+}
+
+func setAddressTxCounts(address *models.Address) {
+	address = getAddressTxCounts(address)
+	if address != nil {
+		crud.GetAddressCrud().UpsertOneCols(address, []string{
+			"address",
+			"transaction_count",
+			"transaction_internal_count",
+			"token_transfer_count",
+			"log_count",
+		})
+	}
 }
