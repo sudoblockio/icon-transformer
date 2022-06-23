@@ -31,7 +31,10 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 		method := extractMethodFromTransactionETL(transactionETL)
 
 		if method == "acceptScore" || method == "rejectScore" {
-			result, err := service.IconNodeServiceGetTransactionResult(transactionETL.Hash)
+
+			creationHash := transactionETL.Logs[0].Indexed[1]
+
+			result, err := service.IconNodeServiceGetTransactionResult(creationHash)
 			if err != nil {
 				zap.S().Warn("Could not get tx result for hash: ", err.Error(), ",Hash=", transactionETL.Hash)
 				continue
@@ -158,60 +161,3 @@ func transformBlockETLToTransactionCreateScores(blockETL *models.BlockETL) []*mo
 
 	return transactionCreateScores
 }
-
-//func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockETL) []*models.TransactionByAddress {
-//	transactionByAddresses := []*models.TransactionByAddress{}
-//
-//	for _, transactionETL := range blockETL.Transactions {
-//		method := extractMethodFromTransactionETL(transactionETL)
-//
-//		if method == "acceptScore" || method == "rejectScore" {
-//			// Creation Transaction Hash
-//			creationTransactionHash := ""
-//			if transactionETL.Data != "" {
-//				dataJSON := map[string]interface{}{}
-//				err := json.Unmarshal([]byte(transactionETL.Data), &dataJSON)
-//				if err == nil {
-//
-//					paramsInterface, ok := dataJSON["params"]
-//					if ok {
-//						// Params field is in dataJSON
-//						params := paramsInterface.(map[string]interface{})
-//
-//						creationTransactionHashInterface, ok := params["txHash"]
-//						if ok {
-//							// Parsing successful
-//							creationTransactionHash = creationTransactionHashInterface.(string)
-//						}
-//					}
-//					if ok == false {
-//						// Parsing error
-//						zap.S().Warn("Transaction params field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
-//						continue
-//					}
-//				} else {
-//					// Parsing error
-//					zap.S().Warn("Transaction data field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
-//					continue
-//				}
-//			}
-//
-//			result, err := service.IconNodeServiceGetTransactionResult(creationTransactionHash)
-//			if err != nil {
-//				zap.S().Warn("Could not get score address from creation tx hash: ", err.Error(), ",Hash=", creationTransactionHash)
-//				continue
-//			}
-//
-//			getScoreAddressFromTransactionResult(result)
-//
-//			transactionByAddress := &models.TransactionByAddress{
-//				TransactionHash: transactionETL.Hash,
-//				Address:         scoreAddress,
-//				BlockNumber:     blockETL.Number,
-//			}
-//
-//			transactionByAddresses = append(transactionByAddresses, transactionByAddress)
-//		}
-//	}
-//	return transactionByAddresses
-//}
