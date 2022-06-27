@@ -125,7 +125,7 @@ func DefaultReadTokenTransferByAddress(ctx context.Context, in *TokenTransferByA
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.Address == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeReadApplyQuery); ok {
@@ -172,7 +172,7 @@ func DefaultDeleteTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.Address == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeDelete_); ok {
@@ -404,7 +404,7 @@ func DefaultListTokenTransferByAddress(ctx context.Context, db *gorm.DB) ([]*Tok
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("address")
+	db = db.Order("transaction_hash")
 	ormResponse := []TokenTransferByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

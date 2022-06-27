@@ -205,23 +205,23 @@ func DefaultDeleteDeadBlockSet(ctx context.Context, in []*DeadBlock, db *gorm.DB
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.Partition == 0 {
+		if ormObj.Topic == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.Partition)
+		keys = append(keys, ormObj.Topic)
 	}
 	if hook, ok := (interface{}(&DeadBlockORM{})).(DeadBlockORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("partition in (?)", keys).Delete(&DeadBlockORM{}).Error
+	err = db.Where("topic in (?)", keys).Delete(&DeadBlockORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func DefaultStrictUpdateDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.D
 		return nil, err
 	}
 	lockedRow := &DeadBlockORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("topic=?", ormObj.Topic).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("offset=?", ormObj.Offset).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -411,7 +411,7 @@ func DefaultListDeadBlock(ctx context.Context, db *gorm.DB) ([]*DeadBlock, error
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("topic")
+	db = db.Order("partition")
 	ormResponse := []DeadBlockORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

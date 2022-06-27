@@ -4,6 +4,8 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
+// RM this - no use
+
 message TransactionCreateScore {
   option (gorm.opts) = {ormable: true};
 
