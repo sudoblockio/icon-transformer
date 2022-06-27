@@ -169,6 +169,37 @@ func (m *TransactionCrud) UpsertOne(
 	return db.Error
 }
 
+func (m *TransactionCrud) UpsertOneColsE(
+	transaction *models.Transaction, cols []string,
+) error {
+	db := m.db
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "hash"}, {Name: "log_index"}},
+		DoUpdates: clause.AssignmentColumns(cols),
+	}).Create(transaction)
+
+	return db.Error
+}
+
+func (m *TransactionCrud) UpsertOneCols(transaction *models.Transaction, cols []string) {
+	err := GetTransactionCrud().UpsertOneColsE(transaction, cols)
+	zap.S().Debug(
+		"Loader=Transaction",
+		" Hash=", transaction.Hash,
+		" - Upserted",
+	)
+	if err != nil {
+		// Postgres error
+		zap.S().Fatal(
+			"Loader=Address",
+			" Hash=", transaction.Hash,
+			" - Error: ", err.Error(),
+		)
+	}
+}
+
 // StartTransactionLoader starts loader
 func StartTransactionLoader() {
 	go func() {
