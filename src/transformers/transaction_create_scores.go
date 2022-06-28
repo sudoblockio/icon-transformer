@@ -21,6 +21,7 @@ func updateTransactionType(transactionHash string, transactionType int32) {
 	transaction := &models.Transaction{
 		Hash:            transactionHash,
 		TransactionType: transactionType,
+		LogIndex:        -1,
 	}
 
 	crud.GetTransactionCrud().UpsertOneCols(transaction, []string{"hash", "transaction_type"})
