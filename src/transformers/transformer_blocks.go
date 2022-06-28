@@ -97,7 +97,11 @@ func processBlocks(blockETL *models.BlockETL) {
 	/////////////////////
 	// NOTE indexed loaders index messages by block number
 	// NOTE each block number can only pass through once
-
+	// Mostly these are items for keeping redis cache up to date
+	if !config.Config.RedisDisable {
+		return
+	}
+	
 	_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// Block not seen yet, proceed
@@ -250,6 +254,17 @@ func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.Bloc
 		loaderChannel <- transactionCreateScore
 	}
 }
+
+//// Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
+////  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
+//func transformBlocksToLoadTransactionCreateScores(blockETL *models.BlockETL) {
+//	loaderChannel := crud.GetTransactionCrud().LoaderChannel
+//
+//	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
+//	for _, transactionCreateScore := range transactionCreateScores {
+//		loaderChannel <- transactionCreateScore
+//	}
+//}
 
 // Address loader
 func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
