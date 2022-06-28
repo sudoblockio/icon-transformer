@@ -98,10 +98,7 @@ func processBlocks(blockETL *models.BlockETL) {
 	// NOTE indexed loaders index messages by block number
 	// NOTE each block number can only pass through once
 	// Mostly these are items for keeping redis cache up to date
-	if !config.Config.RedisDisable {
-		return
-	}
-	
+
 	_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// Block not seen yet, proceed

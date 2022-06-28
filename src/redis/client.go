@@ -29,9 +29,7 @@ func GetRedisClient() *Client {
 			redisClient = new(Client)
 
 			// Init connection
-			if config.Config.RedisDisable {
-				return nil
-			} else if config.Config.RedisSentinelClientMode == false {
+			if config.Config.RedisSentinelClientMode == false {
 				// Use default client
 				redisClient.client = redis.NewClient(&redis.Options{
 					Addr:     addr,

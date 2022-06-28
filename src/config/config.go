@@ -72,7 +72,6 @@ type configType struct {
 	// Redis Channels
 	// NOTE must add to redis client manually
 	// src/redis/client.go:63
-	RedisDisable               bool   `envconfig:"REDIS_DISABLE" required:"false" default:"false"`
 	RedisBlocksChannel         string `envconfig:"REDIS_BLOCKS_CHANNEL" required:"false" default:"blocks"`
 	RedisTransactionsChannel   string `envconfig:"REDIS_TRANSACTIONS_CHANNEL" required:"false" default:"transactions"`
 	RedisLogsChannel           string `envconfig:"REDIS_LOGS_CHANNEL" required:"false" default:"logs"`
