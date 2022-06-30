@@ -34,13 +34,6 @@ jobs:
       - name: Check stack
         run: make ps
 
-#     - name: Go mod tidy
-#       run: cd tests && go mod tidy
-
-#     - name: Run tests
-#       run: cd tests && go test ./... -v
-
-
   docker:
     runs-on: ubuntu-latest
     needs: test
@@ -83,21 +76,7 @@ jobs:
       max-parallel: 1
       matrix:
         include:
-#          - cluster: dev-lax
-#            network_name: mainnet
-#            network_version: v2
-#          - cluster: dev-lax
-#            network_name: sejong
-#            network_version: v2
-#          - cluster: dev-lax
-#            network_name: lisbon
-#            network_version: v2
-#          - cluster: dev-lax
-#            network_name: berlin
-#            network_version: v2
-          - cluster: prod-sng
-            network_name: mainnet
-            network_version: v2
+          # Push to all testnets
           - cluster: prod-sng
             network_name: sejong
             network_version: v2
@@ -106,9 +85,6 @@ jobs:
             network_version: v2
           - cluster: prod-sng
             network_name: berlin
-            network_version: v2
-          - cluster: prod-ams
-            network_name: mainnet
             network_version: v2
           - cluster: prod-ams
             network_name: sejong
