@@ -73,6 +73,16 @@ func (m *TransactionByAddressCrud) CreateIndices() error {
 	return db.Error
 }
 
+// Count for regular transactions.
+// NOTE this function will take a long time
+func (m *TransactionByAddressCrud) CountByAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.TransactionByAddress{}).Where("address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 func (m *TransactionByAddressCrud) UpsertOne(
 	transactionByAddress *models.TransactionByAddress,
 ) error {

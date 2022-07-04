@@ -11,7 +11,7 @@ import (
 
 func getAddressTxCounts(address *models.Address) *models.Address {
 	// Regular Tx Count
-	countRegular, err := crud.GetTransactionCrud().CountRegularByAddress(address.Address)
+	countRegular, err := crud.GetTransactionByAddressCrud().CountByAddress(address.Address)
 	if err != nil {
 		// Try again
 		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())
