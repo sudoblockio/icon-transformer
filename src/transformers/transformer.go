@@ -1,12 +1,20 @@
 package transformers
 
+import "github.com/sudoblockio/icon-transformer/config"
+
 func Start() {
 	// Blocks Topic
-	go startBlocks()
+	if config.Config.KafkaBlocksTopic != "" {
+		go startBlocks()
+	}
 
 	// Contracts Topic
-	go startContracts()
+	if config.Config.KafkaContractsTopic != "" {
+		go startContracts()
+	}
 
 	// Dead Message Topic
-	//go startDeadMessages()
+	if config.Config.KafkaDeadMessageTopic != "" {
+		go startDeadMessages()
+	}
 }

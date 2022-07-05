@@ -23,10 +23,18 @@ func StartConsumers() {
 
 	// Init topic names
 	// NOTE add new kafka topics here
-	topicNames := []string{
-		config.Config.KafkaBlocksTopic,
-		config.Config.KafkaContractsTopic,
-		//config.Config.KafkaDeadMessageTopic,
+	topicNames := []string{}
+
+	if config.Config.KafkaBlocksTopic != "" {
+		topicNames = append(topicNames, config.Config.KafkaBlocksTopic)
+	}
+
+	if config.Config.KafkaContractsTopic != "" {
+		topicNames = append(topicNames, config.Config.KafkaContractsTopic)
+	}
+
+	if config.Config.KafkaDeadMessageTopic != "" {
+		topicNames = append(topicNames, config.Config.KafkaDeadMessageTopic)
 	}
 
 	// Init topic channels
