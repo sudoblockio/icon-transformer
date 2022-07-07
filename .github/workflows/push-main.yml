@@ -77,15 +77,6 @@ jobs:
       matrix:
         include:
           # Push to all testnets
-          - cluster: prod-sng
-            network_name: sejong
-            network_version: v2
-          - cluster: prod-sng
-            network_name: lisbon
-            network_version: v2
-          - cluster: prod-sng
-            network_name: berlin
-            network_version: v2
           - cluster: prod-ams
             network_name: sejong
             network_version: v2
