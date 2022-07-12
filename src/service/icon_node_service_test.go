@@ -51,6 +51,14 @@ func TestIconNodeServiceGetBalance(t *testing.T) {
 	require.NotEmpty(t, body)
 }
 
+func TestIconNodeServiceGetBalanceGovAddress(t *testing.T) {
+	config.ReadEnvironment()
+	body, err := IconNodeServiceGetBalance("hx0000000000000000000000000000000000000000")
+
+	require.Nil(t, err)
+	require.NotEmpty(t, body)
+}
+
 func TestIconNodeServiceGetStakedBalance(t *testing.T) {
 	config.ReadEnvironment()
 	body, err := IconNodeServiceGetStakedBalance("cx993810b4523ab6b1658925d8d6c234f286adbdba")

@@ -12,6 +12,14 @@ var getLastBlockPayload string = `{
     "id": 1234
 	}`
 
+var getBalance string = `{
+	"jsonrpc": "2.0",
+    "method": "icx_getBalance",
+    "id": 1234,
+    "params": {
+         "address": "hx562dc1e2c7897432c298115bc7fbcc3b9d5df294"}
+    }`
+
 func updateConfig() {
 	config.Config.IconNodeServiceURL = []string{
 		"http://funky.wrong",
@@ -22,7 +30,7 @@ func updateConfig() {
 func TestJsonRpcRequestWithRetry(t *testing.T) {
 	config.ReadEnvironment()
 	updateConfig()
-	body, err := JsonRpcRequestWithRetry(getLastBlockPayload)
+	body, err := JsonRpcRequestWithRetry(getBalance)
 	require.Nil(t, err)
 	require.NotEmpty(t, body)
 }

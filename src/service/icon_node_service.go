@@ -206,6 +206,12 @@ func IconNodeServiceGetTokenContractSymbol(tokenContractAddress string) (string,
 }
 
 func IconNodeServiceGetBalance(publicKey string) (string, error) {
+	if publicKey == "hx0000000000000000000000000000000000000000" {
+		return "0x0", nil
+	} else if publicKey == "hx0000000000000000000000000000000000000001" {
+		return "0x0", nil
+	}
+
 	payload := fmt.Sprintf(`{
     "jsonrpc": "2.0",
     "method": "icx_getBalance",
