@@ -34,7 +34,7 @@ type TransactionORM struct {
 	ToAddress          string `gorm:"index:transaction_idx_to_address"`
 	TransactionFee     string
 	TransactionIndex   int64
-	TransactionType    int32
+	TransactionType    int32  `gorm:"index:transaction_idx_transaction_type"`
 	Type               string `gorm:"index:transaction_idx_type"`
 	Value              string
 	ValueDecimal       float64
@@ -320,7 +320,7 @@ func DefaultStrictUpdateTransaction(ctx context.Context, in *Transaction, db *go
 		return nil, err
 	}
 	lockedRow := &TransactionORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("hash=?", ormObj.Hash).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err

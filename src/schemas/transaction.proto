@@ -35,5 +35,5 @@ message Transaction {
   string score_address = 26;
   string logs_bloom = 27;
   string status = 28;
-  int32  transaction_type = 29;
+  int32  transaction_type = 29 [(gorm.field).tag = {index: "transaction_idx_transaction_type"}];
 }
