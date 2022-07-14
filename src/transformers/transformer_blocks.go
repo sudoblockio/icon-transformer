@@ -78,30 +78,15 @@ var blockCounters = []func(etl *models.BlockETL){
 	transformBlocksToServiceTokenAddressBalance,
 }
 
-func runBlockProcessors(blockETL *models.BlockETL) {
+func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), blockETL *models.BlockETL) {
 	var wg sync.WaitGroup
-	for _, i := range blockCounters {
+	for _, f := range blockProcessors {
 		wg.Add(1)
 
-		i := i
+		f := f
 		go func() {
 			defer wg.Done()
-			i(blockETL)
-		}()
-	}
-
-	wg.Wait()
-}
-
-func runBlockCounters(blockETL *models.BlockETL) {
-	var wg sync.WaitGroup
-	for _, i := range blockProcessors {
-		wg.Add(1)
-
-		i := i
-		go func() {
-			defer wg.Done()
-			i(blockETL)
+			f(blockETL)
 		}()
 	}
 
@@ -115,7 +100,7 @@ func processBlocks(blockETL *models.BlockETL) {
 	// NOTE transform blockETL to various database views
 	// NOTE blocks may be passed multiple times, loaders use upserts
 
-	runBlockProcessors(blockETL)
+	runBlockProcessors(blockProcessors, blockETL)
 
 	//// Block loader
 	//transformBlocksToLoadBlock(blockETL)
@@ -162,7 +147,7 @@ func processBlocks(blockETL *models.BlockETL) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// Block not seen yet, proceed
 
-		runBlockCounters(blockETL)
+		runBlockProcessors(blockCounters, blockETL)
 
 		//////////////////////
 		//// Redis channels //
@@ -368,7 +353,7 @@ func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
 
 	addresses := transformBlockETLToAddresses(blockETL)
 	for _, address := range addresses {
-		err := crud.GetAddressCrud().UpsertOne(address)
+		err := crud.GetAddressCrud().UpsertOneColsE(address, []string{"address", "is_contract"})
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
