@@ -79,7 +79,7 @@ var blockCounters = []func(etl *models.BlockETL){
 }
 
 func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), blockETL *models.BlockETL) {
-	var wg sync.WaitGroup
+	var wg *sync.WaitGroup
 	for _, f := range blockProcessors {
 		wg.Add(1)
 
