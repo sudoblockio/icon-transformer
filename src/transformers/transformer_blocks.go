@@ -94,105 +94,18 @@ func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), block
 }
 
 func processBlocks(blockETL *models.BlockETL) {
-	/////////////
-	// Loaders //
-	/////////////
 	// NOTE transform blockETL to various database views
 	// NOTE blocks may be passed multiple times, loaders use upserts
-
 	runBlockProcessors(blockProcessors, blockETL)
 
-	//// Block loader
-	//transformBlocksToLoadBlock(blockETL)
-	//
-	//// Transaction loader
-	//transformBlocksToLoadTransactions(blockETL)
-	//
-	//// Transaction by address loader
-	//transformBlocksToLoadTransactionByAddresses(blockETL)
-	//
-	//// Transaction internal by address loader
-	//transformBlocksToLoadTransactionInternalByAddresses(blockETL)
-	//
-	//// Log loader
-	//transformBlocksToLoadLogs(blockETL)
-	//
-	//// Token transfer loader
-	//transformBlocksToLoadTokenTransfers(blockETL)
-	//
-	//// Token transfer by address loader
-	//transformBlocksToLoadTokenTransferByAddresses(blockETL)
-	//
-	//// Deprecated
-	//// Transaction create score loader
-	////transformBlocksToLoadTransactionCreateScores(blockETL)
-	//
-	//// Transaction create score loader
-	//transformBlocksToLoadTransactionByAddressCreateScores(blockETL)
-	//
-	//// Address loader
-	//transformBlocksToLoadAddresses(blockETL)
-	//
-	//// Address token loader
-	//transformBlocksToLoadTokenAddresses(blockETL)
-
-	/////////////////////
-	// Indexed loaders //
-	/////////////////////
 	// NOTE indexed loaders index messages by block number
 	// NOTE each block number can only pass through once
 	// Mostly these are items for keeping redis cache up to date
-
 	_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		// Block not seen yet, proceed
-
 		runBlockProcessors(blockCounters, blockETL)
 
-		//////////////////////
-		//// Redis channels //
-		//////////////////////
-		//// Blocks channel
-		//transformBlocksToChannelBlocks(blockETL)
-		//
-		//// Transactions channel
-		//transformBlocksToChannelTransactions(blockETL)
-		//
-		//// Logs channel
-		//transformBlocksToChannelLogs(blockETL)
-		//
-		//// Token transfers channel
-		//transformBlocksToChannelTokenTransfers(blockETL)
-		//
-		////////////////
-		//// Counters //
-		////////////////
-		//
-		//// Block count
-		//transformBlocksToCountBlocks(blockETL)
-		//
-		//// Transactions count
-		//transformBlocksToCountTransactions(blockETL)
-		//
-		//// Logs count
-		//transformBlocksToCountLogs(blockETL)
-		//
-		//// Token transfers count
-		//transformBlocksToCountTokenTransfers(blockETL)
-		//
-		/////////////////////
-		//// Service Calls //
-		/////////////////////
-		//
-		//// Address Balance
-		//transformBlocksToServiceAddressBalance(blockETL)
-		//
-		//// Token Address Balance
-		//transformBlocksToServiceTokenAddressBalance(blockETL)
-
-		//////////////////
-		// Commit block //
-		//////////////////
+		// Commit block
 		blockIndex := &models.BlockIndex{Number: blockETL.Number}
 		err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
 
@@ -209,59 +122,43 @@ func processBlocks(blockETL *models.BlockETL) {
 
 // Blocks loader
 func transformBlocksToLoadBlock(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetBlockCrud().LoaderChannel
-
 	block := transformBlockETLToBlock(blockETL)
 	err := crud.GetBlockCrud().UpsertOne(block)
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
-
-	//loaderChannel <- block
 }
 
 // Transactions loader
 func transformBlocksToLoadTransactions(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTransactionCrud().LoaderChannel
-
 	transactions := transformBlockETLToTransactions(blockETL)
 	for _, transaction := range transactions {
 		err := crud.GetTransactionCrud().UpsertOne(transaction)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- transaction
 	}
 }
 
 // Transaction by addresses loader
 func transformBlocksToLoadTransactionByAddresses(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
-
 	transactionByAddresses := transformBlockETLToTransactionByAddresses(blockETL)
 	for _, transactionByAddress := range transactionByAddresses {
 		err := crud.GetTransactionByAddressCrud().UpsertOne(transactionByAddress)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- transactionByAddress
 	}
 }
 
 // Transaction internal by addresses loader
 func transformBlocksToLoadTransactionInternalByAddresses(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTransactionInternalByAddressCrud().LoaderChannel
-
 	transactionInternalByAddresses := transformBlockETLToTransactionInternalByAddresses(blockETL)
 	for _, transactionInternalByAddress := range transactionInternalByAddresses {
 		err := crud.GetTransactionInternalByAddressCrud().UpsertOne(transactionInternalByAddress)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- transactionInternalByAddress
 	}
 }
 
@@ -281,31 +178,23 @@ func transformBlocksToLoadLogs(blockETL *models.BlockETL) {
 
 // Token transfers loader
 func transformBlocksToLoadTokenTransfers(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTokenTransferCrud().LoaderChannel
-
 	tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
 	for _, tokenTransfer := range tokenTransfers {
 		err := crud.GetTokenTransferCrud().UpsertOne(tokenTransfer)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- tokenTransfer
 	}
 }
 
 // Token transfer by address loader
 func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
-
 	tokenTransferByAddresses := transformBlockETLToTokenTransferByAddresses(blockETL)
 	for _, tokenTransferByAddress := range tokenTransferByAddresses {
 		err := crud.GetTokenTransferByAddressCrud().UpsertOne(tokenTransferByAddress)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- tokenTransferByAddress
 	}
 }
 
@@ -323,16 +212,12 @@ func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
 // Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
 //  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
 func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
-
 	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
 	for _, transactionCreateScore := range transactionCreateScores {
 		err := crud.GetTransactionByAddressCrud().UpsertOne(transactionCreateScore)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- transactionCreateScore
 	}
 }
 
@@ -349,37 +234,30 @@ func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.Bloc
 
 // Address loader
 func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetAddressCrud().LoaderChannel
-
 	addresses := transformBlockETLToAddresses(blockETL)
 	for _, address := range addresses {
 		err := crud.GetAddressCrud().UpsertOneColsE(address, []string{"address", "is_contract"})
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-
-		//loaderChannel <- address
 	}
 }
 
 // Address tokens loader
 func transformBlocksToLoadTokenAddresses(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetTokenAddressCrud().LoaderChannel
-
 	tokenAddresses := transformBlockETLToTokenAddresses(blockETL)
 	for _, tokenAddress := range tokenAddresses {
 		err := crud.GetTokenAddressCrud().UpsertOne(tokenAddress)
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
-		//loaderChannel <- tokenAddress
 	}
 }
 
 // Blocks channel
 func transformBlocksToChannelBlocks(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
 		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
@@ -393,7 +271,7 @@ func transformBlocksToChannelBlocks(blockETL *models.BlockETL) {
 // Transactions channel
 func transformBlocksToChannelTransactions(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
 		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
@@ -408,7 +286,7 @@ func transformBlocksToChannelTransactions(blockETL *models.BlockETL) {
 // Logs channel
 func transformBlocksToChannelLogs(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
 		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
@@ -423,7 +301,7 @@ func transformBlocksToChannelLogs(blockETL *models.BlockETL) {
 // Token Transfers channel
 func transformBlocksToChannelTokenTransfers(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
 		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
@@ -726,7 +604,7 @@ func transformBlocksToCountTokenTransfers(blockETL *models.BlockETL) {
 // Address Balance
 func transformBlocksToServiceAddressBalance(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerServiceCallThreshold {
 		// block is recent enough, calculate balances
@@ -773,7 +651,7 @@ func transformBlocksToServiceAddressBalance(blockETL *models.BlockETL) {
 // Token Address Balance
 func transformBlocksToServiceTokenAddressBalance(blockETL *models.BlockETL) {
 
-	blockTimestamp := time.Unix(int64(blockETL.Timestamp/1000000), 0)
+	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 
 	if time.Since(blockTimestamp) <= config.Config.TransformerServiceCallThreshold {
 		// block is recent enough, calculate balances
@@ -808,7 +686,6 @@ func transformBlocksToServiceTokenAddressBalance(blockETL *models.BlockETL) {
 			//copier.Copy(tokenAddressCopy, &tokenAddress)
 
 			// Insert to database
-			//crud.GetTokenAddressCrud().LoaderChannel <- tokenAddressCopy
 			crud.GetTokenAddressCrud().UpsertOneCols(tokenAddress, []string{"address", "balance", "token_contract_address"})
 		}
 	}
