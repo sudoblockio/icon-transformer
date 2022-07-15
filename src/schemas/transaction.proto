@@ -32,7 +32,7 @@ message Transaction {
   string cumulative_step_used = 23;
   string step_used = 24;
   string step_price = 25;
-  string score_address = 26;
+  string score_address = 26 [(gorm.field).tag = {index: "transaction_idx_score_address"}];
   string logs_bloom = 27;
   string status = 28;
   int32  transaction_type = 29 [(gorm.field).tag = {index: "transaction_idx_transaction_type"}];

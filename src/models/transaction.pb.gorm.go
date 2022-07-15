@@ -24,7 +24,7 @@ type TransactionORM struct {
 	Method             string `gorm:"index:transaction_idx_method"`
 	Nid                string
 	Nonce              string
-	ScoreAddress       string
+	ScoreAddress       string `gorm:"index:transaction_idx_score_address"`
 	Signature          string
 	Status             string
 	StepLimit          string
@@ -200,7 +200,7 @@ func DefaultReadTransaction(ctx context.Context, in *Transaction, db *gorm.DB) (
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.Hash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeReadApplyQuery); ok {
@@ -247,7 +247,7 @@ func DefaultDeleteTransaction(ctx context.Context, in *Transaction, db *gorm.DB)
 	if err != nil {
 		return err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.Hash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeDelete_); ok {
@@ -277,23 +277,23 @@ func DefaultDeleteTransactionSet(ctx context.Context, in []*Transaction, db *gor
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.Hash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.Hash)
 	}
 	if hook, ok := (interface{}(&TransactionORM{})).(TransactionORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&TransactionORM{}).Error
+	err = db.Where("hash in (?)", keys).Delete(&TransactionORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -320,7 +320,7 @@ func DefaultStrictUpdateTransaction(ctx context.Context, in *Transaction, db *go
 		return nil, err
 	}
 	lockedRow := &TransactionORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("hash=?", ormObj.Hash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
