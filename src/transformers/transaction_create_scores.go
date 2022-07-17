@@ -6,6 +6,7 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 	"github.com/sudoblockio/icon-transformer/service"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 func getScoreAddressFromTransactionResult(result map[string]interface{}) (string, error) {
@@ -17,14 +18,42 @@ func getScoreAddressFromTransactionResult(result map[string]interface{}) (string
 	return scoreAddress, nil
 }
 
-func updateTransactionType(transactionHash string, transactionType int32) {
+func upsertTransactionType(transactionHash string, scoreAddress string, transactionType int32) {
 	transaction := &models.Transaction{
 		Hash:            transactionHash,
 		TransactionType: transactionType,
+		ScoreAddress:    scoreAddress,
 		LogIndex:        -1,
 	}
 
-	crud.GetTransactionCrud().UpsertOneCols(transaction, []string{"hash", "transaction_type"})
+	crud.GetTransactionCrud().UpsertOneCols(transaction, []string{"hash", "transaction_type", "score_address"})
+}
+
+func updateTransactionTypes(
+	blockETL *models.BlockETL,
+	transactionTypeCreationEvents *[]models.Transaction,
+	scoreAddress string,
+	newStatus int32,
+	oldStatus int32,
+) {
+	if len(*transactionTypeCreationEvents) == 0 || blockETL.Number == (*transactionTypeCreationEvents)[0].BlockNumber {
+		upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
+	} else if blockETL.Number < (*transactionTypeCreationEvents)[0].BlockNumber {
+		upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
+		for _, v := range *transactionTypeCreationEvents {
+			upsertTransactionType(v.Hash, scoreAddress, oldStatus)
+		}
+	} else {
+		upsertTransactionType(blockETL.Hash, scoreAddress, oldStatus)
+	}
+}
+
+func getTransactionTypes(scoreAddress string, transactionTypes []int32) *[]models.Transaction {
+	transactions, err := crud.GetTransactionCrud().SelectManyContractCreations(scoreAddress, transactionTypes)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	}
+	return transactions
 }
 
 // This is for python scores where the Tx for approval needs to be extracted out of the Tx hash by calling the Tx result
@@ -63,12 +92,13 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 			}
 			transactionByAddresses = append(transactionByAddresses, transactionByAddress)
 
-			if method == "acceptScore" {
-				updateTransactionType(transactionETL.Hash, 5)
-			} else if method == "rejectScore" {
-				updateTransactionType(transactionETL.Hash, 6)
-			}
+			transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{5, 6, 7, 8, 9})
 
+			if method == "acceptScore" {
+				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 5, 7)
+			} else if method == "rejectScore" {
+				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 6, 8)
+			}
 		} else if method == "" {
 			// Here we need to perform additional logic to get contract creation events. These events have been
 			// inconsistent over time where in some cases the to-address is the contract address and in others it is
@@ -103,73 +133,11 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 
 				transactionByAddresses = append(transactionByAddresses, transactionByAddress)
 
-				updateTransactionType(transactionETL.Hash, 3)
+				transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{3, 4})
+
+				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 3, 4)
 			}
 		}
 	}
 	return transactionByAddresses
 }
-
-//func transformBlockETLToTransactionCreateScores(blockETL *models.BlockETL) []*models.TransactionCreateScore {
-//
-//	transactionCreateScores := []*models.TransactionCreateScore{}
-//
-//	for _, transactionETL := range blockETL.Transactions {
-//		method := extractMethodFromTransactionETL(transactionETL)
-//
-//		if method == "acceptScore" || method == "rejectScore" {
-//
-//			// Accept Transaction Hash
-//			acceptTransactionHash := ""
-//			if method == "acceptScore" {
-//				acceptTransactionHash = transactionETL.Hash
-//			}
-//
-//			// Reject Transaction Hash
-//			rejectTransactionHash := ""
-//			if method == "rejectScore" {
-//				rejectTransactionHash = transactionETL.Hash
-//			}
-//
-//			// Creation Transaction Hash
-//			creationTransactionHash := ""
-//			if transactionETL.Data != "" {
-//				dataJSON := map[string]interface{}{}
-//				err := json.Unmarshal([]byte(transactionETL.Data), &dataJSON)
-//				if err == nil {
-//
-//					paramsInterface, ok := dataJSON["params"]
-//					if ok {
-//						// Params field is in dataJSON
-//						params := paramsInterface.(map[string]interface{})
-//
-//						creationTransactionHashInterface, ok := params["txHash"]
-//						if ok {
-//							// Parsing successful
-//							creationTransactionHash = creationTransactionHashInterface.(string)
-//						}
-//					}
-//					if ok == false {
-//						// Parsing error
-//						zap.S().Warn("Transaction params field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
-//						continue
-//					}
-//				} else {
-//					// Parsing error
-//					zap.S().Warn("Transaction data field parsing error: ", err.Error(), ",Hash=", transactionETL.Hash)
-//					continue
-//				}
-//			}
-//
-//			transactionCreateScore := &models.TransactionCreateScore{
-//				CreationTransactionHash: creationTransactionHash,
-//				AcceptTransactionHash:   acceptTransactionHash,
-//				RejectTransactionHash:   rejectTransactionHash,
-//			}
-//			transactionCreateScores = append(transactionCreateScores, transactionCreateScore)
-//		}
-//
-//	}
-//
-//	return transactionCreateScores
-//}

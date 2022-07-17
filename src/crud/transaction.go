@@ -149,6 +149,32 @@ func (m *TransactionCrud) SelectOne(
 	return transaction, db.Error
 }
 
+// SelectManyContractCreations - select all the contract creation events
+// Returns: models, error (if present)
+func (m *TransactionCrud) SelectManyContractCreations(
+	address string,
+	tranaction_types []int32,
+) (*[]models.Transaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&[]models.Transaction{})
+
+	// Latest transactions first
+	db = db.Order("block_number ASC")
+
+	// Address
+	db = db.Where("score_address = ?", address)
+
+	// Type
+	db = db.Where("transaction_type IN ?", tranaction_types)
+
+	transactions := &[]models.Transaction{}
+	db = db.Find(transactions)
+
+	return transactions, db.Error
+}
+
 func (m *TransactionCrud) UpsertOne(
 	transaction *models.Transaction,
 ) error {
