@@ -31,21 +31,44 @@ func upsertTransactionType(transactionHash string, scoreAddress string, transact
 
 func updateTransactionTypes(
 	blockETL *models.BlockETL,
+	transactionETL *models.TransactionETL,
 	transactionTypeCreationEvents *[]models.Transaction,
 	scoreAddress string,
 	newStatus int32,
 	oldStatus int32,
 ) {
-	if len(*transactionTypeCreationEvents) == 0 || blockETL.Number == (*transactionTypeCreationEvents)[0].BlockNumber {
-		upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
-	} else if blockETL.Number < (*transactionTypeCreationEvents)[0].BlockNumber {
-		upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
-		for _, v := range *transactionTypeCreationEvents {
+	// Filter out Txs without some fields as some erroneous data has made it into DB
+	// Could only be a couple records but still should be run for time being as not sure how many exactly.
+	// TODO: RM this in later sync
+	newTxTypeList := []models.Transaction{}
+	for _, v := range *transactionTypeCreationEvents {
+		if v.Hash[2:] == "0x" && v.ToAddress != "" {
+			newTxTypeList = append(newTxTypeList, v)
+		}
+	}
+
+	// Classify Tx based on history of other Txs
+	if len(newTxTypeList) == 0 || blockETL.Number == (newTxTypeList)[0].BlockNumber {
+		upsertTransactionType(transactionETL.Hash, scoreAddress, newStatus)
+	} else if blockETL.Number < (newTxTypeList)[0].BlockNumber {
+		upsertTransactionType(transactionETL.Hash, scoreAddress, newStatus)
+		for _, v := range newTxTypeList {
 			upsertTransactionType(v.Hash, scoreAddress, oldStatus)
 		}
 	} else {
-		upsertTransactionType(blockETL.Hash, scoreAddress, oldStatus)
+		upsertTransactionType(transactionETL.Hash, scoreAddress, oldStatus)
 	}
+
+	//if len(*transactionTypeCreationEvents) == 0 || blockETL.Number == (*transactionTypeCreationEvents)[0].BlockNumber {
+	//	upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
+	//} else if blockETL.Number < (*transactionTypeCreationEvents)[0].BlockNumber {
+	//	upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
+	//	for _, v := range *transactionTypeCreationEvents {
+	//		upsertTransactionType(v.Hash, scoreAddress, oldStatus)
+	//	}
+	//} else {
+	//	upsertTransactionType(blockETL.Hash, scoreAddress, oldStatus)
+	//}
 }
 
 func getTransactionTypes(scoreAddress string, transactionTypes []int32) *[]models.Transaction {
@@ -95,9 +118,23 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 			transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{5, 6, 7, 8, 9})
 
 			if method == "acceptScore" {
-				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 5, 7)
+				updateTransactionTypes(
+					blockETL,
+					transactionETL,
+					transactionTypeCreateScores,
+					scoreAddress,
+					5,
+					7,
+				)
 			} else if method == "rejectScore" {
-				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 6, 8)
+				updateTransactionTypes(
+					blockETL,
+					transactionETL,
+					transactionTypeCreateScores,
+					scoreAddress,
+					6,
+					8,
+				)
 			}
 		} else if method == "" {
 			// Here we need to perform additional logic to get contract creation events. These events have been
@@ -106,10 +143,6 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 			// To fix this, we are going to manually extract the scoreAddress by making a getTransactionResult call
 			// which will return the score address and persist this Tx in the transactions_by_address table which is
 			// used to get the transaction list tables.
-
-			// TODO: Need to classify transaction type
-			// Relates to https://github.com/sudoblockio/icon-tracker-frontend/issues/19
-
 			content, ok := extractContentFromTranactionETL(transactionETL)
 
 			if ok && (content == "application/zip" || content == "application/java") {
@@ -135,7 +168,14 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 
 				transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{3, 4})
 
-				updateTransactionTypes(blockETL, transactionTypeCreateScores, scoreAddress, 3, 4)
+				updateTransactionTypes(
+					blockETL,
+					transactionETL,
+					transactionTypeCreateScores,
+					scoreAddress,
+					3,
+					4,
+				)
 			}
 		}
 	}
