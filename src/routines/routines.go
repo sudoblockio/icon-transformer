@@ -19,10 +19,13 @@ var addressRoutines = []func(a *models.Address){
 
 var tokenAddressRoutines = []func(t *models.TokenAddress){
 	setTokenAddressBalances,
+	//setTokenAddressTxCounts,
 }
 
 func StartRecovery() {
 	zap.S().Warn("Init recovery...")
+	// Global count
+	setTransactionCounts()
 
 	// By address
 	AddressGoRoutines(addressRoutines)
