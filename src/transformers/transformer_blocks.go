@@ -3,6 +3,8 @@ package transformers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -78,6 +80,21 @@ var blockCounters = []func(etl *models.BlockETL){
 	transformBlocksToServiceTokenAddressBalance,
 }
 
+func retry(attempts int, sleep time.Duration, f func(*models.BlockETL) error, block *models.BlockETL) (err error) {
+	for i := 0; i < attempts; i++ {
+		if i > 0 {
+			log.Println("retrying after error:", err)
+			time.Sleep(sleep)
+			sleep *= 2
+		}
+		err = f(block)
+		if err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+}
+
 func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), blockETL *models.BlockETL) {
 	var wg sync.WaitGroup
 	for _, f := range blockProcessors {
@@ -86,7 +103,10 @@ func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), block
 		f := f
 		go func() {
 			defer wg.Done()
-			f(blockETL)
+			err := retry(5, 1, f(blockETL), blockETL)
+			if err != nil {
+				panic(err)
+			}
 		}()
 	}
 
@@ -141,14 +161,16 @@ func transformBlocksToLoadTransactions(blockETL *models.BlockETL) {
 }
 
 // Transaction by addresses loader
-func transformBlocksToLoadTransactionByAddresses(blockETL *models.BlockETL) {
+func transformBlocksToLoadTransactionByAddresses(blockETL *models.BlockETL) error {
 	transactionByAddresses := transformBlockETLToTransactionByAddresses(blockETL)
 	for _, transactionByAddress := range transactionByAddresses {
 		err := crud.GetTransactionByAddressCrud().UpsertOne(transactionByAddress)
 		if err != nil {
+			return err
 			zap.S().Fatal(err.Error())
 		}
 	}
+	return nil
 }
 
 // Transaction internal by addresses loader
