@@ -3,8 +3,6 @@ package transformers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -57,7 +55,7 @@ func startBlocks() {
 var blockProcessors = []func(a *models.BlockETL){
 	transformBlocksToLoadBlock,
 	transformBlocksToLoadTransactions,
-	transformBlocksToLoadTransactionByAddresses,
+	//transformBlocksToLoadTransactionByAddresses,
 	transformBlocksToLoadTransactionInternalByAddresses,
 	transformBlocksToLoadLogs,
 	transformBlocksToLoadTokenTransfers,
@@ -80,20 +78,20 @@ var blockCounters = []func(etl *models.BlockETL){
 	transformBlocksToServiceTokenAddressBalance,
 }
 
-func retry(attempts int, sleep time.Duration, f func(*models.BlockETL) error, block *models.BlockETL) (err error) {
-	for i := 0; i < attempts; i++ {
-		if i > 0 {
-			log.Println("retrying after error:", err)
-			time.Sleep(sleep)
-			sleep *= 2
-		}
-		err = f(block)
-		if err == nil {
-			return nil
-		}
-	}
-	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
-}
+//func retry(attempts int, sleep time.Duration, f func(*models.BlockETL) error, block *models.BlockETL) (err error) {
+//	for i := 0; i < attempts; i++ {
+//		if i > 0 {
+//			log.Println("retrying after error:", err)
+//			time.Sleep(sleep)
+//			sleep *= 2
+//		}
+//		err = f(block)
+//		if err == nil {
+//			return nil
+//		}
+//	}
+//	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+//}
 
 func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), blockETL *models.BlockETL) {
 	var wg sync.WaitGroup
@@ -103,10 +101,11 @@ func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), block
 		f := f
 		go func() {
 			defer wg.Done()
-			err := retry(5, 1, f(blockETL), blockETL)
-			if err != nil {
-				panic(err)
-			}
+			f(blockETL)
+			//err := retry(5, 1, f(blockETL), blockETL)
+			//if err != nil {
+			//	panic(err)
+			//}
 		}()
 	}
 
