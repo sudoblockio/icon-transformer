@@ -89,7 +89,7 @@ func (m *TransactionCrud) Count() (int64, error) {
 // NOTE this function will take a long time
 func (m *TransactionCrud) CountRegular() (int64, error) {
 	db := m.db
-	db = db.Model(&models.Transaction{}).Where("type='transaction'")
+	db = db.Model(&models.Transaction{}).Where("type = 'transaction'")
 	var count int64
 	db = db.Count(&count)
 	return count, db.Error
@@ -99,7 +99,7 @@ func (m *TransactionCrud) CountRegular() (int64, error) {
 // NOTE this function will take a long time
 func (m *TransactionCrud) CountInternal() (int64, error) {
 	db := m.db
-	db = db.Model(&models.Transaction{}).Where("type=log")
+	db = db.Model(&models.Transaction{}).Where("type = 'log'")
 	var count int64
 	db = db.Count(&count)
 	return count, db.Error
@@ -109,7 +109,7 @@ func (m *TransactionCrud) CountInternal() (int64, error) {
 // NOTE this function will take a long time
 func (m *TransactionCrud) CountInternalByAddress(address string) (int64, error) {
 	db := m.db
-	db = db.Model(&models.Transaction{}).Where("type='log'")
+	db = db.Model(&models.Transaction{}).Where("type = 'log'")
 	db = db.Model(&models.Transaction{}).Where("to_address = ? or from_address = ?", address, address)
 	var count int64
 	db = db.Count(&count)
