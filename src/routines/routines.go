@@ -27,13 +27,13 @@ func StartRecovery() {
 	// Global count
 	setTransactionCounts()
 
-	// By address
-	AddressGoRoutines(addressRoutines)
-	TokenAddressGoRoutines(tokenAddressRoutines)
-
 	// One shot
 	addressTypeRoutine()
 	countAddressesToRedisRoutine()
+
+	// By address
+	AddressGoRoutines(addressRoutines)
+	TokenAddressGoRoutines(tokenAddressRoutines)
 }
 
 var cronRoutines = []func(){
