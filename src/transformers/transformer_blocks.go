@@ -138,24 +138,19 @@ func transformBlocksToLoadTransactions(blockETL *models.BlockETL) {
 
 // Transaction by addresses loader
 func transformBlocksToLoadTransactionByAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
 	transactionByAddresses := transformBlockETLToTransactionByAddresses(blockETL)
 	for _, transactionByAddress := range transactionByAddresses {
-		err := crud.GetTransactionByAddressCrud().UpsertOne(transactionByAddress)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- transactionByAddress
 	}
 }
 
 // Transaction internal by addresses loader
 func transformBlocksToLoadTransactionInternalByAddresses(blockETL *models.BlockETL) {
-
+	loaderChannel := crud.GetTransactionInternalByAddressCrud().LoaderChannel
 	transactionInternalByAddresses := transformBlockETLToTransactionInternalByAddresses(blockETL)
 	for _, transactionInternalByAddress := range transactionInternalByAddresses {
-		err := crud.GetTransactionInternalByAddressCrud().UpsertOne(transactionInternalByAddress)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- transactionInternalByAddress
 	}
 }
 
