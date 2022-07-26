@@ -10,7 +10,7 @@ x-extractor-env: &extractor-env
   NUM_CLAIM_EXTRACTORS: "4"
   MAX_CLAIM_SIZE: "1000"
   START_HEAD_EXTRACTOR: "true"
-  HEAD_EXTRACTOR_START_BLOCK: "2425319"
+  HEAD_EXTRACTOR_START_BLOCK: "52908035"
   ICON_NODE_SERVICE_MAX_BATCH_SIZE: "1"
 
   # Logging
@@ -107,14 +107,6 @@ services:
     ports:
       - "5432:5432"
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-
   #########
   # Kafka #
   #########
@@ -126,7 +118,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:${CP_ENTERPRISE_KAFKA_TAG:-latest}
+    image: confluentinc/cp-server:7.2.0
     hostname: kafka
     depends_on:
       - zookeeper
@@ -151,9 +143,10 @@ services:
       KAFKA_CONFLUENT_SUPPORT_CUSTOMER_ID: anonymous
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CONFLUENT_METRICS_ENABLE: 'true'
+      KAFKA_CONFLUENT_METRICS_ENABLE: 'false'
       KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: 'false'
       KAFKA_MESSAGE_MAX_BYTES: "67109632"
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
 
   #########
   # Redis #
