@@ -29,12 +29,6 @@ jobs:
       - name: Run tests
         run: cd src && go test ./... -v
 
-      - name: Bring up stack
-        run: make up && sleep 10
-
-      - name: Check stack
-        run: make ps
-
   docker:
     runs-on: ubuntu-latest
     needs: test
