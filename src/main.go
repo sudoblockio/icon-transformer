@@ -11,7 +11,6 @@ import (
 
 func main() {
 	config.ReadEnvironment()
-	//config.ReadTestEnvironment()
 	logging.Init()
 
 	// Feature flags
