@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// retryLoader - retry a function until it returns a non-nil error
 func retryLoader[T any](input T, f func(i T) error, attempts int, sleep time.Duration) (err error) {
 	for i := 0; i < attempts; i++ {
 		if i > 0 {
@@ -15,6 +16,22 @@ func retryLoader[T any](input T, f func(i T) error, attempts int, sleep time.Dur
 			sleep *= 2
 		}
 		err = f(input)
+		if err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+}
+
+// retryLoader - retry a function until it returns a non-nil error
+func retryCrudColumns[T any](input T, columns []string, f func(i T, c []string) error, attempts int, sleep time.Duration) (err error) {
+	for i := 0; i < attempts; i++ {
+		if i > 0 {
+			log.Println("retrying after error:", err)
+			time.Sleep(sleep)
+			sleep *= 2
+		}
+		err = f(input, columns)
 		if err == nil {
 			return nil
 		}

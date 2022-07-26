@@ -203,7 +203,14 @@ func (m *AddressCrud) UpsertOneColsE(
 }
 
 func (m *AddressCrud) UpsertOneCols(address *models.Address, cols []string) {
-	err := GetAddressCrud().UpsertOneColsE(address, cols)
+	//err := GetAddressCrud().UpsertOneColsE(address, cols)
+	err := retryCrudColumns(
+		address,
+		cols,
+		GetAddressCrud().UpsertOneColsE,
+		5,
+		config.Config.DbRetrySleep,
+	)
 	zap.S().Debug(
 		"Loader=Address",
 		" Address=", address.Address,

@@ -195,10 +195,7 @@ func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.Bloc
 func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
 	addresses := transformBlockETLToAddresses(blockETL)
 	for _, address := range addresses {
-		err := crud.GetAddressCrud().UpsertOneColsE(address, []string{"address", "is_contract"})
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "is_contract"})
 	}
 }
 
@@ -599,7 +596,6 @@ func transformBlocksToServiceAddressBalance(blockETL *models.BlockETL) {
 			//copier.Copy(addressCopy, &address)
 
 			// Insert to database
-			//crud.GetAddressCrud().LoaderChannel <- addressCopy
 			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "balance"})
 		}
 	}

@@ -211,7 +211,14 @@ func (m *TransactionCrud) UpsertOneColsE(
 }
 
 func (m *TransactionCrud) UpsertOneCols(transaction *models.Transaction, cols []string) {
-	err := GetTransactionCrud().UpsertOneColsE(transaction, cols)
+	//err := GetTransactionCrud().UpsertOneColsE(transaction, cols)
+	err := retryCrudColumns(
+		transaction,
+		cols,
+		GetTransactionCrud().UpsertOneColsE,
+		5,
+		config.Config.DbRetrySleep,
+	)
 	zap.S().Debug(
 		"Loader=Transaction",
 		" Hash=", transaction.Hash,

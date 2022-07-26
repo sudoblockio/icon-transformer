@@ -145,7 +145,14 @@ func (m *TokenAddressCrud) UpsertOneColsE(
 }
 
 func (m *TokenAddressCrud) UpsertOneCols(addressToken *models.TokenAddress, cols []string) {
-	err := GetTokenAddressCrud().UpsertOneColsE(addressToken, cols)
+	//err := GetTokenAddressCrud().UpsertOneColsE(addressToken, cols)
+	err := retryCrudColumns(
+		addressToken,
+		cols,
+		GetTokenAddressCrud().UpsertOneColsE,
+		5,
+		config.Config.DbRetrySleep,
+	)
 	zap.S().Debug(
 		"Loader=Address",
 		" Address=", addressToken.Address,
