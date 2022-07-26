@@ -11,6 +11,8 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
+// TODO: RM
+
 // RedisKeyCrud - type for redisKey table model
 type RedisKeyCrud struct {
 	db            *gorm.DB

@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -58,6 +59,15 @@ func (m *TokenTransferByAddressCrud) TableName() string {
 	return m.modelORM.TableName()
 }
 
+// CountByTokenTransferByAddress - select one from token_transfers_by_addres table
+func (m *TokenTransferByAddressCrud) CountByTokenTransfersByAddress(address string) (int64, error) {
+	db := m.db
+	db = db.Model(&models.TokenTransferByAddress{}).Where("address = ?", address)
+	var count int64
+	db = db.Count(&count)
+	return count, db.Error
+}
+
 func (m *TokenTransferByAddressCrud) UpsertOne(
 	tokenTransferByAddress *models.TokenTransferByAddress,
 ) error {
@@ -81,31 +91,18 @@ func (m *TokenTransferByAddressCrud) UpsertOne(
 // StartTokenTransferByAddressLoader starts loader
 func StartTokenTransferByAddressLoader() {
 	go func() {
-
 		for {
 			// Read tokenTransferByAddress
 			newTokenTransferByAddress := <-GetTokenTransferByAddressCrud().LoaderChannel
-
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetTokenTransferByAddressCrud().UpsertOne(newTokenTransferByAddress)
-			zap.S().Debug(
-				"Loader=TokenTransferByAddress",
-				" TransactionHash=", newTokenTransferByAddress.TransactionHash,
-				" LogIndex=", newTokenTransferByAddress.LogIndex,
-				" Address=", newTokenTransferByAddress.Address,
-				" - Upserted",
+			err := retryLoader(
+				newTokenTransferByAddress,
+				GetTokenTransferByAddressCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal(
-					"Loader=TokenTransferByAddress",
-					" TransactionHash=", newTokenTransferByAddress.TransactionHash,
-					" LogIndex=", newTokenTransferByAddress.LogIndex,
-					" Address=", newTokenTransferByAddress.Address,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

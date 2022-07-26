@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -168,24 +169,14 @@ func StartTokenAddressLoader() {
 			// Read addressToken
 			newTokenAddress := <-GetTokenAddressCrud().LoaderChannel
 
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetTokenAddressCrud().UpsertOne(newTokenAddress)
-			zap.S().Debug(
-				"Loader=TokenAddress",
-				" Address=", newTokenAddress.Address,
-				" TokenContractAddress=", newTokenAddress.TokenContractAddress,
-				" - Upserted",
+			err := retryLoader(
+				newTokenAddress,
+				GetTokenAddressCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=TokenAddress",
-					" Address=", newTokenAddress.Address,
-					" TokenContractAddress=", newTokenAddress.TokenContractAddress,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

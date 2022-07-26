@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -11,12 +12,18 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
+type LoaderChannelColumns struct {
+	model   *models.Address
+	columns *[]string
+}
+
 // AddressCrud - type for address table model
 type AddressCrud struct {
-	db            *gorm.DB
-	model         *models.Address
-	modelORM      *models.AddressORM
-	LoaderChannel chan *models.Address
+	db                   *gorm.DB
+	model                *models.Address
+	modelORM             *models.AddressORM
+	LoaderChannel        chan *models.Address
+	LoaderChannelColumns chan *LoaderChannelColumns
 }
 
 var addressCrud *AddressCrud
@@ -31,10 +38,11 @@ func GetAddressCrud() *AddressCrud {
 		}
 
 		addressCrud = &AddressCrud{
-			db:            dbConn,
-			model:         &models.Address{},
-			modelORM:      &models.AddressORM{},
-			LoaderChannel: make(chan *models.Address, 1),
+			db:                   dbConn,
+			model:                &models.Address{},
+			modelORM:             &models.AddressORM{},
+			LoaderChannel:        make(chan *models.Address, 1),
+			LoaderChannelColumns: make(chan *LoaderChannelColumns, 1),
 		}
 
 		err := addressCrud.Migrate()
@@ -214,38 +222,19 @@ func (m *AddressCrud) UpsertOneCols(address *models.Address, cols []string) {
 // StartAddressLoader starts loader
 func StartAddressLoader() {
 	go func() {
-
 		for {
 			// Read address
 			newAddress := <-GetAddressCrud().LoaderChannel
-
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetAddressCrud().UpsertOne(newAddress)
-			zap.S().Debug(
-				"Loader=Address",
-				" Address=", newAddress.Address,
-				" - Upserted",
+			err := retryLoader(
+				newAddress,
+				GetAddressCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
 				// Postgres error
-				zap.S().Fatal(
-					"Loader=Address",
-					" Address=", newAddress.Address,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
-		}
-	}()
-}
-
-// StartAddressBalanceLoader starts loader
-func StartAddressBalanceLoader() {
-	go func() {
-		for {
-			newAddress := <-GetAddressCrud().LoaderChannel
-			GetAddressCrud().UpsertOneCols(newAddress, []string{"address", "balance"})
 		}
 	}()
 }

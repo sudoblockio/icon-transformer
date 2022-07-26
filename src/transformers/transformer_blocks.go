@@ -3,9 +3,6 @@ package transformers
 import (
 	"encoding/json"
 	"errors"
-	"sync"
-	"time"
-
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/kafka"
@@ -16,6 +13,8 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
+	"sync"
+	"time"
 )
 
 func startBlocks() {
@@ -122,21 +121,18 @@ func processBlocks(blockETL *models.BlockETL) {
 
 // Blocks loader
 func transformBlocksToLoadBlock(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetBlockCrud().LoaderChannel
 	block := transformBlockETLToBlock(blockETL)
-	err := crud.GetBlockCrud().UpsertOne(block)
-	if err != nil {
-		zap.S().Fatal(err.Error())
-	}
+
+	loaderChannel <- block
 }
 
 // Transactions loader
 func transformBlocksToLoadTransactions(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionCrud().LoaderChannel
 	transactions := transformBlockETLToTransactions(blockETL)
 	for _, transaction := range transactions {
-		err := crud.GetTransactionCrud().UpsertOne(transaction)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- transaction
 	}
 }
 
@@ -153,6 +149,7 @@ func transformBlocksToLoadTransactionByAddresses(blockETL *models.BlockETL) {
 
 // Transaction internal by addresses loader
 func transformBlocksToLoadTransactionInternalByAddresses(blockETL *models.BlockETL) {
+
 	transactionInternalByAddresses := transformBlockETLToTransactionInternalByAddresses(blockETL)
 	for _, transactionInternalByAddress := range transactionInternalByAddresses {
 		err := crud.GetTransactionInternalByAddressCrud().UpsertOne(transactionInternalByAddress)
@@ -164,73 +161,40 @@ func transformBlocksToLoadTransactionInternalByAddresses(blockETL *models.BlockE
 
 // Logs loader
 func transformBlocksToLoadLogs(blockETL *models.BlockETL) {
-	//loaderChannel := crud.GetLogCrud().LoaderChannel
-
+	loaderChannel := crud.GetLogCrud().LoaderChannel
 	logs := transformBlockETLToLogs(blockETL)
 	for _, log := range logs {
-		err := crud.GetLogCrud().UpsertOne(log)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
-		//loaderChannel <- log
+		loaderChannel <- log
 	}
 }
 
 // Token transfers loader
 func transformBlocksToLoadTokenTransfers(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTokenTransferCrud().LoaderChannel
 	tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
 	for _, tokenTransfer := range tokenTransfers {
-		err := crud.GetTokenTransferCrud().UpsertOne(tokenTransfer)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- tokenTransfer
 	}
 }
 
 // Token transfer by address loader
 func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
 	tokenTransferByAddresses := transformBlockETLToTokenTransferByAddresses(blockETL)
 	for _, tokenTransferByAddress := range tokenTransferByAddresses {
-		err := crud.GetTokenTransferByAddressCrud().UpsertOne(tokenTransferByAddress)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- tokenTransferByAddress
 	}
 }
-
-// Deprecated because this additionally needs a routine to be able to get the Tx to show up
-//// Transaction create scores loader
-//func transformBlocksToLoadTransactionCreateScores(blockETL *models.BlockETL) {
-//	loaderChannel := crud.GetTransactionCreateScoreCrud().LoaderChannel
-//
-//	transactionCreateScores := transformBlockETLToTransactionCreateScores(blockETL)
-//	for _, transactionCreateScore := range transactionCreateScores {
-//		loaderChannel <- transactionCreateScore
-//	}
-//}
 
 // Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
 //  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
 func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
 	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
 	for _, transactionCreateScore := range transactionCreateScores {
-		err := crud.GetTransactionByAddressCrud().UpsertOne(transactionCreateScore)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- transactionCreateScore
 	}
 }
-
-//// Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
-////  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
-//func transformBlocksToLoadTransactionCreateScores(blockETL *models.BlockETL) {
-//	loaderChannel := crud.GetTransactionCrud().LoaderChannel
-//
-//	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
-//	for _, transactionCreateScore := range transactionCreateScores {
-//		loaderChannel <- transactionCreateScore
-//	}
-//}
 
 // Address loader
 func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
@@ -245,12 +209,10 @@ func transformBlocksToLoadAddresses(blockETL *models.BlockETL) {
 
 // Address tokens loader
 func transformBlocksToLoadTokenAddresses(blockETL *models.BlockETL) {
+	loaderChannel := crud.GetTokenAddressCrud().LoaderChannel
 	tokenAddresses := transformBlockETLToTokenAddresses(blockETL)
 	for _, tokenAddress := range tokenAddresses {
-		err := crud.GetTokenAddressCrud().UpsertOne(tokenAddress)
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
+		loaderChannel <- tokenAddress
 	}
 }
 

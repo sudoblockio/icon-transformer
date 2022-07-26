@@ -1,14 +1,13 @@
 package crud
 
 import (
-	"reflect"
-	"sync"
-
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-
-	"github.com/sudoblockio/icon-transformer/models"
+	"reflect"
+	"sync"
 )
 
 // TransactionInternalByAddressCrud - type for transactionInternalByAddress table model
@@ -42,6 +41,7 @@ func GetTransactionInternalByAddressCrud() *TransactionInternalByAddressCrud {
 			zap.S().Fatal("TransactionInternalByAddressCrud: Unable migrate postgres table: ", err.Error())
 		}
 
+		//startLoaderChannel(GetTransactionInternalByAddressCrud)
 		StartTransactionInternalByAddressLoader()
 	})
 
@@ -81,31 +81,18 @@ func (m *TransactionInternalByAddressCrud) UpsertOne(
 // StartTransactionInternalByAddressLoader starts loader
 func StartTransactionInternalByAddressLoader() {
 	go func() {
-
 		for {
-			// Read transactionInternalByAddress
 			newTransactionInternalByAddress := <-GetTransactionInternalByAddressCrud().LoaderChannel
 
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetTransactionInternalByAddressCrud().UpsertOne(newTransactionInternalByAddress)
-			zap.S().Debug(
-				"Loader=TransactionInternalByAddress",
-				" TransactionHash=", newTransactionInternalByAddress.TransactionHash,
-				" LogIndex=", newTransactionInternalByAddress.LogIndex,
-				" Address=", newTransactionInternalByAddress.Address,
-				" - Upserted",
+			err := retryLoader(
+				newTransactionInternalByAddress,
+				GetTransactionInternalByAddressCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
+
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=TransactionInternalByAddress",
-					" TransactionHash=", newTransactionInternalByAddress.TransactionHash,
-					" LogIndex=", newTransactionInternalByAddress.LogIndex,
-					" Address=", newTransactionInternalByAddress.Address,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

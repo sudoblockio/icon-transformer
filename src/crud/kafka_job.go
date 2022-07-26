@@ -9,6 +9,8 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
+// TODO: RM
+
 // KafkaJobCrud - type for kafkaJob table model
 type KafkaJobCrud struct {
 	db            *gorm.DB

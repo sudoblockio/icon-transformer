@@ -1,6 +1,26 @@
 package crud
 
-import "reflect"
+import (
+	"fmt"
+	"log"
+	"reflect"
+	"time"
+)
+
+func retryLoader[T any](input T, f func(i T) error, attempts int, sleep time.Duration) (err error) {
+	for i := 0; i < attempts; i++ {
+		if i > 0 {
+			log.Println("retrying after error:", err)
+			time.Sleep(sleep)
+			sleep *= 2
+		}
+		err = f(input)
+		if err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
+}
 
 func extractFilledFieldsFromModel(modelValueOf reflect.Value, modelTypeOf reflect.Type) map[string]interface{} {
 	// Helper for combining structs by giving a struct that represents what is in the DB and another struct that is

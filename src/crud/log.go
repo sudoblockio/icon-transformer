@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -109,25 +110,14 @@ func StartLogLoader() {
 		for {
 			// Read log
 			newLog := <-GetLogCrud().LoaderChannel
-
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetLogCrud().UpsertOne(newLog)
-			zap.S().Debug(
-				"Loader=Log",
-				" TransactionHash=", newLog.TransactionHash,
-				" LogIndex=", newLog.LogIndex,
-				" - Upserted",
+			err := retryLoader(
+				newLog,
+				GetLogCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=Log",
-					" TransactionHash=", newLog.TransactionHash,
-					" LogIndex=", newLog.LogIndex,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

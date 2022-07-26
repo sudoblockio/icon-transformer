@@ -1,15 +1,20 @@
 package crud
 
 import (
-	"reflect"
-	"sync"
-
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"reflect"
+	"sync"
 
+	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/models"
 )
+
+type Loader[T any] struct {
+	msg     T
+	columns *[]string
+}
 
 // BlockCrud - type for block table model
 type BlockCrud struct {
@@ -82,27 +87,17 @@ func (m *BlockCrud) UpsertOne(
 // StartBlockLoader starts loader
 func StartBlockLoader() {
 	go func() {
-
 		for {
-			// Read block
 			newBlock := <-GetBlockCrud().LoaderChannel
 
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetBlockCrud().UpsertOne(newBlock)
-			zap.S().Debug(
-				"Loader=Block",
-				" Number=", newBlock.Number,
-				" - Upserted",
+			err := retryLoader(
+				newBlock,
+				GetBlockCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=Block",
-					" Number=", newBlock.Number,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

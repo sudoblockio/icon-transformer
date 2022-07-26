@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -83,29 +84,16 @@ func StartDeadBlockLoader() {
 	go func() {
 
 		for {
-			// Read deadBlock
 			newDeadBlock := <-GetDeadBlockCrud().LoaderChannel
-
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetDeadBlockCrud().UpsertOne(newDeadBlock)
-			zap.S().Debug(
-				"Loader=DeadBlock",
-				" Topic=", newDeadBlock.Topic,
-				" Partition=", newDeadBlock.Partition,
-				" Offset=", newDeadBlock.Offset,
-				" - Upserted",
+			err := retryLoader(
+				newDeadBlock,
+				GetDeadBlockCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
+
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=DeadBlock",
-					" Topic=", newDeadBlock.Topic,
-					" Partition=", newDeadBlock.Partition,
-					" Offset=", newDeadBlock.Offset,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

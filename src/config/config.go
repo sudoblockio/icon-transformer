@@ -1,7 +1,10 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"log"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -47,16 +50,17 @@ type configType struct {
 	ConsumerPartitionStartOffset int    `envconfig:"CONSUMER_PARTITION_START_OFFSET" required:"false" default:"1"`
 
 	// DB
-	DbDriver             string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
-	DbHost               string `envconfig:"DB_HOST" required:"false" default:"localhost"`
-	DbPort               string `envconfig:"DB_PORT" required:"false" default:"5432"`
-	DbUser               string `envconfig:"DB_USER" required:"false" default:"postgres"`
-	DbPassword           string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
-	DbName               string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
-	DbSslmode            string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
-	DbTimezone           string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
-	DbMaxIdleConnections int    `envconfig:"DB_MAX_IDLE_CONNECTIONS" required:"false" default:"2"`
-	DbMaxOpenConnections int    `envconfig:"DB_MAX_OPEN_CONNECTIONS" required:"false" default:"10"`
+	DbDriver             string        `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
+	DbHost               string        `envconfig:"DB_HOST" required:"false" default:"localhost"`
+	DbPort               string        `envconfig:"DB_PORT" required:"false" default:"5432"`
+	DbUser               string        `envconfig:"DB_USER" required:"false" default:"postgres"`
+	DbPassword           string        `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
+	DbName               string        `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
+	DbSslmode            string        `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
+	DbTimezone           string        `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+	DbMaxIdleConnections int           `envconfig:"DB_MAX_IDLE_CONNECTIONS" required:"false" default:"2"`
+	DbMaxOpenConnections int           `envconfig:"DB_MAX_OPEN_CONNECTIONS" required:"false" default:"10"`
+	DbRetrySleep         time.Duration `envconfig:"DB_RETRY_SLEEP" required:"false" default:"1s"`
 
 	// GORM
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`
@@ -102,8 +106,22 @@ var Config configType
 
 // ReadEnvironment - Read and store runtime config
 func ReadEnvironment() {
+	// Only for local tests
+	loadEnv()
+
 	err := envconfig.Process("", &Config)
 	if err != nil {
 		log.Fatalf("ERROR: envconfig - %s\n", err.Error())
 	}
+}
+
+// LoadEnv loads env vars from .env.test
+func loadEnv() {
+	// Only for local tests - Env vars for actual runtime
+	// Source: https://github.com/joho/godotenv/issues/43#issuecomment-503183127
+	re := regexp.MustCompile(`^(.*src)`)
+	cwd, _ := os.Getwd()
+	rootPath := re.Find([]byte(cwd))
+
+	godotenv.Load(string(rootPath) + `/../.env.test`)
 }

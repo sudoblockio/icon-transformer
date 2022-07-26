@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -110,14 +111,14 @@ func StartTransactionCreateScoreLoader() {
 			// Read transactionCreateScore
 			newTransactionCreateScore := <-GetTransactionCreateScoreCrud().LoaderChannel
 
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetTransactionCreateScoreCrud().UpsertOne(newTransactionCreateScore)
-			zap.S().Debug("Loader=TransactionCreateScore, CreationTransactionHash=", newTransactionCreateScore.CreationTransactionHash, " - Upserted")
+			err := retryLoader(
+				newTransactionCreateScore,
+				GetTransactionCreateScoreCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
+			)
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal("Loader=TransactionCreateScore, CreationTransactionHash=", newTransactionCreateScore.CreationTransactionHash, " - Error: ", err.Error())
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

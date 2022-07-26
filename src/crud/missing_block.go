@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
 	"reflect"
 	"sync"
 
@@ -102,22 +103,14 @@ func StartMissingBlockLoader() {
 			// Read missingBlock
 			newMissingBlock := <-GetMissingBlockCrud().LoaderChannel
 
-			//////////////////////
-			// Load to postgres //
-			//////////////////////
-			err := GetMissingBlockCrud().UpsertOne(newMissingBlock)
-			zap.S().Debug(
-				"Loader=MissingBlock",
-				" Number=", newMissingBlock.Number,
-				" - Upserted",
+			err := retryLoader(
+				newMissingBlock,
+				GetMissingBlockCrud().UpsertOne,
+				5,
+				config.Config.DbRetrySleep,
 			)
 			if err != nil {
-				// Postgres error
-				zap.S().Fatal(
-					"Loader=MissingBlock",
-					" Number=", newMissingBlock.Number,
-					" - Error: ", err.Error(),
-				)
+				zap.S().Fatal(err.Error())
 			}
 		}
 	}()
