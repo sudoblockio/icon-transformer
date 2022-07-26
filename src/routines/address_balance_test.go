@@ -9,7 +9,7 @@ import (
 )
 
 func TestAddressBalance(t *testing.T) {
-	config.ReadTestEnvironment()
+	config.ReadEnvironment()
 	address := &models.Address{Address: "hx562dc1e2c7897432c298115bc7fbcc3b9d5df294"}
 	getAddressBalances(address)
 

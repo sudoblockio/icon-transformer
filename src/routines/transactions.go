@@ -7,7 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-
 func setTransactionCounts() {
 	// Regular Txs
 	count, err := crud.GetTransactionCrud().CountRegular()

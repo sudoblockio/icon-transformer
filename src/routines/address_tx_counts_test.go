@@ -8,9 +8,9 @@ import (
 )
 
 func TestGetAddressTxCounts(t *testing.T) {
-	config.ReadTestEnvironment()
+	config.ReadEnvironment()
 	address := &models.Address{
-		Address: "hx68646780e14ee9097085f7280ab137c3633b4b5f",
+		Address: "hxc1481b2459afdbbde302ab528665b8603f7014dc",
 	}
 	getAddressTxCounts(address)
 

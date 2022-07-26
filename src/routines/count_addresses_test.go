@@ -6,6 +6,6 @@ import (
 )
 
 func TestCountAddresses(t *testing.T) {
-	config.ReadTestEnvironment()
+	config.ReadEnvironment()
 	countAddressesToRedisRoutine()
 }
