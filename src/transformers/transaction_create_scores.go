@@ -85,11 +85,6 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 	transactionByAddresses := []*models.TransactionByAddress{}
 
 	for _, transactionETL := range blockETL.Transactions {
-		if transactionETL.Status == "0x0" {
-			// Skip failed Txs which could have unaccepted results
-			continue
-		}
-
 		method := extractMethodFromTransactionETL(transactionETL)
 
 		if method == "acceptScore" || method == "rejectScore" {
