@@ -71,6 +71,13 @@ func (k *kafkaTopicConsumer) consumeGroup(group string) {
 	// Initial Offset
 	saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
 
+	// Config values
+	saramaConfig.Consumer.MaxProcessingTime = 2 * time.Second
+	saramaConfig.Consumer.Group.Session.Timeout = 20 * time.Second
+	saramaConfig.Net.KeepAlive = 1 * time.Minute
+	saramaConfig.Metadata.Retry.Max = 10
+	saramaConfig.Metadata.Retry.Backoff = 2 * time.Second
+
 	// Balance Strategy
 	switch config.Config.ConsumerGroupBalanceStrategy {
 	case "BalanceStrategyRange":
