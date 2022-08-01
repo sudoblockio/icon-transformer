@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"math/big"
+	"reflect"
+	"runtime"
 
 	"go.uber.org/zap"
 )
@@ -40,4 +43,19 @@ func StringHexToFloat64(hex string, base int) float64 {
 	valueDecimal, _ = valueBigFloat.Float64()
 
 	return valueDecimal
+}
+
+func StringHexToInt64(i string) int64 {
+	o := new(big.Int)
+	_, err := fmt.Sscan(i, o)
+	if err != nil {
+		zap.S().Warn("String conversion failure Error: ", err.Error())
+		return 0
+	}
+
+	return o.Int64()
+}
+
+func GetFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }

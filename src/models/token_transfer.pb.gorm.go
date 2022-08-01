@@ -14,6 +14,7 @@ type TokenTransferORM struct {
 	BlockTimestamp       int64
 	FromAddress          string `gorm:"index:token_transfer_idx_from_address"`
 	LogIndex             int64  `gorm:"primary_key"`
+	NftId                int64
 	ToAddress            string `gorm:"index:token_transfer_idx_to_address"`
 	TokenContractAddress string `gorm:"index:token_transfer_idx_token_contract_address"`
 	TokenContractName    string
@@ -51,6 +52,7 @@ func (m *TokenTransfer) ToORM(ctx context.Context) (TokenTransferORM, error) {
 	to.TokenContractName = m.TokenContractName
 	to.TokenContractSymbol = m.TokenContractSymbol
 	to.TransactionFee = m.TransactionFee
+	to.NftId = m.NftId
 	if posthook, ok := interface{}(m).(TokenTransferWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -79,6 +81,7 @@ func (m *TokenTransferORM) ToPB(ctx context.Context) (TokenTransfer, error) {
 	to.TokenContractName = m.TokenContractName
 	to.TokenContractSymbol = m.TokenContractSymbol
 	to.TransactionFee = m.TransactionFee
+	to.NftId = m.NftId
 	if posthook, ok := interface{}(m).(TokenTransferWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -149,7 +152,7 @@ func DefaultReadTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm.D
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeReadApplyQuery); ok {
@@ -196,7 +199,7 @@ func DefaultDeleteTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm
 	if err != nil {
 		return err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeDelete_); ok {
@@ -269,7 +272,7 @@ func DefaultStrictUpdateTokenTransfer(ctx context.Context, in *TokenTransfer, db
 		return nil, err
 	}
 	lockedRow := &TokenTransferORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -429,6 +432,10 @@ func DefaultApplyFieldMaskTokenTransfer(ctx context.Context, patchee *TokenTrans
 		}
 		if f == prefix+"TransactionFee" {
 			patchee.TransactionFee = patcher.TransactionFee
+			continue
+		}
+		if f == prefix+"NftId" {
+			patchee.NftId = patcher.NftId
 			continue
 		}
 	}

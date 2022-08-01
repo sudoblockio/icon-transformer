@@ -19,4 +19,5 @@ message TokenTransfer {
   string token_contract_name = 10;
   string token_contract_symbol = 11;
   string transaction_fee = 12;
+  int64 nft_id = 13;
 }
