@@ -108,7 +108,7 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 				}
 
 				tokenTransfers = append(tokenTransfers, tokenTransfer)
-			} else if logETL.Indexed[0] == "Transfer(Address,Address,int)" {
+			} else if logETL.Indexed[0] == "Transfer(Address,Address,int)" && len(logETL.Indexed) == 4 {
 				// Transfer is not a protected method
 				// Handle IRC3 transfers
 
@@ -172,7 +172,7 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 				}
 
 				tokenTransfers = append(tokenTransfers, tokenTransfer)
-			} else if logETL.Indexed[0] == "TransferSingle(Address,Address,Address,int,int)" {
+			} else if logETL.Indexed[0] == "TransferSingle(Address,Address,Address,int,int)" && len(logETL.Indexed) == 4 {
 				// TransferSingle is not a protected method
 				// Handle IRC31 transfers single
 
