@@ -1,12 +1,14 @@
 package transformers
 
 import (
+	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) []*models.TokenTransferByAddress {
+func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) {
 
-	tokenTransferByAddresses := []*models.TokenTransferByAddress{}
+	//tokenTransferByAddresses := []*models.TokenTransferByAddress{}
+	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
 
 	//////////
 	// Logs //
@@ -16,9 +18,10 @@ func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) []*m
 
 			// NOTE check for specific log definition
 			// NOTE 'Transfer' is not a protected name in Icon
-			if logETL.Indexed[0] == "Transfer(Address,Address,int,bytes)" && len(logETL.Indexed) == 4 {
+			if logETL.Indexed[0] == "Transfer(Address,Address,int,bytes)" && len(logETL.Indexed) == 4 ||
+				logETL.Indexed[0] == "Transfer(Address,Address,int)" && len(logETL.Indexed) == 4 ||
+				logETL.Indexed[0] == "TransferSingle(Address,Address,Address,int,int)" && len(logETL.Indexed) == 4 {
 				// Token Transfers
-
 				// From Address
 				fromAddress := logETL.Indexed[1]
 				tokenTransferByFromAddress := &models.TokenTransferByAddress{
@@ -27,7 +30,7 @@ func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) []*m
 					Address:         fromAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				tokenTransferByAddresses = append(tokenTransferByAddresses, tokenTransferByFromAddress)
+				loaderChannel <- tokenTransferByFromAddress
 
 				// To Address
 				toAddress := logETL.Indexed[2]
@@ -37,11 +40,8 @@ func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) []*m
 					Address:         toAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				tokenTransferByAddresses = append(tokenTransferByAddresses, tokenTransferByToAddress)
-
+				loaderChannel <- tokenTransferByToAddress
 			}
 		}
 	}
-
-	return tokenTransferByAddresses
 }

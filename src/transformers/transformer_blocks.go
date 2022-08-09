@@ -62,10 +62,11 @@ var allBlockProcessors = []func(a *models.BlockETL){
 	transformBlocksToLoadTransactionInternalByAddresses,
 	transformBlocksToLoadLogs,
 	transformBlocksToLoadTokenTransfers,
-	transformBlocksToLoadTokenTransferByAddresses,
 	transformBlocksToLoadTransactionByAddressCreateScores,
 	transformBlocksToLoadAddresses,
 	transformBlocksToLoadTokenAddresses,
+	// Updated
+	transformBlockETLToTokenTransferByAddresses,
 }
 
 var allBlockCounters = []func(etl *models.BlockETL){
@@ -201,13 +202,13 @@ func transformBlocksToLoadTokenTransfers(blockETL *models.BlockETL) {
 }
 
 // Token transfer by address loader
-func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
-	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
-	tokenTransferByAddresses := transformBlockETLToTokenTransferByAddresses(blockETL)
-	for _, tokenTransferByAddress := range tokenTransferByAddresses {
-		loaderChannel <- tokenTransferByAddress
-	}
-}
+//func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
+//	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
+//	tokenTransferByAddresses := transformBlockETLToTokenTransferByAddresses(blockETL)
+//	for _, tokenTransferByAddress := range tokenTransferByAddresses {
+//		loaderChannel <- tokenTransferByAddress
+//	}
+//}
 
 // Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
 //
