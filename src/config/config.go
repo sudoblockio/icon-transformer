@@ -99,6 +99,10 @@ type configType struct {
 
 	// Redis Recovery
 	RedisRecoveryRunOnly bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`
+
+	// Backfill Params
+	ProcessCounts        bool     `envconfig:"TRANSFORMER_PROCESS_COUNTS" required:"false" default:"true"`
+	TransformerFunctions []string `envconfig:"TRANSFORMER_FUNCTIONS" required:"false" default:""`
 }
 
 // Config - runtime config struct

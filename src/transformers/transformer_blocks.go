@@ -100,22 +100,24 @@ func processBlocks(blockETL *models.BlockETL) {
 	// NOTE indexed loaders index messages by block number
 	// NOTE each block number can only pass through once
 	// Mostly these are items for keeping redis cache up to date
-	_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		runBlockProcessors(blockCounters, blockETL)
+	if config.Config.ProcessCounts {
+		_, err := crud.GetBlockIndexCrud().SelectOne(blockETL.Number)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			runBlockProcessors(blockCounters, blockETL)
 
-		// Commit block
-		blockIndex := &models.BlockIndex{Number: blockETL.Number}
-		err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
+			// Commit block
+			blockIndex := &models.BlockIndex{Number: blockETL.Number}
+			err = crud.GetBlockIndexCrud().InsertOne(blockIndex)
 
-	} else if err != nil {
-		// ERROR inserting block index
-		zap.S().Warn(
-			"Routine=Transformer,",
-			" BlockNumber=", blockETL.Number,
-			" Step=", "Insert block index into postgres",
-			" Error=", err.Error(),
-		)
+		} else if err != nil {
+			// ERROR inserting block index
+			zap.S().Warn(
+				"Routine=Transformer,",
+				" BlockNumber=", blockETL.Number,
+				" Step=", "Insert block index into postgres",
+				" Error=", err.Error(),
+			)
+		}
 	}
 }
 
@@ -182,7 +184,8 @@ func transformBlocksToLoadTokenTransferByAddresses(blockETL *models.BlockETL) {
 }
 
 // Transaction by address for creating scores loader. Finds approval Txs for core submission and inserts into
-//  transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
+//
+//	transaction_by_address table so that the Txs are brought up in the list view when viewing a contract's Txs.
 func transformBlocksToLoadTransactionByAddressCreateScores(blockETL *models.BlockETL) {
 	loaderChannel := crud.GetTransactionByAddressCrud().LoaderChannel
 	transactionCreateScores := transformBlockETLToTransactionByAddressCreateScores(blockETL)
