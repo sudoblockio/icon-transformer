@@ -199,12 +199,6 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 				// Block Timestamp
 				blockTimestamp := blockETL.Timestamp
 
-				// Token Contract Name
-				tokenContractName, err := service.IconNodeServiceGetTokenContractName(tokenContractAddress)
-				if err != nil {
-					zap.S().Fatal(err)
-				}
-
 				// Transaction Fee
 				stepPriceBig := big.NewInt(0)
 				if transactionETL.StepPrice != "" {
@@ -227,7 +221,6 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 					Value:                value,
 					ValueDecimal:         valueDecimal,
 					BlockTimestamp:       blockTimestamp,
-					TokenContractName:    tokenContractName,
 					TransactionFee:       transactionFee,
 					NftId:                nftId,
 				}
