@@ -11,6 +11,7 @@ import (
 	"github.com/sudoblockio/icon-transformer/service"
 	"github.com/sudoblockio/icon-transformer/utils"
 	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 	"google.golang.org/protobuf/proto"
 	"gorm.io/gorm"
 	"sync"
@@ -22,6 +23,9 @@ func startBlocks() {
 
 	// Input channels
 	kafkaBlocksTopicChannel := kafka.KafkaTopicConsumer.TopicChannels[kafkaBlocksTopic]
+
+	// Build the transformer list
+	filterTransformers()
 
 	zap.S().Debug("Blocks transformer: started working")
 	for {
@@ -51,7 +55,7 @@ func startBlocks() {
 	}
 }
 
-var blockProcessors = []func(a *models.BlockETL){
+var allBlockProcessors = []func(a *models.BlockETL){
 	transformBlocksToLoadBlock,
 	transformBlocksToLoadTransactions,
 	transformBlocksToLoadTransactionByAddresses,
@@ -64,7 +68,7 @@ var blockProcessors = []func(a *models.BlockETL){
 	transformBlocksToLoadTokenAddresses,
 }
 
-var blockCounters = []func(etl *models.BlockETL){
+var allBlockCounters = []func(etl *models.BlockETL){
 	transformBlocksToChannelBlocks,
 	transformBlocksToChannelTransactions,
 	transformBlocksToChannelLogs,
@@ -75,6 +79,28 @@ var blockCounters = []func(etl *models.BlockETL){
 	transformBlocksToCountTokenTransfers,
 	transformBlocksToServiceAddressBalance,
 	transformBlocksToServiceTokenAddressBalance,
+}
+
+var blockProcessors []func(a *models.BlockETL)
+var blockCounters []func(etl *models.BlockETL)
+
+// Filter the list of transform functions based on the value in the config
+func filterTransformers() {
+	if len(config.Config.TransformerFunctions) == 0 {
+		blockProcessors = allBlockProcessors
+		blockCounters = allBlockCounters
+		return
+	}
+	for _, v := range allBlockProcessors {
+		if slices.Contains(config.Config.TransformerFunctions, getFunctionName(v)) {
+			blockProcessors = append(blockProcessors, v)
+		}
+	}
+	for _, v := range allBlockCounters {
+		if slices.Contains(config.Config.TransformerFunctions, getFunctionName(v)) {
+			allBlockCounters = append(allBlockCounters, v)
+		}
+	}
 }
 
 func runBlockProcessors(blockProcessors []func(blockETL *models.BlockETL), blockETL *models.BlockETL) {

@@ -2,9 +2,10 @@ package transformers
 
 import (
 	"encoding/json"
-	"strings"
-
 	"github.com/sudoblockio/icon-transformer/models"
+	"reflect"
+	"runtime"
+	"strings"
 )
 
 func extractMethodFromTransactionETL(transactionETL *models.TransactionETL) string {
@@ -42,4 +43,12 @@ func extractContentFromTranactionETL(transactionETL *models.TransactionETL) (str
 	content, ok := dataJSON["contentType"].(string)
 
 	return content, ok
+}
+
+// Used to get the function name so that we can put that into a config file so that only parts of the trnasformation
+// can be processed.
+func getFunctionName(i interface{}) string {
+	functionParts := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	functionNames := strings.Split(functionParts, ".")
+	return functionNames[len(functionNames)-1]
 }
