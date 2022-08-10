@@ -80,7 +80,8 @@ func getTransactionTypes(scoreAddress string, transactionTypes []int32) *[]model
 }
 
 // This is for python scores where the Tx for approval needs to be extracted out of the Tx hash by calling the Tx result
-//  manually. This is because the score address is not the one actually creating the Tx.
+//
+//	manually. This is because the score address is not the one actually creating the Tx.
 func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockETL) []*models.TransactionByAddress {
 	transactionByAddresses := []*models.TransactionByAddress{}
 
@@ -89,6 +90,10 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 
 		if method == "acceptScore" || method == "rejectScore" {
 
+			if transactionETL.Status != "0x1" {
+				// Failed Txs will not have event logs that can be indexed
+				continue
+			}
 			creationHash := transactionETL.Logs[0].Indexed[1]
 
 			result, err := service.IconNodeServiceGetTransactionResult(creationHash)
