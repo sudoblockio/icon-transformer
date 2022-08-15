@@ -1,8 +1,6 @@
 package crud
 
 import (
-	"github.com/sudoblockio/icon-transformer/config"
-	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
@@ -18,6 +16,8 @@ type TokenTransferByAddressCrud struct {
 	model         *models.TokenTransferByAddress
 	modelORM      *models.TokenTransferByAddressORM
 	LoaderChannel chan *models.TokenTransferByAddress
+	columns       []string
+	primaryKeys   []clause.Column
 }
 
 var tokenTransferByAddressCrud *TokenTransferByAddressCrud
@@ -35,7 +35,9 @@ func GetTokenTransferByAddressCrud() *TokenTransferByAddressCrud {
 			db:            dbConn,
 			model:         &models.TokenTransferByAddress{},
 			modelORM:      &models.TokenTransferByAddressORM{},
-			LoaderChannel: make(chan *models.TokenTransferByAddress, 1),
+			LoaderChannel: make(chan *models.TokenTransferByAddress, 100),
+			columns:       getModelColumnNames(models.TokenTransferByAddress{}),
+			primaryKeys:   getModelPrimaryKeys(models.TokenTransferByAddressORM{}),
 		}
 
 		err := tokenTransferByAddressCrud.Migrate()
@@ -43,7 +45,12 @@ func GetTokenTransferByAddressCrud() *TokenTransferByAddressCrud {
 			zap.S().Fatal("TokenTransferByAddressCrud: Unable migrate postgres table: ", err.Error())
 		}
 
-		StartTokenTransferByAddressLoader()
+		//StartTokenTransferByAddressLoader()
+		startBatchLoader(
+			tokenTransferByAddressCrud.LoaderChannel,
+			tokenTransferByAddressCrud.UpsertMany,
+			tokenTransferByAddressCrud.columns,
+		)
 	})
 
 	return tokenTransferByAddressCrud
@@ -68,42 +75,75 @@ func (m *TokenTransferByAddressCrud) CountByTokenTransfersByAddress(address stri
 	return count, db.Error
 }
 
-func (m *TokenTransferByAddressCrud) UpsertOne(
-	tokenTransferByAddress *models.TokenTransferByAddress,
+func (m *TokenTransferByAddressCrud) UpsertMany(
+	tokenTransferByAddress []*models.TokenTransferByAddress,
+	cols []string,
 ) error {
 	db := m.db
-
-	// map[string]interface{}
-	updateOnConflictValues := extractFilledFieldsFromModel(
-		reflect.ValueOf(*tokenTransferByAddress),
-		reflect.TypeOf(*tokenTransferByAddress),
-	)
-
-	// Upsert
 	db = db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "log_index"}, {Name: "address"}}, // NOTE set to primary keys for table
-		DoUpdates: clause.Assignments(updateOnConflictValues),
+		Columns:   m.primaryKeys,
+		DoUpdates: clause.AssignmentColumns(cols),
 	}).Create(tokenTransferByAddress)
+
+	if db.Error == nil {
+		return nil
+	}
+
+	gormErr := getGormError(db)
+	if gormErr.Code == "21000" {
+		for _, v := range tokenTransferByAddress {
+			db := m.db
+			db = db.Clauses(clause.OnConflict{
+				Columns:   m.primaryKeys,
+				DoUpdates: clause.AssignmentColumns(cols),
+			}).Create(v)
+
+			if db.Error != nil {
+				zap.S().Fatal(db.Error.Error())
+			}
+			return nil
+		}
+	}
 
 	return db.Error
 }
 
-// StartTokenTransferByAddressLoader starts loader
-func StartTokenTransferByAddressLoader() {
-	go func() {
-		for {
-			// Read tokenTransferByAddress
-			newTokenTransferByAddress := <-GetTokenTransferByAddressCrud().LoaderChannel
-			err := retryLoader(
-				newTokenTransferByAddress,
-				GetTokenTransferByAddressCrud().UpsertOne,
-				5,
-				config.Config.DbRetrySleep,
-			)
-			if err != nil {
-				// Postgres error
-				zap.S().Fatal(err.Error())
-			}
-		}
-	}()
-}
+//func (m *TokenTransferByAddressCrud) UpsertOne(
+//	tokenTransferByAddress *models.TokenTransferByAddress,
+//) error {
+//	db := m.db
+//
+//	// map[string]interface{}
+//	updateOnConflictValues := extractFilledFieldsFromModel(
+//		reflect.ValueOf(*tokenTransferByAddress),
+//		reflect.TypeOf(*tokenTransferByAddress),
+//	)
+//
+//	// Upsert
+//	db = db.Clauses(clause.OnConflict{
+//		Columns:   []clause.Column{{Name: "transaction_hash"}, {Name: "log_index"}, {Name: "address"}}, // NOTE set to primary keys for table
+//		DoUpdates: clause.Assignments(updateOnConflictValues),
+//	}).Create(tokenTransferByAddress)
+//
+//	return db.Error
+//}
+
+//// StartTokenTransferByAddressLoader starts loader
+//func StartTokenTransferByAddressLoader() {
+//	go func() {
+//		for {
+//			// Read tokenTransferByAddress
+//			newTokenTransferByAddress := <-GetTokenTransferByAddressCrud().LoaderChannel
+//			err := retryLoader(
+//				newTokenTransferByAddress,
+//				GetTokenTransferByAddressCrud().UpsertOne,
+//				5,
+//				config.Config.DbRetrySleep,
+//			)
+//			if err != nil {
+//				// Postgres error
+//				zap.S().Fatal(err.Error())
+//			}
+//		}
+//	}()
+//}
