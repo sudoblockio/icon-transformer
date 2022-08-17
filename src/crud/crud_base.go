@@ -36,6 +36,18 @@ func (m *Crud[Model, ModelOrm]) CreateIndexes(statement string) {
 	}
 }
 
+func (m *Crud[Model, ModelOrm]) UpsertOne(
+	block *models.Block,
+	cols []string,
+) error {
+	db := m.db
+	db = db.Clauses(clause.OnConflict{
+		Columns:   m.primaryKeys,
+		DoUpdates: clause.AssignmentColumns(cols),
+	}).Create(block)
+	return db.Error
+}
+
 func (m *Crud[Model, ModelOrm]) UpsertMany(
 	values []*Model,
 	cols []string,

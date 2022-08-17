@@ -63,7 +63,7 @@ func startBlocks() {
 }
 
 var allBlockProcessors = []func(a *models.BlockETL){
-	transformBlocksToLoadBlock,
+	//transformBlocksToLoadBlock,
 	transformBlocksToLoadTransactions,
 	transformBlocksToLoadTransactionByAddresses,
 	transformBlocksToLoadTransactionInternalByAddresses,
@@ -72,12 +72,13 @@ var allBlockProcessors = []func(a *models.BlockETL){
 	transformBlocksToLoadAddresses,
 	transformBlocksToLoadTokenAddresses,
 	// Updated
+	transformBlockETLToBlock,
 	transformBlockETLToTokenTransfers,
 	transformBlockETLToTokenTransferByAddresses,
 }
 
 var allBlockCounters = []func(etl *models.BlockETL){
-	transformBlocksToChannelBlocks,
+	//transformBlocksToChannelBlocks,
 	transformBlocksToChannelTransactions,
 	transformBlocksToChannelLogs,
 	//transformBlocksToChannelTokenTransfers,
@@ -155,13 +156,13 @@ func processBlocks(blockETL *models.BlockETL) {
 	}
 }
 
-// Blocks loader
-func transformBlocksToLoadBlock(blockETL *models.BlockETL) {
-	loaderChannel := crud.GetBlockCrud().LoaderChannel
-	block := transformBlockETLToBlock(blockETL)
-
-	loaderChannel <- block
-}
+//// Blocks loader
+//func transformBlocksToLoadBlock(blockETL *models.BlockETL) {
+//	loaderChannel := crud.GetBlockCrud().LoaderChannel
+//	block := transformBlockETLToBlock(blockETL)
+//
+//	loaderChannel <- block
+//}
 
 // Transactions loader
 func transformBlocksToLoadTransactions(blockETL *models.BlockETL) {
@@ -245,19 +246,19 @@ func transformBlocksToLoadTokenAddresses(blockETL *models.BlockETL) {
 	}
 }
 
-// Blocks channel
-func transformBlocksToChannelBlocks(blockETL *models.BlockETL) {
-
-	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
-
-	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
-		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
-		// block is recent enough, calculate balances
-		block := transformBlockETLToBlock(blockETL)
-		blockJSON, _ := json.Marshal(block)
-		redis.GetRedisClient().Publish(config.Config.RedisBlocksChannel, blockJSON)
-	}
-}
+//// Blocks channel
+//func transformBlocksToChannelBlocks(blockETL *models.BlockETL) {
+//
+//	blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
+//
+//	if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+//		int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+//		// block is recent enough, calculate balances
+//		block := transformBlockETLToBlock(blockETL)
+//		blockJSON, _ := json.Marshal(block)
+//		redis.GetRedisClient().Publish(config.Config.RedisBlocksChannel, blockJSON)
+//	}
+//}
 
 // Transactions channel
 func transformBlocksToChannelTransactions(blockETL *models.BlockETL) {
