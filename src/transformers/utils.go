@@ -2,10 +2,13 @@ package transformers
 
 import (
 	"encoding/json"
+	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/models"
+	"github.com/sudoblockio/icon-transformer/redis"
 	"reflect"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func extractMethodFromTransactionETL(transactionETL *models.TransactionETL) string {
@@ -51,4 +54,19 @@ func getFunctionName(i interface{}) string {
 	functionParts := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 	functionNames := strings.Split(functionParts, ".")
 	return functionNames[len(functionNames)-1]
+}
+
+// broadcastToWebsocketRedisChannel - Broadcast an event to redis channel for websockets output
+func broadcastToWebsocketRedisChannel[T any](blockETL *models.BlockETL, t T, channelName string) {
+	if config.Config.BroadcastWebsocket {
+		// TODO: Consider removing
+		// Determine if within broadcast threshold to prevent broadcasting old events
+		blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
+		if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
+			int64(config.Config.TransformerRedisChannelThreshold) == 0 {
+			//tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
+			output, _ := json.Marshal(t)
+			redis.GetRedisClient().Publish(channelName, output)
+		}
+	}
 }

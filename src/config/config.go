@@ -102,7 +102,11 @@ type configType struct {
 
 	// Backfill Params
 	ProcessCounts        bool     `envconfig:"TRANSFORMER_PROCESS_COUNTS" required:"false" default:"true"`
+	BroadcastWebsocket   bool     `envconfig:"TRANSFORMER_BROADCAST_WEBSOCKET" required:"false" default:"true"`
 	TransformerFunctions []string `envconfig:"TRANSFORMER_FUNCTIONS" required:"false" default:""`
+
+	// A counter so that each block you don't get a message. Set to 0 to log every block (good for at head)
+	LogMsgCount int `envconfig:"LOG_MSG_COUNT" required:"false" default:"1000"`
 }
 
 // Config - runtime config struct

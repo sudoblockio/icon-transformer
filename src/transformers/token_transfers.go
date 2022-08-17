@@ -2,6 +2,9 @@ package transformers
 
 import (
 	"fmt"
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/redis"
 	"math/big"
 
 	"github.com/sudoblockio/icon-transformer/models"
@@ -29,9 +32,10 @@ func findHighestIcxTransfer(logs []*models.LogETL) (string, float64) {
 	return highestIcxTransferValue, highestIcxTransfer
 }
 
-func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.TokenTransfer {
+func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) {
 
-	tokenTransfers := []*models.TokenTransfer{}
+	//tokenTransfers := []*models.TokenTransfer{}
+	loaderChannel := crud.GetTokenTransferCrud().LoaderChannel
 
 	//////////
 	// Logs //
@@ -107,7 +111,11 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 					TransactionFee:       transactionFee,
 				}
 
-				tokenTransfers = append(tokenTransfers, tokenTransfer)
+				//tokenTransfers = append(tokenTransfers, tokenTransfer)
+				loaderChannel <- tokenTransfer
+				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
+				tokenTransferCounts(tokenTransfer)
+
 			} else if logETL.Indexed[0] == "Transfer(Address,Address,int)" && len(logETL.Indexed) == 4 {
 				// Transfer is not a protected method
 				// Handle IRC3 transfers
@@ -171,7 +179,11 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 					NftId:                nftId,
 				}
 
-				tokenTransfers = append(tokenTransfers, tokenTransfer)
+				//tokenTransfers = append(tokenTransfers, tokenTransfer)
+				loaderChannel <- tokenTransfer
+				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
+				tokenTransferCounts(tokenTransfer)
+
 			} else if logETL.Indexed[0] == "TransferSingle(Address,Address,Address,int,int)" && len(logETL.Indexed) == 4 {
 				// TransferSingle is not a protected method
 				// Handle IRC31 transfers single
@@ -225,10 +237,79 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) []*models.Toke
 					NftId:                nftId,
 				}
 
-				tokenTransfers = append(tokenTransfers, tokenTransfer)
+				//tokenTransfers = append(tokenTransfers, tokenTransfer)
+				loaderChannel <- tokenTransfer
+				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
+				tokenTransferCounts(tokenTransfer)
 			}
 		}
 	}
 
-	return tokenTransfers
+	//return tokenTransfers
+}
+
+// Token Transfers count
+func tokenTransferCounts(tokenTransfer *models.TokenTransfer) {
+
+	if config.Config.ProcessCounts {
+		// Set count
+		countKey := config.Config.RedisKeyPrefix + "token_transfer_count"
+		_, err := redis.GetRedisClient().IncCountBy(countKey, 1)
+		if err != nil {
+			zap.S().Warn(err.Error())
+		}
+
+		//////////////////////
+		// Count by address //
+		//////////////////////
+
+		// Get count
+		countByAddress := map[string]int64{}
+		countByTokenContract := map[string]int64{}
+
+		fromAddress := tokenTransfer.FromAddress
+		toAddress := tokenTransfer.ToAddress
+		tokenContractAddress := tokenTransfer.TokenContractAddress
+
+		// From address
+		if _, ok := countByAddress[fromAddress]; ok == true {
+			countByAddress[fromAddress]++
+		} else {
+			countByAddress[fromAddress] = 1
+		}
+
+		// To address
+		if _, ok := countByAddress[toAddress]; ok == true {
+			countByAddress[toAddress]++
+		} else {
+			countByAddress[toAddress] = 1
+		}
+
+		// Token Contract Address
+		if _, ok := countByTokenContract[tokenContractAddress]; ok == true {
+			countByTokenContract[tokenContractAddress]++
+		} else {
+			countByTokenContract[tokenContractAddress] = 1
+		}
+
+		// Set count
+		for address, count := range countByAddress {
+			// Count by address
+
+			countByAddressKey := config.Config.RedisKeyPrefix + "token_transfer_count_by_address_" + address
+			_, err = redis.GetRedisClient().IncCountBy(countByAddressKey, count)
+			if err != nil {
+				zap.S().Warn(err.Error())
+			}
+		}
+		for tokenContract, count := range countByTokenContract {
+			// Count by token contract
+
+			countByTokenContractKey := config.Config.RedisKeyPrefix + "token_transfer_count_by_token_contract_" + tokenContract
+			_, err = redis.GetRedisClient().IncCountBy(countByTokenContractKey, count)
+			if err != nil {
+				zap.S().Warn(err.Error())
+			}
+		}
+	}
 }
