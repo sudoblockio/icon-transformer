@@ -8,7 +8,6 @@ import (
 )
 
 func TestProcessContracts(t *testing.T) {
-	//config.ReadTestEnvironment()
 	config.ReadEnvironment()
 
 	contract := models.ContractProcessed{

@@ -1,100 +1,27 @@
 package crud
 
 import (
-	"github.com/sudoblockio/icon-transformer/config"
-	"reflect"
 	"sync"
-
-	"go.uber.org/zap"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-// DeadBlockCrud - type for deadBlock table model
-type DeadBlockCrud struct {
-	db            *gorm.DB
-	model         *models.DeadBlock
-	modelORM      *models.DeadBlockORM
-	LoaderChannel chan *models.DeadBlock
-}
-
-var deadBlockCrud *DeadBlockCrud
 var deadBlockCrudOnce sync.Once
+var DeadBlockCrud *Crud[models.DeadBlock, models.DeadBlockORM]
 
 // GetDeadBlockCrud - create and/or return the deadBlocks table model
-func GetDeadBlockCrud() *DeadBlockCrud {
+func GetDeadBlockCrud() *Crud[models.DeadBlock, models.DeadBlockORM] {
 	deadBlockCrudOnce.Do(func() {
-		dbConn := getPostgresConn()
-		if dbConn == nil {
-			zap.S().Fatal("Cannot connect to postgres database")
-		}
+		DeadBlockCrud = GetCrud(models.DeadBlock{}, models.DeadBlockORM{})
 
-		deadBlockCrud = &DeadBlockCrud{
-			db:            dbConn,
-			model:         &models.DeadBlock{},
-			modelORM:      &models.DeadBlockORM{},
-			LoaderChannel: make(chan *models.DeadBlock, 1),
-		}
+		DeadBlockCrud.Migrate()
 
-		err := deadBlockCrud.Migrate()
-		if err != nil {
-			zap.S().Fatal("DeadBlockCrud: Unable migrate postgres table: ", err.Error())
-		}
-
-		StartDeadBlockLoader()
+		DeadBlockCrud.MakeStartLoaderChannel()
 	})
 
-	return deadBlockCrud
+	return DeadBlockCrud
 }
 
-// Migrate - migrate deadBlocks table
-func (m *DeadBlockCrud) Migrate() error {
-	// Only using DeadBlockRawORM (ORM version of the proto generated struct) to create the TABLE
-	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
-	return err
-}
-func (m *DeadBlockCrud) TableName() string {
-	return m.modelORM.TableName()
-}
-
-func (m *DeadBlockCrud) UpsertOne(
-	deadBlock *models.DeadBlock,
-) error {
-	db := m.db
-
-	// map[string]interface{}
-	updateOnConflictValues := extractFilledFieldsFromModel(
-		reflect.ValueOf(*deadBlock),
-		reflect.TypeOf(*deadBlock),
-	)
-
-	// Upsert
-	db = db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "topic"}, {Name: "partition"}, {Name: "offset"}}, // NOTE set to primary keys for table
-		DoUpdates: clause.Assignments(updateOnConflictValues),
-	}).Create(deadBlock)
-
-	return db.Error
-}
-
-// StartDeadBlockLoader starts loader
-func StartDeadBlockLoader() {
-	go func() {
-
-		for {
-			newDeadBlock := <-GetDeadBlockCrud().LoaderChannel
-			err := retryLoader(
-				newDeadBlock,
-				GetDeadBlockCrud().UpsertOne,
-				5,
-				config.Config.DbRetrySleep,
-			)
-
-			if err != nil {
-				zap.S().Fatal(err.Error())
-			}
-		}
-	}()
+func InitDeadBlockCrud() {
+	GetDeadBlockCrud()
 }

@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-func getAddressTxCounts(address *models.Address) *models.Address {
+func GetAddressTxCounts(address *models.Address) *models.Address {
 	// Regular Tx Count
-	countRegular, err := crud.GetTransactionByAddressCrud().CountByAddress(address.Address)
+	countRegular, err := crud.GetTransactionByAddressCrud().CountWhere("address", address.Address)
 	if err != nil {
 		// Try again
 		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())
@@ -29,8 +29,27 @@ func getAddressTxCounts(address *models.Address) *models.Address {
 		return nil
 	}
 
+	// Regular Tx Count
+	countIcx, err := crud.GetTransactionCrud().CountTransactionIcxByAddress(address.Address)
+	if err != nil {
+		// Try again
+		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())
+		time.Sleep(1 * time.Second)
+		return nil
+	}
+	//address.TransactionIcxCount = countIcx
+	err = redis.GetRedisClient().SetCount(
+		config.Config.RedisKeyPrefix+"transaction_icx_count_by_address_"+address.Address,
+		countIcx,
+	)
+	if err != nil {
+		zap.S().Warn("Routine=TxCount, Address=", address.Address, " - Error: ", err.Error())
+		time.Sleep(1 * time.Second)
+		return nil
+	}
+
 	// Internal Tx Count
-	countInternal, err := crud.GetTransactionCrud().CountInternalByAddress(address.Address)
+	countInternal, err := crud.GetTransactionCrud().CountTransactionsInternalByAddress(address.Address)
 	if err != nil {
 		zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
 		return nil
@@ -62,7 +81,7 @@ func getAddressTxCounts(address *models.Address) *models.Address {
 	}
 
 	// Log Count
-	countLog, err := crud.GetLogCrud().CountLogsByAddress(address.Address)
+	countLog, err := crud.GetLogCrud().CountWhere("address", address.Address)
 	if err != nil {
 		zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
 		return nil
@@ -80,15 +99,9 @@ func getAddressTxCounts(address *models.Address) *models.Address {
 	return address
 }
 
-func setAddressTxCounts(address *models.Address) {
-	address = getAddressTxCounts(address)
+func SetAddressTxCounts(address *models.Address) {
+	addressNew := GetAddressTxCounts(address)
 	if address != nil {
-		crud.GetAddressCrud().UpsertOneCols(address, []string{
-			"address",
-			"transaction_count",
-			"transaction_internal_count",
-			"token_transfer_count",
-			"log_count",
-		})
+		crud.GetAddressRoutineCruds()["counts"].LoaderChannel <- addressNew
 	}
 }

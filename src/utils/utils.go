@@ -2,11 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"math/big"
 	"reflect"
 	"runtime"
-
-	"go.uber.org/zap"
 )
 
 func StringInSlice(a string, list []string) bool {
@@ -20,6 +19,12 @@ func StringInSlice(a string, list []string) bool {
 
 func StringHexToFloat64(hex string, base int) float64 {
 	valueDecimal := float64(0)
+
+	var negative bool
+	if hex[:1] == "-" {
+		hex = hex[1:]
+		negative = true
+	}
 
 	valueBigInt, success := new(big.Int).SetString(hex[2:], 16)
 	if success == false {
@@ -41,6 +46,10 @@ func StringHexToFloat64(hex string, base int) float64 {
 	valueBigFloat = valueBigFloat.Quo(valueBigFloat, baseBigFloat)
 
 	valueDecimal, _ = valueBigFloat.Float64()
+
+	if negative {
+		valueDecimal = -1 * valueDecimal
+	}
 
 	return valueDecimal
 }

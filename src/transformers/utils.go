@@ -64,7 +64,7 @@ func broadcastToWebsocketRedisChannel[T any](blockETL *models.BlockETL, t T, cha
 		blockTimestamp := time.Unix(blockETL.Timestamp/1000000, 0)
 		if time.Since(blockTimestamp) <= config.Config.TransformerRedisChannelThreshold ||
 			int64(config.Config.TransformerRedisChannelThreshold) == 0 {
-			//tokenTransfers := transformBlockETLToTokenTransfers(blockETL)
+			//tokenTransfers := tokenTransfers(blockETL)
 			output, _ := json.Marshal(t)
 			redis.GetRedisClient().Publish(channelName, output)
 		}

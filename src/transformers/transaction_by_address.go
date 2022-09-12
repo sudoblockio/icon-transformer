@@ -1,12 +1,13 @@
 package transformers
 
 import (
+	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-func transformBlockETLToTransactionByAddresses(blockETL *models.BlockETL) []*models.TransactionByAddress {
+func transactionByAddresses(blockETL *models.BlockETL) {
 
-	transactionByAddresses := []*models.TransactionByAddress{}
+	transactionByFromAddress := &models.TransactionByAddress{}
 
 	//////////////////
 	// Transactions //
@@ -22,20 +23,16 @@ func transformBlockETLToTransactionByAddresses(blockETL *models.BlockETL) []*mod
 				BlockNumber:     blockETL.Number,
 			}
 
-			transactionByAddresses = append(transactionByAddresses, transactionByFromAddress)
+			crud.TransactionByAddressCrud.LoaderChannel <- transactionByFromAddress
 		}
-
-		// To address
-		if transactionETL.ToAddress != "" {
+		if transactionETL.ToAddress != "" && transactionETL.ToAddress != transactionByFromAddress.Address {
 			transactionByToAddress := &models.TransactionByAddress{
 				TransactionHash: transactionETL.Hash,
 				Address:         transactionETL.ToAddress,
 				BlockNumber:     blockETL.Number,
 			}
 
-			transactionByAddresses = append(transactionByAddresses, transactionByToAddress)
+			crud.TransactionByAddressCrud.LoaderChannel <- transactionByToAddress
 		}
 	}
-
-	return transactionByAddresses
 }

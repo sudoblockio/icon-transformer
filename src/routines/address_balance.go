@@ -11,11 +11,14 @@ import (
 func getAddressBalances(address *models.Address) *models.Address {
 
 	// Balance //
+	// Assume error means zero balance
+	//balance, _ := service.IconNodeServiceGetBalance(address.Address)
 	balance, err := service.IconNodeServiceGetBalance(address.Address)
-	if err != nil {
+	if err != nil && err.Error() != "Invalid response" {
 		// Icon node error
+		// Can happen when a node has only failed Txs in history
 		zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
-		return nil
+		//return nil
 	}
 	// Hex -> float64
 	address.Balance = utils.StringHexToFloat64(balance, 18)
@@ -34,8 +37,12 @@ func getAddressBalances(address *models.Address) *models.Address {
 }
 
 func setAddressBalances(address *models.Address) {
-	address = getAddressTxCounts(address)
+	//zap.S().Info(address.Address)
+	addressNew := getAddressBalances(address)
 	if address != nil {
-		crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "balance"})
+		crud.GetAddressRoutineCruds()["address_balance"].LoaderChannel <- addressNew
+	} else {
+
+		println()
 	}
 }

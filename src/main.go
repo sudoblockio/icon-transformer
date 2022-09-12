@@ -5,6 +5,7 @@ import (
 	"github.com/sudoblockio/icon-transformer/global"
 	"github.com/sudoblockio/icon-transformer/kafka"
 	"github.com/sudoblockio/icon-transformer/logging"
+	"github.com/sudoblockio/icon-transformer/metrics"
 	"github.com/sudoblockio/icon-transformer/routines"
 	"github.com/sudoblockio/icon-transformer/transformers"
 )
@@ -12,6 +13,7 @@ import (
 func main() {
 	config.ReadEnvironment()
 	logging.Init()
+	metrics.Start()
 
 	// Feature flags
 	if config.Config.RoutinesRunOnly == true {

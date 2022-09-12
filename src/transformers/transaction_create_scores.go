@@ -26,7 +26,7 @@ func upsertTransactionType(transactionHash string, scoreAddress string, transact
 		LogIndex:        -1,
 	}
 
-	crud.GetTransactionCrud().UpsertOneCols(transaction, []string{"hash", "transaction_type", "score_address"})
+	crud.TransactionTypeCrud.LoaderChannel <- transaction
 }
 
 func updateTransactionTypes(
@@ -82,8 +82,8 @@ func getTransactionTypes(scoreAddress string, transactionTypes []int32) *[]model
 // This is for python scores where the Tx for approval needs to be extracted out of the Tx hash by calling the Tx result
 //
 //	manually. This is because the score address is not the one actually creating the Tx.
-func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockETL) []*models.TransactionByAddress {
-	transactionByAddresses := []*models.TransactionByAddress{}
+func transactionByAddressCreateScores(blockETL *models.BlockETL) {
+	//transactionByAddresses := []*models.TransactionByAddress{}
 
 	for _, transactionETL := range blockETL.Transactions {
 		method := extractMethodFromTransactionETL(transactionETL)
@@ -113,8 +113,8 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 				Address:         scoreAddress,
 				BlockNumber:     blockETL.Number,
 			}
-			transactionByAddresses = append(transactionByAddresses, transactionByAddress)
 
+			crud.TransactionByAddressCreateScoreCrud.LoaderChannel <- transactionByAddress
 			transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{5, 6, 7, 8, 9})
 
 			if method == "acceptScore" {
@@ -146,6 +146,11 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 			content, ok := extractContentFromTranactionETL(transactionETL)
 
 			if ok && (content == "application/zip" || content == "application/java") {
+				if transactionETL.Status != "0x1" {
+					//skip failed Txs as they won't have responses from API
+					continue
+				}
+
 				result, err := service.IconNodeServiceGetTransactionResult(transactionETL.Hash)
 				if err != nil {
 					zap.S().Warn("Could not get tx result for hash: ", err.Error(), ",Hash=", transactionETL.Hash)
@@ -164,8 +169,9 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 					BlockNumber:     blockETL.Number,
 				}
 
-				transactionByAddresses = append(transactionByAddresses, transactionByAddress)
+				//transactionByAddresses = append(transactionByAddresses, transactionByAddress)
 
+				crud.TransactionByAddressCreateScoreCrud.LoaderChannel <- transactionByAddress
 				transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{3, 4})
 
 				updateTransactionTypes(
@@ -179,5 +185,4 @@ func transformBlockETLToTransactionByAddressCreateScores(blockETL *models.BlockE
 			}
 		}
 	}
-	return transactionByAddresses
 }

@@ -1,16 +1,15 @@
 package transformers
 
 import (
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-func transformBlockETLToTransactionInternalByAddresses(blockETL *models.BlockETL) []*models.TransactionInternalByAddress {
+func transactionInternalByAddresses(blockETL *models.BlockETL) {
 
 	transactionInternalByAddresses := []*models.TransactionInternalByAddress{}
 
-	//////////
-	// Logs //
-	//////////
 	for _, transactionETL := range blockETL.Transactions {
 		for iL, logETL := range transactionETL.Logs {
 
@@ -18,8 +17,6 @@ func transformBlockETLToTransactionInternalByAddresses(blockETL *models.BlockETL
 
 			// NOTE 'ICXTransfer' is a protected name in Icon
 			if method == "ICXTransfer" {
-				// Internal Transaction
-
 				// From Address
 				fromAddress := logETL.Indexed[1]
 				transactionInternalByFromAddress := &models.TransactionInternalByAddress{
@@ -28,7 +25,6 @@ func transformBlockETLToTransactionInternalByAddresses(blockETL *models.BlockETL
 					Address:         fromAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				transactionInternalByAddresses = append(transactionInternalByAddresses, transactionInternalByFromAddress)
 
 				// To Address
 				toAddress := logETL.Indexed[2]
@@ -38,10 +34,15 @@ func transformBlockETLToTransactionInternalByAddresses(blockETL *models.BlockETL
 					Address:         toAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				transactionInternalByAddresses = append(transactionInternalByAddresses, transactionInternalByToAddress)
+
+				if config.Config.ProcessCounts {
+					transactionInternalByAddresses = append(transactionInternalByAddresses, transactionInternalByFromAddress)
+					transactionInternalByAddresses = append(transactionInternalByAddresses, transactionInternalByToAddress)
+				}
+				crud.TransactionInternalByAddressCrud.LoaderChannel <- transactionInternalByToAddress
+				crud.TransactionInternalByAddressCrud.LoaderChannel <- transactionInternalByFromAddress
+				broadcastToWebsocketRedisChannel(blockETL, transactionInternalByAddresses, config.Config.RedisTransactionsChannel)
 			}
 		}
 	}
-
-	return transactionInternalByAddresses
 }

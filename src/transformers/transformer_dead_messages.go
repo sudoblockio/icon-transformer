@@ -5,30 +5,30 @@ import (
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/kafka"
+	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 )
 
 func startDeadMessages() {
 	kafkaDeadMessageTopic := config.Config.KafkaDeadMessageTopic
-
-	// Input channels
 	kafkaDeadMessageTopicChannel := kafka.KafkaTopicConsumer.TopicChannels[kafkaDeadMessageTopic]
 
+	loaderChannel := crud.GetDeadBlockCrud().LoaderChannel
 	zap.S().Debug("DeadMessage transformer: started working")
 	for {
-
-		///////////////////
-		// Kafka Message //
-		///////////////////
-
 		deadMessage := <-kafkaDeadMessageTopicChannel
 
-		/////////////
-		// Loaders //
-		/////////////
+		//deadBlock := transformDeadMessageToDeadBlock(deadMessage)
 
-		// Dead block loader
-		transformDeadMessageToLoadDeadBlock(deadMessage)
+		deadBlock := &models.DeadBlock{
+			Topic:     deadMessage.Topic,
+			Partition: int64(deadMessage.Partition),
+			Offset:    deadMessage.Offset,
+			Key:       string(deadMessage.Key),
+			Value:     string(deadMessage.Value),
+		}
+
+		loaderChannel <- deadBlock
 	}
 }
 

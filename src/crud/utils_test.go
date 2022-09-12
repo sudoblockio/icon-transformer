@@ -1,10 +1,12 @@
 package crud
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/sudoblockio/icon-transformer/models"
 	"gorm.io/gorm/clause"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -29,11 +31,44 @@ func TestCrudUtilsGetModelColumnsNames(t *testing.T) {
 }
 
 func TestCrudUtilsGetModelPrimaryKeys(t *testing.T) {
-	model := models.AddressORM{}
+	model := models.LogORM{}
 	keys := getModelPrimaryKeys(model)
-	assert.Equal(t, keys[0], clause.Column{Name: "address"})
+	assert.Equal(t, keys[0], clause.Column{Name: "log_index"})
 	for i := range keys {
 		// Make sure it does not have any of the default proto struct fields
 		assert.NotEqual(t, "sizeOf", keys[i])
+	}
+}
+
+type TestsRegex struct {
+	regexp *regexp.Regexp
+	input  string
+	output bool
+}
+
+func TestCrudUtilsRegex(t *testing.T) {
+	for _, test := range []TestsRegex{
+		{
+			regexp: matchPrimaryKey,
+			input:  "primary_key",
+			output: true,
+		},
+		{
+			regexp: matchPrimaryKey,
+			input:  "primary_",
+			output: false,
+		},
+		{
+			regexp: matchPrimaryKey,
+			input:  "primary_key;index:log_foo",
+			output: true,
+		},
+	} {
+		assert.Equal(
+			t,
+			test.regexp.MatchString(test.input),
+			test.output,
+			fmt.Sprintf("input: %v, regex: %v", test.input, test.regexp),
+		)
 	}
 }

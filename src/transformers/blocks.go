@@ -4,12 +4,22 @@ import (
 	"fmt"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
+	"github.com/sudoblockio/icon-transformer/redis"
+	"go.uber.org/zap"
 	"math/big"
 
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-func transformBlockETLToBlock(blockETL *models.BlockETL) {
+func transformBlocksToCountBlocks() {
+	countKey := config.Config.RedisKeyPrefix + "block_count"
+	_, err := redis.GetRedisClient().IncCountBy(countKey, 1)
+	if err != nil {
+		zap.S().Warn(err.Error())
+	}
+}
+
+func blocks(blockETL *models.BlockETL) {
 
 	transactionCount := int64(len(blockETL.Transactions))
 	transactionAmount := "0x0"
@@ -103,7 +113,10 @@ func transformBlockETLToBlock(blockETL *models.BlockETL) {
 		InternalTransactionAmount: internalTransactionAmount,
 	}
 
-	loaderChannel := crud.GetBlockCrud().LoaderChannel
-	loaderChannel <- block
+	if config.Config.ProcessCounts {
+		transformBlocksToCountBlocks()
+	}
+
+	crud.BlockCrud.LoaderChannel <- block
 	broadcastToWebsocketRedisChannel(blockETL, block, config.Config.RedisBlocksChannel)
 }
