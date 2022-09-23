@@ -17,6 +17,7 @@ func GetAddressCrud() *Crud[models.Address, models.AddressORM] {
 	addressCrudOnce.Do(func() {
 		AddressCrud = GetCrud(models.Address{}, models.AddressORM{})
 
+		// There is no loader channel for generic addresses -> only contracts
 		AddressCrud.Migrate()
 
 		// For main transformer - requires tuning due to many duplicate records
