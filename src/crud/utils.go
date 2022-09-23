@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/metrics"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
+	"golang.org/x/exp/slices"
 	"gorm.io/gorm/clause"
 	"log"
 	"reflect"
@@ -13,40 +14,6 @@ import (
 	"strings"
 	"time"
 )
-
-// TODO: Replace when done
-// retryLoader - retry a function until it returns a non-nil error
-func retryLoader[T any](input T, f func(i T) error, attempts int, sleep time.Duration) (err error) {
-	for i := 0; i < attempts; i++ {
-		if i > 0 {
-			log.Println("retrying after error:", err)
-			time.Sleep(sleep)
-			sleep *= 2
-		}
-		err = f(input)
-		if err == nil {
-			return nil
-		}
-	}
-	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
-}
-
-// TODO: This is going to be replaced
-// retryLoader - retry a function until it returns a non-nil error
-func retryCrudColumns[T any](input T, columns []string, f func(i T, c []string) error, attempts int, sleep time.Duration) (err error) {
-	for i := 0; i < attempts; i++ {
-		if i > 0 {
-			log.Println("retrying after error:", err)
-			time.Sleep(sleep)
-			sleep *= 2
-		}
-		err = f(input, columns)
-		if err == nil {
-			return nil
-		}
-	}
-	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
-}
 
 // getModelColumnNames - Get a slice of column names from a model's tags
 func getModelColumnNames[T any](model T) []string {
@@ -61,7 +28,27 @@ func getModelColumnNames[T any](model T) []string {
 	return fields
 }
 
-// TODO: Replace with parser from model tags that gets the actual column name instead of just assuming it is snake
+func removeColumnNames(cols []string, rmCols []string) []string {
+	var output []string
+	for _, v := range cols {
+		if !slices.Contains(rmCols, v) {
+			output = append(output, v)
+		}
+	}
+	return output
+}
+
+func (m *Crud[M, O]) removeColumnNames(rmCols []string) {
+	var output []string
+	for _, v := range m.columns {
+		if !slices.Contains(rmCols, v) {
+			output = append(output, v)
+		}
+	}
+	m.columns = output
+}
+
+// TODO: Replace with parser from model tags that gets the actual column Name instead of just assuming it is snake
 //
 //	https://github.com/sudoblockio/icon-transformer/issues/40
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
@@ -73,13 +60,16 @@ func ToSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
+var matchPrimaryKey = regexp.MustCompile("primary_key")
+
 // getModelPrimaryKeys - Get a slice of primary keys from the ORM model's tags
 func getModelPrimaryKeys[T any](model T) []clause.Column {
 	var fields []clause.Column
 	vals := reflect.ValueOf(model)
 	for i, _ := range reflect.VisibleFields(vals.Type()) {
 		gormField, _ := vals.Type().Field(i).Tag.Lookup("gorm")
-		if gormField == "primary_key" {
+		//if gormField == "primary_key" {
+		if matchPrimaryKey.MatchString(gormField) {
 			// Assuming keys are in snake case -> Should probably do another lookup
 			fields = append(fields, clause.Column{Name: ToSnakeCase(vals.Type().Field(i).Name)})
 		}
@@ -87,58 +77,95 @@ func getModelPrimaryKeys[T any](model T) []clause.Column {
 	return fields
 }
 
+// startCustomBatchUpsertLoader - upsert loader with customizations
+func (m *Crud[M, O]) startBatchUpsertLoader() {
+
+	batchCounter := m.batchSampleInterval
+	var channelOutputs []*M
+
+	go func() {
+		for {
+			time.Sleep(m.dbBufferWait)
+			for i := 0; i < len(m.LoaderChannel); i++ {
+				channelOutputs = append(channelOutputs, <-m.LoaderChannel)
+			}
+
+			// Sleep if queue is empty / at head
+			numOutputs := len(channelOutputs)
+			if numOutputs == 0 {
+				time.Sleep(config.Config.DbIdleChannelWait)
+				continue
+			}
+
+			// Metrics
+			batchCounter++
+			if batchCounter > m.batchSampleInterval {
+				//fmt.Println("Loader channel queue=", len(channelOutputs))
+				m.metrics.loaderChannelLength.Set(float64(numOutputs))
+				batchCounter = 0
+			}
+
+			// Retry on failure
+			err := m.retryBatchLoader(
+				channelOutputs,
+				m.UpsertMany,
+			)
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			// Clear the channel
+			channelOutputs = nil
+		}
+	}()
+}
+
+func (m *Crud[M, O]) createCrudMetrics() {
+	// Metrics
+	m.metrics.loaderChannelLength = metrics.CreateGuage(
+		"loader_batch_size",
+		"loader channel batch size",
+		map[string]string{"table_name": m.TableName, "series": m.metrics.Name},
+	)
+
+	m.metrics.loaderChannelDuplicateErrors = metrics.CreateCounter(
+		"loader_duplicate_errors",
+		"number of duplicate msg errors sql 21000",
+		map[string]string{"table_name": m.TableName, "series": m.metrics.Name},
+	)
+}
+
+func (m *Crud[M, O]) MakeStartLoaderChannel() {
+	m.LoaderChannel = make(chan *M, m.loaderChannelBuffer)
+	m.createCrudMetrics()
+	m.startBatchUpsertLoader()
+}
+
 // TODO: See below - https://github.com/sudoblockio/icon-transformer/issues/38
 // retryBatchLoader - retry a function until it returns a non-nil error
-func retryBatchLoader[T any](input []T, f func([]T, []string) error, cols []string, attempts int, sleep time.Duration) (err error) {
-	for i := 0; i < attempts; i++ {
+func (m *Crud[M, O]) retryBatchLoader(
+	input []*M,
+	f func(values []*M) error,
+) (err error) {
+	var sleep = config.Config.DbRetrySleep
+
+	for i := 0; i < m.retryAttempts; i++ {
 		if i > 0 {
 			log.Println("retrying after error:", err)
 			time.Sleep(sleep)
 			sleep *= 2
 		}
-		err = f(input, cols)
+		if m.batchErrorHandler == nil {
+			err = m.DefaultRetryHandler(f(input), input)
+		} else {
+			err = m.batchErrorHandler(f(input), input)
+		}
 		if err == nil {
 			return nil
 		}
+
 	}
-	return fmt.Errorf("after %d attempts, last error: %s", attempts, err)
-}
-
-// TODO: This will be replaced / updated when crud functions are implemented
-//
-//	https://github.com/sudoblockio/icon-transformer/issues/38
-type GenericChan[T any] chan T
-
-// startBatchLoader - Starts a loader channel that batches the inputs to the
-func startBatchLoader[T any](c GenericChan[T], f func([]T, []string) error, cols []string) {
-	var channelOutputs []T
-	go func() {
-		for {
-			for i := 1; i < len(c); i++ {
-				channelOutputs = append(channelOutputs, <-c)
-			}
-			if len(channelOutputs) == 0 {
-				time.Sleep(100 * time.Millisecond)
-				continue
-			}
-
-			fmt.Println(len(channelOutputs))
-			// Retry on failure
-			err := retryBatchLoader(
-				channelOutputs,
-				f,
-				cols,
-				5,
-				config.Config.DbRetrySleep,
-			)
-			// Clear the channel
-			channelOutputs = nil
-			if err != nil {
-				// Postgres error
-				zap.S().Fatal(err.Error())
-			}
-		}
-	}()
+	return fmt.Errorf("after %d attempts, last error: %s", m.retryAttempts, err)
 }
 
 type GormErr struct {
@@ -147,11 +174,19 @@ type GormErr struct {
 }
 
 // getGormError - Unmarshall the go error
-func getGormError(db *gorm.DB) GormErr {
+func getGormError(err error) GormErr {
 	var newError GormErr
-	if db.Error != nil {
-		byteErr, _ := json.Marshal(db.Error)
-		json.Unmarshal(byteErr, &newError)
+	if err != nil {
+		byteErr, ok := json.Marshal(err)
+		if ok != nil {
+			zap.S().Info(ok)
+			return newError
+		}
+		ok = json.Unmarshal(byteErr, &newError)
+		if ok != nil {
+			zap.S().Info(ok)
+			return newError
+		}
 		return newError
 	}
 	return newError

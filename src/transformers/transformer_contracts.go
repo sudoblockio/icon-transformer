@@ -39,13 +39,7 @@ func startContracts() {
 		}
 		zap.S().Info("Transformer: Processing contract address ", contractProcessed.Address)
 
-		/////////////
-		// Loaders //
-		/////////////
-		// NOTE transform contracts processed to various database views
-		// NOTE contracts may be passed multiple times, loaders use upserts
-
-		// Address loader
+		// Upsert Contract to Address
 		transformContractsToLoadAddress(contractProcessed)
 	}
 }
@@ -60,23 +54,50 @@ func transformContractToAddress(contract *models.ContractProcessed) *models.Addr
 		IsToken:              contract.IsToken,
 		IsContract:           true,
 		ContractUpdatedBlock: contract.ContractUpdatedBlock,
-		TokenStandard:        contract.TokenStandard,
 		ContractType:         contract.ContractType,
+		TokenStandard:        contract.TokenStandard,
+		//Symbol:               contract.Symbol,
 	}
 
 	return address
 }
 
+//func transformContractToTransactionByAddress(contract *models.ContractProcessed) *models.TransactionByAddress {
+//	// Facing issues getting the contract creation events into the transactions so this hack is here to make
+//	// sure we have a hash to lookup the Tx by.
+//	transaction_by_address := &models.TransactionByAddress{
+//		Address:         contract.Address,
+//		TransactionHash: contract.TransactionHash,
+//		BlockNumber:     contract.ContractUpdatedBlock,
+//	}
+//
+//	return transaction_by_address
+//}
+//
+//func transformContractToTransaction(contract *models.ContractProcessed) *models.Transaction {
+//	// Facing issues getting the contract creation events into the transactions so this hack is here to make
+//	// sure we get the right `transaction_type` classification into the transactions page.
+//	// Need to first lookup prior
+//
+//	transaction := &models.Transaction{
+//		Hash: contract.TransactionHash,
+//	}
+//
+//	return transaction
+//}
+
 // Address loader
 func transformContractsToLoadAddress(contract *models.ContractProcessed) {
 	address := transformContractToAddress(contract)
-	db_address, err := crud.GetAddressCrud().SelectOneAddress(address.Address)
+
+	var dbAddresses *models.Address
+	dbAddresses, err := crud.GetAddressCrud().SelectOneWhere("address", address.Address)
 	if err != nil {
 		zap.S().Info(err.Error())
 	}
 
-	if db_address.ContractUpdatedBlock <= address.ContractUpdatedBlock {
-		crud.GetAddressCrud().UpsertOneCols(address, []string{
+	if dbAddresses.ContractUpdatedBlock <= address.ContractUpdatedBlock {
+		err = crud.GetAddressCrud().UpsertOneColumns(address, []string{
 			"address",
 			"name",
 			"created_timestamp",
@@ -87,5 +108,20 @@ func transformContractsToLoadAddress(contract *models.ContractProcessed) {
 			"contract_type",
 			"token_standard",
 		})
+		if err != nil {
+			zap.S().Fatal(err.Error())
+		}
 	}
+
+	//transaction_by_address := transformContractToTransactionByAddress(contract)
+	//err = crud.GetTransactionByAddressCrud().UpsertOne(transaction_by_address)
+	//if err != nil {
+	//	zap.S().Info(err.Error())
+	//}
+	//
+	//transaction := transformContractToTransactionByAddress(contract)
+	//err = crud.GetTransactionCrud().UpsertOne(transaction)
+	//if err != nil {
+	//	zap.S().Info(err.Error())
+	//}
 }

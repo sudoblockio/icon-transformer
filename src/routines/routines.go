@@ -5,20 +5,22 @@ import (
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/models"
-	"github.com/sudoblockio/icon-transformer/redis"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"os"
 	"sync"
 	"time"
 )
 
+// Functions that are used in recovery that output a model that needs to be upserted into the address table
 var addressRoutines = []func(a *models.Address){
 	setAddressBalances,
-	setAddressTxCounts,
+	SetAddressTxCounts,
 }
 
 var tokenAddressRoutines = []func(t *models.TokenAddress){
 	setTokenAddressBalances,
+	// TODO: Fix this
 	//setTokenAddressTxCounts,
 }
 
@@ -32,8 +34,12 @@ func StartRecovery() {
 	countAddressesToRedisRoutine()
 
 	// By address
-	AddressGoRoutines(addressRoutines)
-	TokenAddressGoRoutines(tokenAddressRoutines)
+	LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
+	// By token address
+	LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
+
+	zap.S().Info("finished recovery. exiting..")
+	os.Exit(0)
 }
 
 var cronRoutines = []func(){
@@ -51,7 +57,8 @@ func CronStart() {
 	go RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
 
 	// Long
-	go AddressRoutinesCron(addressRoutines, 6*time.Hour)
+	// TODO: These were snubbed because they stress DB and should be run with something to slow them down
+	//go AddressRoutinesCron(addressRoutines, 6*time.Hour)
 }
 
 // Wrapper for generic routines
@@ -66,121 +73,49 @@ func RoutinesCron(routines []func(), sleepDuration time.Duration) {
 	}
 }
 
-// Wrapper for generic address routines
-func AddressRoutinesCron(routines []func(address *models.Address), sleepDuration time.Duration) {
-	for {
-		AddressGoRoutines(routines)
-		zap.S().Info("Completed routine, sleeping...")
-		time.Sleep(sleepDuration)
-	}
-}
-
-// Takes a crud count method, calls it, takes the count and puts it into a redis countKey.
-func CrudCountSetRedis(c func() (int64, error), countKey string) error {
-	count, err := c()
-	if err != nil {
-		// Postgres error
-		zap.S().Warn(err)
-		return err
-	}
-	err = redis.GetRedisClient().SetCount(countKey, count)
-	if err != nil {
-		// Redis error
-		zap.S().Warn(err)
-		return err
-	}
-	return nil
-}
-
-func AddressGoRoutines(routines []func(address *models.Address)) {
+func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	var wg sync.WaitGroup
-	for i := 0; i <= config.Config.RoutinesNumWorkers; i++ {
+	for i := 0; i <= (config.Config.RoutinesNumWorkers - 1); i++ {
 		wg.Add(1)
 
 		i := i
 		go func() {
 			defer wg.Done()
-			AddressSetRoutine(routines, i)
+			// Loop through all addresses
+			skip := i * config.Config.RoutinesBatchSize
+			limit := config.Config.RoutinesBatchSize
+
+			zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with workerId=", i)
+			// Run loop until addresses have all been iterated over
+			for {
+				routineItems, err := Crud.SelectMany(limit, skip)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					zap.S().Warn("Ending address routing with error=", err.Error())
+					break
+				} else if err != nil {
+					zap.S().Warn("Ending address routing with error=", err.Error())
+					break
+				}
+				if len(*routineItems) == 0 {
+					zap.S().Warn("Ending address routing, no more addresses")
+					break
+				}
+
+				zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
+				for i := 0; i < len(*routineItems); i++ {
+					for _, r := range routines {
+						var item *M
+						item = &(*routineItems)[i]
+						r(item)
+					}
+				}
+
+				zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
+
+				skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
+			}
 		}()
 	}
 
 	wg.Wait()
-}
-
-func AddressSetRoutine(routines []func(address *models.Address), workerId int) {
-	// Loop through all addresses
-	skip := workerId * config.Config.RoutinesBatchSize
-	limit := config.Config.RoutinesBatchSize
-
-	zap.S().Info("Starting AddressSetRoutine with workerId=", workerId)
-	// Run loop until addresses have all been iterated over
-	for {
-		addresses, err := crud.GetAddressCrud().SelectMany(limit, skip)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			zap.S().Warn("Ending address routing with error=", err.Error())
-			break
-		} else if err != nil {
-			zap.S().Warn("Ending address routing with error=", err.Error())
-			break
-		}
-		if len(*addresses) == 0 {
-			zap.S().Warn("Ending address routing, no more addresses")
-			break
-		}
-
-		zap.S().Info("Routine=Address - Processing ", len(*addresses), " addresses, workerId=", workerId)
-		for _, address := range *addresses {
-			for _, r := range routines {
-				r(&address)
-			}
-		}
-		zap.S().Info("Finished skip=", skip, " limit=", limit)
-
-		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
-	}
-}
-
-func TokenAddressGoRoutines(routines []func(address *models.TokenAddress)) {
-	var wg sync.WaitGroup
-
-	for i := 0; i <= config.Config.RoutinesNumWorkers; i++ {
-		wg.Add(1)
-
-		i := i
-		go func() {
-			defer wg.Done()
-			TokenAddressSetRoutine(routines, i)
-		}()
-	}
-	wg.Wait()
-}
-
-func TokenAddressSetRoutine(routines []func(tokenAddress *models.TokenAddress), workerId int) {
-	// Loop through all addresses
-	skip := workerId * config.Config.RoutinesBatchSize
-	limit := config.Config.RoutinesBatchSize
-
-	// Run loop until addresses have all been iterated over
-	for {
-		tokenAddresses, err := crud.GetTokenAddressCrud().SelectMany(limit, skip)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Sleep
-			break
-		} else if err != nil {
-			zap.S().Fatal(err.Error())
-		}
-		if len(*tokenAddresses) == 0 {
-			// Sleep
-			break
-		}
-
-		zap.S().Info("Routine=AddressBalance", " - Processing ", skip, " addresses...")
-		for _, tokenAddress := range *tokenAddresses {
-			for _, r := range routines {
-				r(&tokenAddress)
-			}
-		}
-
-		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
-	}
 }

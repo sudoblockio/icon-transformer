@@ -28,7 +28,10 @@ func addressTypeRoutine() {
 			Type:    _type,
 		}
 		//crud.GetAddressCrud().LoaderChannel <- newAddress
-		crud.GetAddressCrud().UpsertOneCols(newAddress, []string{"address", "type"})
+		err := crud.GetAddressCrud().UpsertOneColumns(newAddress, []string{"address", "type"})
+		if err != nil {
+			zap.S().Fatal(err.Error())
+		}
 	}
 	zap.S().Info("Finished address type routine.")
 }

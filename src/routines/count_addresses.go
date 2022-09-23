@@ -12,7 +12,7 @@ import (
 
 func countAddressesToRedisRoutine() {
 	// All
-	countAll, err := crud.GetAddressCrud().CountAll()
+	countAll, err := crud.GetAddressCrud().Count()
 	if err != nil {
 		// Try again
 		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())
@@ -20,7 +20,7 @@ func countAddressesToRedisRoutine() {
 		return
 	}
 
-	countContracts, err := crud.GetAddressCrud().CountContracts()
+	countContracts, err := crud.GetAddressCrud().CountWhere("is_contract", "true")
 	if err != nil {
 		// Try again
 		zap.S().Warn("Routine=AddressCount - ERROR: ", err.Error())

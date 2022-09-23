@@ -50,20 +50,27 @@ type configType struct {
 	ConsumerPartitionStartOffset int    `envconfig:"CONSUMER_PARTITION_START_OFFSET" required:"false" default:"1"`
 
 	// DB
-	DbDriver             string        `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
-	DbHost               string        `envconfig:"DB_HOST" required:"false" default:"localhost"`
-	DbPort               string        `envconfig:"DB_PORT" required:"false" default:"5432"`
-	DbUser               string        `envconfig:"DB_USER" required:"false" default:"postgres"`
-	DbPassword           string        `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
-	DbName               string        `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
-	DbSslmode            string        `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
-	DbTimezone           string        `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
-	DbMaxIdleConnections int           `envconfig:"DB_MAX_IDLE_CONNECTIONS" required:"false" default:"2"`
-	DbMaxOpenConnections int           `envconfig:"DB_MAX_OPEN_CONNECTIONS" required:"false" default:"10"`
-	DbRetrySleep         time.Duration `envconfig:"DB_RETRY_SLEEP" required:"false" default:"1s"`
+	DbDriver              string        `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
+	DbHost                string        `envconfig:"DB_HOST" required:"false" default:"localhost"`
+	DbPort                string        `envconfig:"DB_PORT" required:"false" default:"5432"`
+	DbUser                string        `envconfig:"DB_USER" required:"false" default:"postgres"`
+	DbPassword            string        `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
+	DbName                string        `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
+	DbSslmode             string        `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
+	DbTimezone            string        `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+	DbMaxIdleConnections  int           `envconfig:"DB_MAX_IDLE_CONNECTIONS" required:"false" default:"2"`
+	DbMaxOpenConnections  int           `envconfig:"DB_MAX_OPEN_CONNECTIONS" required:"false" default:"10"`
+	DbRetrySleep          time.Duration `envconfig:"DB_RETRY_SLEEP" required:"false" default:"1s"`
+	DbLoaderChannelBuffer int           `envconfig:"DB_LOADER_CHANNEL_BUFFER" required:"false" default:"1000"`
+	DbIdleChannelWait     time.Duration `envconfig:"DB_IDLE_CHANNEL_WAIT" required:"false" default:"100ms"`
+	DbBufferWait          time.Duration `envconfig:"DB_BUFFER_WAIT" required:"false" default:"100ms"`
 
 	// GORM
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`
+
+	// Metrics
+	MetricsPrefix string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
+	MetricsPort   string `envconfig:"METRICS_PORT" required:"false" default:"9400"`
 
 	// Redis
 	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"localhost"`

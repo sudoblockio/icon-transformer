@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -93,7 +94,7 @@ func retry(payload string, JsonRpcRequestWithBackup func(payload string) (map[st
 		}
 
 		time.Sleep(duration)
-		log.Println("retrying after error:", err)
+		zap.S().Warn("retrying after error:", err)
 	}
 	return map[string]interface{}{}, fmt.Errorf("after %d attempts, last error: %s", attempts, err)
 }

@@ -5,14 +5,8 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 )
 
-func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) {
+func tokenTransferByAddress(blockETL *models.BlockETL) {
 
-	//tokenTransferByAddresses := []*models.TokenTransferByAddress{}
-	loaderChannel := crud.GetTokenTransferByAddressCrud().LoaderChannel
-
-	//////////
-	// Logs //
-	//////////
 	for _, transactionETL := range blockETL.Transactions {
 		for iL, logETL := range transactionETL.Logs {
 
@@ -30,7 +24,7 @@ func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) {
 					Address:         fromAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				loaderChannel <- tokenTransferByFromAddress
+				crud.TokenTransferByAddressCrud.LoaderChannel <- tokenTransferByFromAddress
 
 				// To Address
 				toAddress := logETL.Indexed[2]
@@ -40,7 +34,7 @@ func transformBlockETLToTokenTransferByAddresses(blockETL *models.BlockETL) {
 					Address:         toAddress,
 					BlockNumber:     blockETL.Number,
 				}
-				loaderChannel <- tokenTransferByToAddress
+				crud.TokenTransferByAddressCrud.LoaderChannel <- tokenTransferByToAddress
 			}
 		}
 	}

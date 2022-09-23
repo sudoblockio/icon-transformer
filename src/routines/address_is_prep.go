@@ -12,8 +12,17 @@ import (
 
 func addressIsPrep() {
 
-	pRepAddressesDb, err := crud.GetAddressCrud().SelectPReps()
+	//pRepAddressesDb, err := crud.GetAddressCrud().SelectWhere("is_prep", "true")
+
+	pRepAddressesDb, err := crud.GetAddressCrud().SelectPrep()
+
+	if err != nil {
+		zap.S().Fatal(err.Error())
+	}
 	pRepAddressesRpc, err := service.IconNodeServiceGetPreps()
+	if err != nil {
+		zap.S().Fatal(err.Error())
+	}
 
 	if err != nil {
 		zap.S().Warn("Routine=AddressIsPrep - Error routine, sleeping ", config.Config.RoutinesSleepDuration.String(), err.Error())
@@ -25,7 +34,7 @@ func addressIsPrep() {
 
 		isInDb := false
 
-		for _, pRepAddressDb := range *pRepAddressesDb {
+		for _, pRepAddressDb := range pRepAddressesDb {
 			if pRepAddressRpc == pRepAddressDb.Address {
 				isInDb = true
 				break
@@ -39,12 +48,16 @@ func addressIsPrep() {
 				IsPrep:  true,
 			}
 
-			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "is_prep"})
+			//err = crud.GetAddressCrud().UpsertOneColumns(address, []string{"address", "is_prep"})
+			crud.GetAddressRoutineCruds()["address_is_prep"].LoaderChannel <- address
+			if err != nil {
+				zap.S().Fatal(err.Error())
+			}
 		}
 	}
 
 	// Remove old preps
-	for _, pRepAddressDb := range *pRepAddressesDb {
+	for _, pRepAddressDb := range pRepAddressesDb {
 
 		isInRpc := false
 
@@ -62,7 +75,12 @@ func addressIsPrep() {
 				IsPrep:  false,
 			}
 			//crud.GetAddressCrud().LoaderChannel <- address
-			crud.GetAddressCrud().UpsertOneCols(address, []string{"address", "is_prep"})
+			//err = crud.GetAddressCrud().UpsertOneColumns(address, []string{"address", "is_prep"})
+			crud.GetAddressRoutineCruds()["address_is_prep"].LoaderChannel <- address
+
+			if err != nil {
+				zap.S().Fatal(err.Error())
+			}
 		}
 	}
 	zap.S().Info("Routine=AddressIsPrep - Completed routine...")

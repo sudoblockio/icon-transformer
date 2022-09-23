@@ -64,14 +64,30 @@ func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
 	return session, err
 }
 
+func getLogLevel() logger.LogLevel {
+	switch config.Config.LogLevel {
+	case "warn":
+		return logger.Warn
+	case "silent":
+		return logger.Silent
+	case "error":
+		return logger.Error
+	case "info":
+		return logger.Info
+	default:
+		return logger.Warn
+	}
+}
+
 func createSession(dsn string) (*gorm.DB, error) {
 
 	slowThreshold := (time.Duration(config.Config.GormLoggingThresholdMilli) * time.Millisecond)
+
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
 			SlowThreshold:             slowThreshold, // Slow SQL threshold
-			LogLevel:                  logger.Warn,   // Log level
+			LogLevel:                  getLogLevel(), // Log level
 			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
 			Colorful:                  true,
 		},

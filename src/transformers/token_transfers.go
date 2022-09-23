@@ -32,14 +32,8 @@ func findHighestIcxTransfer(logs []*models.LogETL) (string, float64) {
 	return highestIcxTransferValue, highestIcxTransfer
 }
 
-func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) {
+func tokenTransfers(blockETL *models.BlockETL) {
 
-	//tokenTransfers := []*models.TokenTransfer{}
-	loaderChannel := crud.GetTokenTransferCrud().LoaderChannel
-
-	//////////
-	// Logs //
-	//////////
 	for _, transactionETL := range blockETL.Transactions {
 		for iL, logETL := range transactionETL.Logs {
 
@@ -112,7 +106,7 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) {
 				}
 
 				//tokenTransfers = append(tokenTransfers, tokenTransfer)
-				loaderChannel <- tokenTransfer
+				crud.TokenTransferCrud.LoaderChannel <- tokenTransfer
 				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
 				tokenTransferCounts(tokenTransfer)
 
@@ -180,7 +174,7 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) {
 				}
 
 				//tokenTransfers = append(tokenTransfers, tokenTransfer)
-				loaderChannel <- tokenTransfer
+				crud.TokenTransferCrud.LoaderChannel <- tokenTransfer
 				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
 				tokenTransferCounts(tokenTransfer)
 
@@ -237,15 +231,12 @@ func transformBlockETLToTokenTransfers(blockETL *models.BlockETL) {
 					NftId:                nftId,
 				}
 
-				//tokenTransfers = append(tokenTransfers, tokenTransfer)
-				loaderChannel <- tokenTransfer
+				crud.TokenTransferCrud.LoaderChannel <- tokenTransfer
 				broadcastToWebsocketRedisChannel(blockETL, tokenTransfer, config.Config.RedisTokenTransfersChannel)
 				tokenTransferCounts(tokenTransfer)
 			}
 		}
 	}
-
-	//return tokenTransfers
 }
 
 // Token Transfers count

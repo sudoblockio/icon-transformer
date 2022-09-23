@@ -22,7 +22,9 @@ func StartFindMissing() {
 
 func getStartBlock() int64 {
 	if config.Config.FindMissingStartBlock == 0 {
-		startBlock, err := crud.GetBlockIndexCrud().SelectLowestNumber()
+		//startBlock, err := crud.GetBlockIndexCrud().SelectLowestNumber()
+		startBlock, err := crud.SelectLowestNumber(crud.GetBlockIndexCrud())
+
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
@@ -34,7 +36,8 @@ func getStartBlock() int64 {
 
 func getEndBlock() int64 {
 	if config.Config.FindMissingEndBlock == 0 {
-		endBlock, err := crud.GetBlockIndexCrud().SelectHighestNumber()
+		//endBlock, err := crud.GetBlockIndexCrud().SelectHighestNumber()
+		endBlock, err := crud.SelectHighestNumber(crud.GetBlockIndexCrud())
 		if err != nil {
 			zap.S().Fatal(err.Error())
 		}
@@ -51,15 +54,15 @@ func findMissingBlocks() {
 	startBlock := getStartBlock()
 	endBlock := getEndBlock()
 
-	missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing(startBlock, endBlock)
-	//missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing()
+	//missingBlockNumbers, err := crud.GetBlockIndexCrud().FindMissing(startBlock, endBlock)
+	missingBlockNumbers, err := crud.FindMissingBlocks(crud.GetBlockIndexCrud(), startBlock, endBlock)
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
 
 	zap.S().Info("Found missing blocks. Now deleting old entries.")
 	// Delete old rows
-	err = crud.GetMissingBlockCrud().DeleteAll()
+	err = crud.GetMissingBlockCrud().DeleteMissing()
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}

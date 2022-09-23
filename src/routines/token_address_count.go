@@ -14,11 +14,7 @@ import (
 func tokenAddressCountRoutine() {
 	tokenAddressCounts, err := crud.GetTokenAddressCrud().CountByTokenContractAddress()
 	if err != nil {
-		zap.S().Fatal(
-			"Routine=TokenAddressCount,",
-			" Step=", "Get count from db",
-			" Error=", err.Error(),
-		)
+		zap.S().Fatal(err.Error())
 	}
 
 	zap.S().Info("Routine=TokenAddressCountRoutine", " - Processing tokenAddressCounts...")
@@ -26,11 +22,7 @@ func tokenAddressCountRoutine() {
 		countKey := config.Config.RedisKeyPrefix + "token_address_count_by_token_contract_" + tokenContractAddress
 		err = redis.GetRedisClient().SetCount(countKey, count)
 		if err != nil {
-			zap.S().Warn(
-				"Routine=TokenAddressCount,",
-				" Step=", "Set count in redis",
-				" Error=", err.Error(),
-			)
+			zap.S().Warn(err.Error())
 		}
 	}
 
