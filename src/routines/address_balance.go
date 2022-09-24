@@ -12,13 +12,11 @@ func getAddressBalances(address *models.Address) *models.Address {
 
 	// Balance //
 	// Assume error means zero balance
-	//balance, _ := service.IconNodeServiceGetBalance(address.Address)
 	balance, err := service.IconNodeServiceGetBalance(address.Address)
 	if err != nil && err.Error() != "Invalid response" {
 		// Icon node error
-		// Can happen when a node has only failed Txs in history
-		zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
-		//return nil
+		// Can happen when an address has only failed Txs in history and hence will have 0 / nil balance
+		zap.S().Debug("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
 	}
 	// Hex -> float64
 	address.Balance = utils.StringHexToFloat64(balance, 18)
@@ -27,8 +25,8 @@ func getAddressBalances(address *models.Address) *models.Address {
 	stakedBalance, err := service.IconNodeServiceGetStakedBalance(address.Address)
 	if err != nil {
 		// Icon node error
-		zap.S().Warn("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
-		return nil
+		zap.S().Debug("Routine=Balance, Address=", address.Address, " - Error: ", err.Error())
+		return address
 	}
 
 	// Hex -> float64
@@ -41,8 +39,5 @@ func setAddressBalances(address *models.Address) {
 	addressNew := getAddressBalances(address)
 	if address != nil {
 		crud.GetAddressRoutineCruds()["address_balance"].LoaderChannel <- addressNew
-	} else {
-
-		println()
 	}
 }
