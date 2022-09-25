@@ -64,6 +64,7 @@ type configType struct {
 	DbLoaderChannelBuffer int           `envconfig:"DB_LOADER_CHANNEL_BUFFER" required:"false" default:"1000"`
 	DbIdleChannelWait     time.Duration `envconfig:"DB_IDLE_CHANNEL_WAIT" required:"false" default:"100ms"`
 	DbBufferWait          time.Duration `envconfig:"DB_BUFFER_WAIT" required:"false" default:"100ms"`
+	DbSkipMigrations      bool          `envconfig:"DB_SKIP_MIGRATIONS" required:"false" default:"false"`
 
 	// GORM
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`

@@ -59,6 +59,10 @@ func GetCrud[M any, O ModelOrm](m M, o O) *Crud[M, O] {
 
 // Migrate - migrate table
 func (m *Crud[M, O]) Migrate() {
+	if config.Config.DbSkipMigrations {
+		return
+	}
+
 	err := m.db.AutoMigrate(m.modelORM)
 	if err != nil {
 		zap.S().Fatal("TokenTransferCrud: Unable migrate postgres table: ", err.Error())
@@ -69,6 +73,10 @@ func (m *Crud[M, O]) Migrate() {
 
 // CreateIndexes - Create indexes
 func (m *Crud[Model, ModelOrm]) CreateIndexes(statement string) {
+	if config.Config.DbSkipMigrations {
+		return
+	}
+
 	db := m.db
 	db = db.Exec(statement)
 	if db.Error != nil {
