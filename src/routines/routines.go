@@ -103,9 +103,9 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 
 				zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
 				for i := 0; i < len(*routineItems); i++ {
+					var item *M
+					item = &(*routineItems)[i]
 					for _, r := range routines {
-						var item *M
-						item = &(*routineItems)[i]
 						r(item)
 					}
 				}
