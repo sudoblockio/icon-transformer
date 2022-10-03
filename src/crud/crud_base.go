@@ -92,6 +92,9 @@ func (m *Crud[M, O]) DefaultRetryHandler(err error, values []*M) error {
 	gormErr := getGormError(err)
 
 	switch gormErr.Code {
+	case "":
+		zap.S().Info("Nil error on table: ", m.TableName)
+		return nil
 	case "0":
 		return nil
 	case "21000":
