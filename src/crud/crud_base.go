@@ -98,7 +98,10 @@ func (m *Crud[M, O]) DefaultRetryHandler(err error, values []*M) error {
 		m.metrics.loaderChannelDuplicateErrors.Inc()
 		return m.LoopUpsertOne(values)
 	default:
-		zap.S().Info(gormErr.Code)
+		zap.S().Info("Error on table: ", m.TableName)
+		zap.S().Info("Exit code: ", gormErr.Code)
+		zap.S().Info("Exit message: ", gormErr.Message)
+		zap.S().Info("Exit on values: ", values)
 		zap.S().Fatal(gormErr.Message)
 		return err
 	}
