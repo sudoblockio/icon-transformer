@@ -18,7 +18,7 @@ func GetLogCrud() *Crud[models.Log, models.LogORM] {
 		LogCrud.Migrate()
 		LogCrud.CreateIndexes("CREATE INDEX IF NOT EXISTS log_idx_address_block_number ON public.logs USING btree (address, block_number)")
 
-		TransactionCrud.dbBufferWait = 10 * time.Millisecond
+		LogCrud.dbBufferWait = 10 * time.Millisecond
 
 		LogCrud.MakeStartLoaderChannel()
 	})
