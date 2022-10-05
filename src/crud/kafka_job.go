@@ -11,7 +11,7 @@ import (
 
 // TODO: RM
 
-// KafkaJobCrud - type for kafkaJob table model
+// KafkaJobCrud - type for kafkaJob table Model
 type KafkaJobCrud struct {
 	db            *gorm.DB
 	model         *models.KafkaJob
@@ -22,7 +22,7 @@ type KafkaJobCrud struct {
 var kafkaJobCrud *KafkaJobCrud
 var kafkaJobCrudOnce sync.Once
 
-// GetKafkaJobCrud - create and/or return the kafkaJobs table model
+// GetKafkaJobCrud - create and/or return the kafkaJobs table Model
 func GetKafkaJobCrud() *KafkaJobCrud {
 	kafkaJobCrudOnce.Do(func() {
 		dbConn := getPostgresConn()

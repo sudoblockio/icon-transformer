@@ -13,7 +13,7 @@ import (
 
 // TODO: RM
 
-// RedisKeyCrud - type for redisKey table model
+// RedisKeyCrud - type for redisKey table Model
 type RedisKeyCrud struct {
 	db            *gorm.DB
 	model         *models.RedisKey
@@ -24,7 +24,7 @@ type RedisKeyCrud struct {
 var redisKeyCrud *RedisKeyCrud
 var redisKeyCrudOnce sync.Once
 
-// GetRedisKeyCrud - create and/or return the redisKeys table model
+// GetRedisKeyCrud - create and/or return the redisKeys table Model
 func GetRedisKeyCrud() *RedisKeyCrud {
 	redisKeyCrudOnce.Do(func() {
 		dbConn := getPostgresConn()

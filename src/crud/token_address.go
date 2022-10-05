@@ -9,7 +9,7 @@ import (
 var addressTokenCrudOnce sync.Once
 var TokenAddressCrud *Crud[models.TokenAddress, models.TokenAddressORM]
 
-// GetTokenAddressCrud - create and/or return the addressToken table model
+// GetTokenAddressCrud - create and/or return the addressToken table Model
 func GetTokenAddressCrud() *Crud[models.TokenAddress, models.TokenAddressORM] {
 	addressTokenCrudOnce.Do(func() {
 		TokenAddressCrud = GetCrud(models.TokenAddress{}, models.TokenAddressORM{})
@@ -29,7 +29,7 @@ func InitTokenAddressCrud() {
 var addressTokenBalanceCrudOnce sync.Once
 var TokenAddressBalanceCrud *Crud[models.TokenAddress, models.TokenAddressORM]
 
-// GetTokenAddressCrud - create and/or return the addressToken table model
+// GetTokenAddressCrud - create and/or return the addressToken table Model
 func GetTokenAddressBalanceCrud() *Crud[models.TokenAddress, models.TokenAddressORM] {
 	addressTokenBalanceCrudOnce.Do(func() {
 		TokenAddressBalanceCrud = GetCrud(models.TokenAddress{}, models.TokenAddressORM{})

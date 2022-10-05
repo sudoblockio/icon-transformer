@@ -11,7 +11,7 @@ var transactionCrudOnce sync.Once
 var TransactionCrud *Crud[models.Transaction, models.TransactionORM]
 var TransactionTypeCrud *Crud[models.Transaction, models.TransactionORM]
 
-// GetTransactionCrud - create and/or return the transactions table model
+// GetTransactionCrud - create and/or return the transactions table Model
 func GetTransactionCrud() *Crud[models.Transaction, models.TransactionORM] {
 	transactionCrudOnce.Do(func() {
 		TransactionCrud = GetCrud(models.Transaction{}, models.TransactionORM{})

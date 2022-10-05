@@ -1,17 +1,17 @@
 package crud
 
-//// TransactionCreateScoreCrud - type for transactionCreateScore table model
+//// TransactionCreateScoreCrud - type for transactionCreateScore table Model
 //type TransactionCreateScoreCrud struct {
 //	db            *gorm.DB
-//	model         *models.TransactionCreateScore
-//	modelORM      *models.TransactionCreateScoreORM
+//	Model         *models.TransactionCreateScore
+//	ModelORM      *models.TransactionCreateScoreORM
 //	LoaderChannel chan *models.TransactionCreateScore
 //}
 //
 //var transactionCreateScoreCrud *TransactionCreateScoreCrud
 //var transactionCreateScoreCrudOnce sync.Once
 //
-//// GetTransactionCreateScoreCrud - create and/or return the transactionCreateScores table model
+//// GetTransactionCreateScoreCrud - create and/or return the transactionCreateScores table Model
 //func GetTransactionCreateScoreCrud() *TransactionCreateScoreCrud {
 //	transactionCreateScoreCrudOnce.Do(func() {
 //		dbConn := getPostgresConn()
@@ -21,8 +21,8 @@ package crud
 //
 //		transactionCreateScoreCrud = &TransactionCreateScoreCrud{
 //			db:            dbConn,
-//			model:         &models.TransactionCreateScore{},
-//			modelORM:      &models.TransactionCreateScoreORM{},
+//			Model:         &models.TransactionCreateScore{},
+//			ModelORM:      &models.TransactionCreateScoreORM{},
 //			LoaderChannel: make(chan *models.TransactionCreateScore, 1),
 //		}
 //
@@ -40,11 +40,11 @@ package crud
 //// Migrate - migrate transactionCreateScores table
 //func (m *TransactionCreateScoreCrud) Migrate() error {
 //	// Only using TransactionCreateScoreRawORM (ORM version of the proto generated struct) to create the TABLE
-//	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
+//	err := m.db.AutoMigrate(m.ModelORM) // Migration and Index creation
 //	return err
 //}
 //func (m *TransactionCreateScoreCrud) TableName() string {
-//	return m.modelORM.TableName()
+//	return m.ModelORM.TableName()
 //}
 //
 //// SelectMany - select many from addreses table

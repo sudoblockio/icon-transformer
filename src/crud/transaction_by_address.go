@@ -9,7 +9,7 @@ var transactionByAddressCrudOnce sync.Once
 var TransactionByAddressCrud *Crud[models.TransactionByAddress, models.TransactionByAddressORM]
 var TransactionByAddressCreateScoreCrud *Crud[models.TransactionByAddress, models.TransactionByAddressORM]
 
-// InitTransactionByAddressCrud - create and/or return the transactionByAddresss table model
+// InitTransactionByAddressCrud - create and/or return the transactionByAddresss table Model
 func GetTransactionByAddressCrud() *Crud[models.TransactionByAddress, models.TransactionByAddressORM] {
 	transactionByAddressCrudOnce.Do(func() {
 		TransactionByAddressCrud = GetCrud(models.TransactionByAddress{}, models.TransactionByAddressORM{})
@@ -28,7 +28,7 @@ func GetTransactionByAddressCrud() *Crud[models.TransactionByAddress, models.Tra
 	return TransactionByAddressCrud
 }
 
-// InitTransactionByAddressCrud - initialize the transactionByAddresss table model and loaders
+// InitTransactionByAddressCrud - initialize the transactionByAddresss table Model and loaders
 func InitTransactionByAddressCrud() {
 	GetTransactionByAddressCrud()
 }

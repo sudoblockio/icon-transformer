@@ -9,7 +9,7 @@ import (
 var TokenTransferByAddressCrud *Crud[models.TokenTransferByAddress, models.TokenTransferByAddressORM]
 var tokenTransferByAddressCrudOnce sync.Once
 
-// GetTokenTransferByAddressCrud - create and/or return the tokenTransferByAddresss table model
+// GetTokenTransferByAddressCrud - create and/or return the tokenTransferByAddresss table Model
 func GetTokenTransferByAddressCrud() *Crud[models.TokenTransferByAddress, models.TokenTransferByAddressORM] {
 	tokenTransferByAddressCrudOnce.Do(func() {
 		TokenTransferByAddressCrud = GetCrud(models.TokenTransferByAddress{}, models.TokenTransferByAddressORM{})

@@ -30,6 +30,29 @@ func TestCrudUtilsGetModelColumnsNames(t *testing.T) {
 	}
 }
 
+func TestCrudUtilsGetModelColumnsNames2(t *testing.T) {
+	model := models.Address{}
+	//keys := getModelColumnNames(Model)
+	var fields []string
+
+	//vals := reflect.ValueOf(Model)
+	vals := reflect.ValueOf(&model)
+
+	for i, f := range reflect.VisibleFields(vals.Type()) {
+		if f.IsExported() {
+			jsonField, _ := vals.Type().Field(i).Tag.Lookup("json")
+			fields = append(fields, jsonField)
+		}
+	}
+
+	assert.Greater(t, len(fields), 10)
+
+	//for i := range keys {
+	//	// Make sure it does not have any of the default proto struct fields
+	//	assert.NotEqual(t, "sizeOf", keys[i])
+	//}
+}
+
 func TestCrudUtilsGetModelPrimaryKeys(t *testing.T) {
 	model := models.LogORM{}
 	keys := getModelPrimaryKeys(model)

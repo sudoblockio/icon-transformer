@@ -9,7 +9,7 @@ import (
 var tokenTransferCrudOnce sync.Once
 var TokenTransferCrud *Crud[models.TokenTransfer, models.TokenTransferORM]
 
-// GetTokenTransferCrud - create and/or return the tokenTransfers table model
+// GetTokenTransferCrud - create and/or return the tokenTransfers table Model
 func GetTokenTransferCrud() *Crud[models.TokenTransfer, models.TokenTransferORM] {
 	tokenTransferCrudOnce.Do(func() {
 		TokenTransferCrud = GetCrud(models.TokenTransfer{}, models.TokenTransferORM{})

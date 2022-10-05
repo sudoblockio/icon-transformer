@@ -9,7 +9,7 @@ import (
 var missingBlockCrudOnce sync.Once
 var MissingBlockCrud *Crud[models.MissingBlock, models.MissingBlockORM]
 
-// GetMissingBlockCrud - create and/or return the missingBlocks table model
+// GetMissingBlockCrud - create and/or return the missingBlocks table Model
 func GetMissingBlockCrud() *Crud[models.MissingBlock, models.MissingBlockORM] {
 	missingBlockCrudOnce.Do(func() {
 		missingBlockCrudOnce.Do(func() {

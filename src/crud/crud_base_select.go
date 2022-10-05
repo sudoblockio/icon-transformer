@@ -7,7 +7,7 @@ func (m *Crud[Model, ModelOrm]) SelectMany(
 	skip int,
 ) (*[]Model, error) {
 	db := m.db
-	db = db.Model(&m.model)
+	db = db.Model(&m.Model)
 	db = db.Limit(limit)
 	if skip != 0 {
 		db = db.Offset(skip)
@@ -20,7 +20,7 @@ func (m *Crud[Model, ModelOrm]) SelectMany(
 // SelectWhere - select with one where
 func (m *Crud[Model, ModelOrm]) SelectWhere(column string, equals string) ([]*Model, error) {
 	db := m.db
-	db = db.Model(&m.model)
+	db = db.Model(&m.Model)
 	db = db.Where("? = ?", column, equals)
 
 	var output []*Model
@@ -31,7 +31,7 @@ func (m *Crud[Model, ModelOrm]) SelectWhere(column string, equals string) ([]*Mo
 // SelectWhere - select with one where
 func (m *Crud[Model, ModelOrm]) SelectPrep() ([]*Model, error) {
 	db := m.db
-	db = db.Model(&m.model)
+	db = db.Model(&m.Model)
 	db = db.Where("is_prep = ?", true)
 
 	var output []*Model
@@ -42,7 +42,7 @@ func (m *Crud[Model, ModelOrm]) SelectPrep() ([]*Model, error) {
 // SelectOneWhere - select one address from addresses table
 func (m *Crud[Model, ModelOrm]) SelectOneWhere(column string, equals string) (*Model, error) {
 	db := m.db
-	db = db.Model(&m.model)
+	db = db.Model(&m.Model)
 	db = db.Where("? = ?", column, equals)
 
 	var output *Model

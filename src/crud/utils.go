@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// getModelColumnNames - Get a slice of column names from a model's tags
+// getModelColumnNames - Get a slice of column names from a Model's tags
 func getModelColumnNames[T any](model T) []string {
 	var fields []string
 	vals := reflect.ValueOf(model)
@@ -48,7 +48,7 @@ func (m *Crud[M, O]) removeColumnNames(rmCols []string) {
 	m.columns = output
 }
 
-// TODO: Replace with parser from model tags that gets the actual column Name instead of just assuming it is snake
+// TODO: Replace with parser from Model tags that gets the actual column Name instead of just assuming it is snake
 //
 //	https://github.com/sudoblockio/icon-transformer/issues/40
 var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
@@ -62,7 +62,7 @@ func ToSnakeCase(str string) string {
 
 var matchPrimaryKey = regexp.MustCompile("primary_key")
 
-// getModelPrimaryKeys - Get a slice of primary keys from the ORM model's tags
+// getModelPrimaryKeys - Get a slice of primary keys from the ORM Model's tags
 func getModelPrimaryKeys[T any](model T) []clause.Column {
 	var fields []clause.Column
 	vals := reflect.ValueOf(model)

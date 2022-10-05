@@ -18,8 +18,8 @@ type CrudMetrics struct {
 // Generic struct to hold common objects when doing crud
 type Crud[M any, O any] struct {
 	db                  *gorm.DB
-	model               *M
-	modelORM            *O
+	Model               *M
+	ModelORM            *O
 	columns             []string
 	primaryKeys         []clause.Column
 	TableName           string
@@ -45,8 +45,8 @@ func GetCrud[M any, O ModelOrm](m M, o O) *Crud[M, O] {
 
 	return &Crud[M, O]{
 		db:                  dbConn,
-		model:               &m,
-		modelORM:            &o,
+		Model:               &m,
+		ModelORM:            &o,
 		columns:             getModelColumnNames(m),
 		primaryKeys:         getModelPrimaryKeys(o),
 		TableName:           o.TableName(),
@@ -63,7 +63,7 @@ func (m *Crud[M, O]) Migrate() {
 		return
 	}
 
-	err := m.db.AutoMigrate(m.modelORM)
+	err := m.db.AutoMigrate(m.ModelORM)
 	if err != nil {
 		zap.S().Fatal("TokenTransferCrud: Unable migrate postgres table: ", err.Error())
 	}

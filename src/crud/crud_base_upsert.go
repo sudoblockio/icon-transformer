@@ -7,7 +7,7 @@ func (m *Crud[Model, ModelOrm]) UpsertManyColumns(
 	cols []string,
 ) error {
 	db := m.db
-	db = db.Model(&m.model)
+	db = db.Model(&m.Model)
 	db = db.Clauses(clause.OnConflict{
 		Columns:   m.primaryKeys,
 		DoUpdates: clause.AssignmentColumns(cols),

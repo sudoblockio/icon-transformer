@@ -12,7 +12,7 @@ import (
 var blockIndexCrudOnce sync.Once
 var BlockIndexCrud *Crud[models.BlockIndex, models.BlockIndexORM]
 
-// GetBlockIndexCrud - create and/or return the blockIndexs table model
+// GetBlockIndexCrud - create and/or return the blockIndexs table Model
 func GetBlockIndexCrud() *Crud[models.BlockIndex, models.BlockIndexORM] {
 	blockIndexCrudOnce.Do(func() {
 		BlockIndexCrud = GetCrud(models.BlockIndex{}, models.BlockIndexORM{})

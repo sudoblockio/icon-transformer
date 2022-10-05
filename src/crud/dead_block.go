@@ -9,7 +9,7 @@ import (
 var deadBlockCrudOnce sync.Once
 var DeadBlockCrud *Crud[models.DeadBlock, models.DeadBlockORM]
 
-// GetDeadBlockCrud - create and/or return the deadBlocks table model
+// GetDeadBlockCrud - create and/or return the deadBlocks table Model
 func GetDeadBlockCrud() *Crud[models.DeadBlock, models.DeadBlockORM] {
 	deadBlockCrudOnce.Do(func() {
 		DeadBlockCrud = GetCrud(models.DeadBlock{}, models.DeadBlockORM{})

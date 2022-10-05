@@ -8,7 +8,7 @@ import (
 var transactionInternalByAddressCrudOnce sync.Once
 var TransactionInternalByAddressCrud *Crud[models.TransactionInternalByAddress, models.TransactionInternalByAddressORM]
 
-// GetTransactionInternalByAddressCrud - create and/or return the transactionInternalByAddresss table model
+// GetTransactionInternalByAddressCrud - create and/or return the transactionInternalByAddresss table Model
 func GetTransactionInternalByAddressCrud() *Crud[models.TransactionInternalByAddress, models.TransactionInternalByAddressORM] {
 	transactionInternalByAddressCrudOnce.Do(func() {
 		TransactionInternalByAddressCrud = GetCrud(models.TransactionInternalByAddress{}, models.TransactionInternalByAddressORM{})

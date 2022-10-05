@@ -10,7 +10,7 @@ import (
 var logCrudOnce sync.Once
 var LogCrud *Crud[models.Log, models.LogORM]
 
-// GetLogCrud - create and/or return the logs table model
+// GetLogCrud - create and/or return the logs table Model
 func GetLogCrud() *Crud[models.Log, models.LogORM] {
 	logCrudOnce.Do(func() {
 		LogCrud = GetCrud(models.Log{}, models.LogORM{})
@@ -33,7 +33,7 @@ func InitLogCrud() {
 //// NOTE this function will take a long time
 //func (m *Crud[M, O]) CountLogsByAddress(address string) (int64, error) {
 //	db := m.db
-//	db = db.Model(&m.model).Where("address = ?", address)
+//	db = db.Model(&m.Model).Where("address = ?", address)
 //	var count int64
 //	db = db.Count(&count)
 //	return count, db.Error
@@ -42,12 +42,12 @@ func InitLogCrud() {
 //// Migrate - migrate logs table
 //func (m *LogCrud) Migrate() error {
 //	// Only using LogRawORM (ORM version of the proto generated struct) to create the TABLE
-//	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
+//	err := m.db.AutoMigrate(m.ModelORM) // Migration and Index creation
 //	return err
 //}
 //
 //func (m *LogCrud) TableName() string {
-//	return m.modelORM.TableName()
+//	return m.ModelORM.TableName()
 //}
 //
 //func (m *LogCrud) CreateIndices() error {

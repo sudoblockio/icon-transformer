@@ -23,7 +23,7 @@ func GetAddressCrud() *Crud[models.Address, models.AddressORM] {
 		// For main transformer - requires tuning due to many duplicate records
 		AddressContractCrud = GetCrud(models.Address{}, models.AddressORM{})
 		AddressContractCrud.columns = []string{"address", "is_contract"}
-		AddressContractCrud.dbBufferWait = 1 * time.Millisecond
+		//AddressContractCrud.dbBufferWait = 1 * time.Millisecond
 		AddressContractCrud.MakeStartLoaderChannel()
 	})
 
@@ -91,17 +91,17 @@ func InitAddressCrud() {
 //}
 
 //func (m *Crud[M, O]) RemoveDuplicatePrimaryKeys(batch []*M) []*M {
-//	var model *M
+//	var Model *M
 //	allKeys := make(map[*M]bool)
 //	list := []*M{}
 //
 //	for _, item := range batch {
 //		for _, pkey := range m.primaryKeys {
 //			value := reflect.ValueOf(item).FieldByName(pkey.Name)
-//			reflect.ValueOf(model).Elem().FieldByName(pkey.Name).Set(reflect.ValueOf(value))
+//			reflect.ValueOf(Model).Elem().FieldByName(pkey.Name).Set(reflect.ValueOf(value))
 //		}
 //
-//		if _, value := allKeys[model]; !value {
+//		if _, value := allKeys[Model]; !value {
 //			allKeys[item] = true
 //			list = append(list, item)
 //		}
