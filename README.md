@@ -54,5 +54,4 @@ services:
 Simply reads from a kafka topic, transforms the message into various views, and inserts into various services. This service will read from the two topics and insert data into a postgres database, count records in redis keys, and stream data into redis channels. All centered around `/src/transformers/transformer.go`
 > NOTE: The original icon-explorer project was based on the icon-etl project, which seperated the data into 3 topics; blocks, transactions, logs. This caused many issues downstream in the first version, so the the icon-extractor was created. The icon-extractor combined the 3 streams of data into one and fixed these issues downstream, this service.
 
-
 ![unnamed](https://user-images.githubusercontent.com/77865393/165399000-6be57fce-2101-4b5f-8a16-9d80bbf485ed.png)
