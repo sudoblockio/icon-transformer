@@ -12,9 +12,9 @@ import (
 
 var allAddresses = make(map[string]bool)
 
-func loadAddressCheckDuplicate(address string, modelAddress *models.Address) {
-	if _, ok := allAddresses[address]; !ok {
-		allAddresses[address] = true
+func loadAddressCheckDuplicate(modelAddress *models.Address) {
+	if _, ok := allAddresses[modelAddress.Address]; !ok {
+		allAddresses[modelAddress.Address] = true
 		crud.AddressContractCrud.LoaderChannel <- modelAddress
 	}
 }
@@ -29,10 +29,6 @@ func appendAddress(addresses []*models.Address, address *models.Address) []*mode
 func addresses(blockETL *models.BlockETL) {
 
 	addresses := []*models.Address{}
-
-	//////////////////
-	// Transactions //
-	//////////////////
 	for _, transactionETL := range blockETL.Transactions {
 
 		// From address
@@ -46,7 +42,7 @@ func addresses(blockETL *models.BlockETL) {
 				IsContract: isContract,
 			}
 			addresses = appendAddress(addresses, address)
-			loadAddressCheckDuplicate(address.Address, address)
+			loadAddressCheckDuplicate(address)
 		}
 
 		// To address
@@ -60,7 +56,7 @@ func addresses(blockETL *models.BlockETL) {
 				IsContract: isContract,
 			}
 			addresses = appendAddress(addresses, address)
-			loadAddressCheckDuplicate(address.Address, address)
+			loadAddressCheckDuplicate(address)
 		}
 	}
 
@@ -85,7 +81,7 @@ func addresses(blockETL *models.BlockETL) {
 						IsContract: isContract,
 					}
 					addresses = appendAddress(addresses, address)
-					loadAddressCheckDuplicate(address.Address, address)
+					loadAddressCheckDuplicate(address)
 				}
 
 				// To Address
@@ -101,7 +97,7 @@ func addresses(blockETL *models.BlockETL) {
 					}
 
 					addresses = appendAddress(addresses, address)
-					loadAddressCheckDuplicate(address.Address, address)
+					loadAddressCheckDuplicate(address)
 				}
 			} else if logETL.Indexed[0] == "Transfer(Address,Address,int,bytes)" && len(logETL.Indexed) == 4 {
 				// From Address
@@ -117,7 +113,7 @@ func addresses(blockETL *models.BlockETL) {
 					}
 
 					addresses = appendAddress(addresses, address)
-					loadAddressCheckDuplicate(address.Address, address)
+					loadAddressCheckDuplicate(address)
 				}
 
 				// To Address
@@ -133,7 +129,7 @@ func addresses(blockETL *models.BlockETL) {
 					}
 
 					addresses = appendAddress(addresses, address)
-					loadAddressCheckDuplicate(address.Address, address)
+					loadAddressCheckDuplicate(address)
 				}
 			}
 		}
