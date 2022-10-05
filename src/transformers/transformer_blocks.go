@@ -1,9 +1,11 @@
 package transformers
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
 	"github.com/sudoblockio/icon-transformer/kafka"
+	"github.com/sudoblockio/icon-transformer/metrics"
 	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
@@ -22,6 +24,9 @@ func startBlocks() {
 
 	// Call init functions
 	callProcessorInits()
+
+	// Setup metrics
+	setupBlockTransformerMetrics()
 
 	// Counter for displaying logs
 	var blockLogCounter int = 0
@@ -136,6 +141,24 @@ func callProcessorInits() {
 			Processors[i].initFunctions[f]()
 		}
 	}
+}
+
+var metricsBlockTransformer struct {
+	addressesSeen    prometheus.Counter
+	addressesIgnored prometheus.Counter
+}
+
+func setupBlockTransformerMetrics() {
+	metricsBlockTransformer.addressesSeen = metrics.CreateCounter(
+		"transformer_addresses_seen",
+		"number of addresses transformed",
+		nil,
+	)
+	metricsBlockTransformer.addressesIgnored = metrics.CreateCounter(
+		"transformer_addresses_ignored",
+		"number of addresses ignored",
+		nil,
+	)
 }
 
 func runBlockProcessors(blockETL *models.BlockETL) {

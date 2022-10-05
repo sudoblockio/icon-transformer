@@ -16,11 +16,10 @@ func loadAddressCheckDuplicate(modelAddress *models.Address) {
 	if _, ok := allAddresses[modelAddress.Address]; !ok {
 		allAddresses[modelAddress.Address] = true
 		crud.AddressContractCrud.LoaderChannel <- modelAddress
-		//err := crud.AddressContractCrud.UpsertOne(modelAddress)
-		//if err != nil {
-		//	zap.S().Info("Error in addresses: ", err.Error())
-		//}
+		metricsBlockTransformer.addressesSeen.Inc()
+		return
 	}
+	metricsBlockTransformer.addressesIgnored.Inc()
 }
 
 func appendAddress(addresses []*models.Address, address *models.Address) []*models.Address {
