@@ -15,7 +15,11 @@ var allAddresses = make(map[string]bool)
 func loadAddressCheckDuplicate(modelAddress *models.Address) {
 	if _, ok := allAddresses[modelAddress.Address]; !ok {
 		allAddresses[modelAddress.Address] = true
-		crud.AddressContractCrud.LoaderChannel <- modelAddress
+		//crud.AddressContractCrud.LoaderChannel <- modelAddress
+		err := crud.AddressContractCrud.UpsertOne(modelAddress)
+		if err != nil {
+			zap.S().Info("Error in addresses: ", err.Error())
+		}
 	}
 }
 
