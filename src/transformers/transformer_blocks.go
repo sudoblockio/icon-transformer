@@ -91,7 +91,7 @@ var Processors = []Processor{
 	},
 	{
 		transformerFunction: transactionByAddressCreateScores,
-		initFunctions:       []func(){crud.InitTransactionCrud, crud.InitTransactionByAddressCrud},
+		initFunctions:       []func(){crud.InitTransactionCrud, crud.InitTransactionByAddressCrud, crud.InitAddressCrud},
 	},
 	{
 		transformerFunction: tokenTransfers,

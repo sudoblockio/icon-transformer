@@ -182,6 +182,9 @@ func transactionByAddressCreateScores(blockETL *models.BlockETL) {
 					3,
 					4,
 				)
+
+				address := &models.Address{Address: scoreAddress, IsContract: true}
+				loadAddressCheckDuplicate(address)
 			}
 		}
 	}
