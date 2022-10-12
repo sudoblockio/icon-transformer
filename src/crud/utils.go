@@ -77,6 +77,15 @@ func getModelPrimaryKeys[T any](model T) []clause.Column {
 	return fields
 }
 
+// columnToString - return slice of strings from slice of columns
+func columnToString(cols []clause.Column) []string {
+	var columnString []string
+	for _, v := range cols {
+		columnString = append(columnString, v.Name)
+	}
+	return columnString
+}
+
 // startCustomBatchUpsertLoader - upsert loader with customizations
 func (m *Crud[M, O]) startBatchUpsertLoader() {
 
@@ -96,6 +105,8 @@ func (m *Crud[M, O]) startBatchUpsertLoader() {
 				time.Sleep(config.Config.DbIdleChannelWait)
 				continue
 			}
+
+			channelOutputs = removeDuplicatePrimaryKeys[M](channelOutputs, columnToString(m.primaryKeys))
 
 			// Metrics
 			batchCounter++
