@@ -22,10 +22,10 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type TransactionInternalByAddress struct {
-	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash,omitempty"`
-	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index,omitempty"`
-	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
-	BlockNumber          int64    `protobuf:"varint,4,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
+	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash"`
+	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index"`
+	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address"`
+	BlockNumber          int64    `protobuf:"varint,4,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
 }
 
 func (m *TransactionInternalByAddress) Reset()         { *m = TransactionInternalByAddress{} }

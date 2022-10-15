@@ -22,9 +22,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type TokenAddress struct {
-	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	TokenContractAddress string   `protobuf:"bytes,2,opt,name=token_contract_address,json=tokenContractAddress,proto3" json:"token_contract_address,omitempty"`
-	Balance              float64  `protobuf:"fixed64,3,opt,name=balance,proto3" json:"balance,omitempty"`
+	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address"`
+	TokenContractAddress string   `protobuf:"bytes,2,opt,name=token_contract_address,json=tokenContractAddress,proto3" json:"token_contract_address"`
+	Balance              float64  `protobuf:"fixed64,3,opt,name=balance,proto3" json:"balance"`
 }
 
 func (m *TokenAddress) Reset()         { *m = TokenAddress{} }

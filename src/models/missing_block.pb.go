@@ -22,7 +22,7 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type MissingBlock struct {
-	Number               int64    `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
+	Number               int64    `protobuf:"varint,1,opt,name=number,proto3" json:"number"`
 }
 
 func (m *MissingBlock) Reset()         { *m = MissingBlock{} }

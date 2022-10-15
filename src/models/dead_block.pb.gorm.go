@@ -128,7 +128,7 @@ func DefaultReadDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*Dea
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.Topic == "" {
+	if ormObj.Offset == 0 {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeReadApplyQuery); ok {
@@ -175,7 +175,7 @@ func DefaultDeleteDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) err
 	if err != nil {
 		return err
 	}
-	if ormObj.Topic == "" {
+	if ormObj.Offset == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeDelete_); ok {
@@ -248,7 +248,7 @@ func DefaultStrictUpdateDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.D
 		return nil, err
 	}
 	lockedRow := &DeadBlockORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("topic=?", ormObj.Topic).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("partition=?", ormObj.Partition).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err

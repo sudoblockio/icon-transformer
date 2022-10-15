@@ -22,35 +22,35 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Transaction struct {
-	Hash                 string   `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
-	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index,omitempty"`
-	Type                 string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
-	Method               string   `protobuf:"bytes,4,opt,name=method,proto3" json:"method,omitempty"`
-	FromAddress          string   `protobuf:"bytes,5,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress            string   `protobuf:"bytes,6,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
-	BlockNumber          int64    `protobuf:"varint,7,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	LogCount             int64    `protobuf:"varint,8,opt,name=log_count,json=logCount,proto3" json:"log_count,omitempty"`
-	Version              string   `protobuf:"bytes,9,opt,name=version,proto3" json:"version,omitempty"`
-	Value                string   `protobuf:"bytes,10,opt,name=value,proto3" json:"value,omitempty"`
-	ValueDecimal         float64  `protobuf:"fixed64,11,opt,name=value_decimal,json=valueDecimal,proto3" json:"value_decimal,omitempty"`
-	StepLimit            string   `protobuf:"bytes,12,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit,omitempty"`
-	Timestamp            int64    `protobuf:"varint,13,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	BlockTimestamp       int64    `protobuf:"varint,14,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp,omitempty"`
-	Nid                  string   `protobuf:"bytes,15,opt,name=nid,proto3" json:"nid,omitempty"`
-	Nonce                string   `protobuf:"bytes,16,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	TransactionIndex     int64    `protobuf:"varint,17,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index,omitempty"`
-	BlockHash            string   `protobuf:"bytes,18,opt,name=block_hash,json=blockHash,proto3" json:"block_hash,omitempty"`
-	TransactionFee       string   `protobuf:"bytes,19,opt,name=transaction_fee,json=transactionFee,proto3" json:"transaction_fee,omitempty"`
-	Signature            string   `protobuf:"bytes,20,opt,name=signature,proto3" json:"signature,omitempty"`
-	DataType             string   `protobuf:"bytes,21,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
-	Data                 string   `protobuf:"bytes,22,opt,name=data,proto3" json:"data,omitempty"`
-	CumulativeStepUsed   string   `protobuf:"bytes,23,opt,name=cumulative_step_used,json=cumulativeStepUsed,proto3" json:"cumulative_step_used,omitempty"`
-	StepUsed             string   `protobuf:"bytes,24,opt,name=step_used,json=stepUsed,proto3" json:"step_used,omitempty"`
-	StepPrice            string   `protobuf:"bytes,25,opt,name=step_price,json=stepPrice,proto3" json:"step_price,omitempty"`
-	ScoreAddress         string   `protobuf:"bytes,26,opt,name=score_address,json=scoreAddress,proto3" json:"score_address,omitempty"`
-	LogsBloom            string   `protobuf:"bytes,27,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom,omitempty"`
-	Status               string   `protobuf:"bytes,28,opt,name=status,proto3" json:"status,omitempty"`
-	TransactionType      int32    `protobuf:"varint,29,opt,name=transaction_type,json=transactionType,proto3" json:"transaction_type,omitempty"`
+	Hash                 string   `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
+	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index"`
+	Type                 string   `protobuf:"bytes,3,opt,name=type,proto3" json:"type"`
+	Method               string   `protobuf:"bytes,4,opt,name=method,proto3" json:"method"`
+	FromAddress          string   `protobuf:"bytes,5,opt,name=from_address,json=fromAddress,proto3" json:"from_address"`
+	ToAddress            string   `protobuf:"bytes,6,opt,name=to_address,json=toAddress,proto3" json:"to_address"`
+	BlockNumber          int64    `protobuf:"varint,7,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
+	LogCount             int64    `protobuf:"varint,8,opt,name=log_count,json=logCount,proto3" json:"log_count"`
+	Version              string   `protobuf:"bytes,9,opt,name=version,proto3" json:"version"`
+	Value                string   `protobuf:"bytes,10,opt,name=value,proto3" json:"value"`
+	ValueDecimal         float64  `protobuf:"fixed64,11,opt,name=value_decimal,json=valueDecimal,proto3" json:"value_decimal"`
+	StepLimit            string   `protobuf:"bytes,12,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit"`
+	Timestamp            int64    `protobuf:"varint,13,opt,name=timestamp,proto3" json:"timestamp"`
+	BlockTimestamp       int64    `protobuf:"varint,14,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp"`
+	Nid                  string   `protobuf:"bytes,15,opt,name=nid,proto3" json:"nid"`
+	Nonce                string   `protobuf:"bytes,16,opt,name=nonce,proto3" json:"nonce"`
+	TransactionIndex     int64    `protobuf:"varint,17,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index"`
+	BlockHash            string   `protobuf:"bytes,18,opt,name=block_hash,json=blockHash,proto3" json:"block_hash"`
+	TransactionFee       string   `protobuf:"bytes,19,opt,name=transaction_fee,json=transactionFee,proto3" json:"transaction_fee"`
+	Signature            string   `protobuf:"bytes,20,opt,name=signature,proto3" json:"signature"`
+	DataType             string   `protobuf:"bytes,21,opt,name=data_type,json=dataType,proto3" json:"data_type"`
+	Data                 string   `protobuf:"bytes,22,opt,name=data,proto3" json:"data"`
+	CumulativeStepUsed   string   `protobuf:"bytes,23,opt,name=cumulative_step_used,json=cumulativeStepUsed,proto3" json:"cumulative_step_used"`
+	StepUsed             string   `protobuf:"bytes,24,opt,name=step_used,json=stepUsed,proto3" json:"step_used"`
+	StepPrice            string   `protobuf:"bytes,25,opt,name=step_price,json=stepPrice,proto3" json:"step_price"`
+	ScoreAddress         string   `protobuf:"bytes,26,opt,name=score_address,json=scoreAddress,proto3" json:"score_address"`
+	LogsBloom            string   `protobuf:"bytes,27,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom"`
+	Status               string   `protobuf:"bytes,28,opt,name=status,proto3" json:"status"`
+	TransactionType      int32    `protobuf:"varint,29,opt,name=transaction_type,json=transactionType,proto3" json:"transaction_type"`
 }
 
 func (m *Transaction) Reset()         { *m = Transaction{} }

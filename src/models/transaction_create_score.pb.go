@@ -22,9 +22,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type TransactionCreateScore struct {
-	CreationTransactionHash string   `protobuf:"bytes,1,opt,name=creation_transaction_hash,json=creationTransactionHash,proto3" json:"creation_transaction_hash,omitempty"`
-	AcceptTransactionHash   string   `protobuf:"bytes,2,opt,name=accept_transaction_hash,json=acceptTransactionHash,proto3" json:"accept_transaction_hash,omitempty"`
-	RejectTransactionHash   string   `protobuf:"bytes,3,opt,name=reject_transaction_hash,json=rejectTransactionHash,proto3" json:"reject_transaction_hash,omitempty"`
+	CreationTransactionHash string   `protobuf:"bytes,1,opt,name=creation_transaction_hash,json=creationTransactionHash,proto3" json:"creation_transaction_hash"`
+	AcceptTransactionHash   string   `protobuf:"bytes,2,opt,name=accept_transaction_hash,json=acceptTransactionHash,proto3" json:"accept_transaction_hash"`
+	RejectTransactionHash   string   `protobuf:"bytes,3,opt,name=reject_transaction_hash,json=rejectTransactionHash,proto3" json:"reject_transaction_hash"`
 }
 
 func (m *TransactionCreateScore) Reset()         { *m = TransactionCreateScore{} }

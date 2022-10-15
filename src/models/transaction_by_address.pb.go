@@ -22,9 +22,9 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type TransactionByAddress struct {
-	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash,omitempty"`
-	Address              string   `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	BlockNumber          int64    `protobuf:"varint,3,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
+	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash"`
+	Address              string   `protobuf:"bytes,2,opt,name=address,proto3" json:"address"`
+	BlockNumber          int64    `protobuf:"varint,3,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
 }
 
 func (m *TransactionByAddress) Reset()         { *m = TransactionByAddress{} }

@@ -22,14 +22,14 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Log struct {
-	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash,omitempty"`
-	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index,omitempty"`
-	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
-	BlockNumber          int64    `protobuf:"varint,4,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	Method               string   `protobuf:"bytes,5,opt,name=method,proto3" json:"method,omitempty"`
-	Data                 string   `protobuf:"bytes,9,opt,name=data,proto3" json:"data,omitempty"`
-	Indexed              string   `protobuf:"bytes,10,opt,name=indexed,proto3" json:"indexed,omitempty"`
-	BlockTimestamp       int64    `protobuf:"varint,11,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp,omitempty"`
+	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash"`
+	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index"`
+	Address              string   `protobuf:"bytes,3,opt,name=address,proto3" json:"address"`
+	BlockNumber          int64    `protobuf:"varint,4,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
+	Method               string   `protobuf:"bytes,5,opt,name=method,proto3" json:"method"`
+	Data                 string   `protobuf:"bytes,9,opt,name=data,proto3" json:"data"`
+	Indexed              string   `protobuf:"bytes,10,opt,name=indexed,proto3" json:"indexed"`
+	BlockTimestamp       int64    `protobuf:"varint,11,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp"`
 }
 
 func (m *Log) Reset()         { *m = Log{} }

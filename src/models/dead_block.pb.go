@@ -22,11 +22,11 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type DeadBlock struct {
-	Topic                string   `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic,omitempty"`
-	Partition            int64    `protobuf:"varint,2,opt,name=partition,proto3" json:"partition,omitempty"`
-	Offset               int64    `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
-	Key                  string   `protobuf:"bytes,4,opt,name=key,proto3" json:"key,omitempty"`
-	Value                string   `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
+	Topic                string   `protobuf:"bytes,1,opt,name=topic,proto3" json:"topic"`
+	Partition            int64    `protobuf:"varint,2,opt,name=partition,proto3" json:"partition"`
+	Offset               int64    `protobuf:"varint,3,opt,name=offset,proto3" json:"offset"`
+	Key                  string   `protobuf:"bytes,4,opt,name=key,proto3" json:"key"`
+	Value                string   `protobuf:"bytes,5,opt,name=value,proto3" json:"value"`
 }
 
 func (m *DeadBlock) Reset()         { *m = DeadBlock{} }

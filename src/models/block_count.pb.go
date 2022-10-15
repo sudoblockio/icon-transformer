@@ -22,8 +22,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type BlockCount struct {
-	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Count                int64    `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type"`
+	Count                int64    `protobuf:"varint,2,opt,name=count,proto3" json:"count"`
 }
 
 func (m *BlockCount) Reset()         { *m = BlockCount{} }

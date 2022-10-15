@@ -23,21 +23,21 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Block struct {
 	// Base
-	Number                    int64    `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
-	PeerId                    string   `protobuf:"bytes,3,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
-	Signature                 string   `protobuf:"bytes,4,opt,name=signature,proto3" json:"signature,omitempty"`
-	Version                   string   `protobuf:"bytes,5,opt,name=version,proto3" json:"version,omitempty"`
-	MerkleRootHash            string   `protobuf:"bytes,6,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash,omitempty"`
-	Hash                      string   `protobuf:"bytes,7,opt,name=hash,proto3" json:"hash,omitempty"`
-	ParentHash                string   `protobuf:"bytes,8,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash,omitempty"`
-	Timestamp                 int64    `protobuf:"varint,9,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	TransactionCount          int64    `protobuf:"varint,10,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
-	LogCount                  int64    `protobuf:"varint,11,opt,name=log_count,json=logCount,proto3" json:"log_count,omitempty"`
-	TransactionAmount         string   `protobuf:"bytes,12,opt,name=transaction_amount,json=transactionAmount,proto3" json:"transaction_amount,omitempty"`
-	TransactionFees           string   `protobuf:"bytes,13,opt,name=transaction_fees,json=transactionFees,proto3" json:"transaction_fees,omitempty"`
-	FailedTransactionCount    int64    `protobuf:"varint,14,opt,name=failed_transaction_count,json=failedTransactionCount,proto3" json:"failed_transaction_count,omitempty"`
-	InternalTransactionCount  int64    `protobuf:"varint,15,opt,name=internal_transaction_count,json=internalTransactionCount,proto3" json:"internal_transaction_count,omitempty"`
-	InternalTransactionAmount string   `protobuf:"bytes,16,opt,name=internal_transaction_amount,json=internalTransactionAmount,proto3" json:"internal_transaction_amount,omitempty"`
+	Number                    int64    `protobuf:"varint,1,opt,name=number,proto3" json:"number"`
+	PeerId                    string   `protobuf:"bytes,3,opt,name=peer_id,json=peerId,proto3" json:"peer_id"`
+	Signature                 string   `protobuf:"bytes,4,opt,name=signature,proto3" json:"signature"`
+	Version                   string   `protobuf:"bytes,5,opt,name=version,proto3" json:"version"`
+	MerkleRootHash            string   `protobuf:"bytes,6,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash"`
+	Hash                      string   `protobuf:"bytes,7,opt,name=hash,proto3" json:"hash"`
+	ParentHash                string   `protobuf:"bytes,8,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash"`
+	Timestamp                 int64    `protobuf:"varint,9,opt,name=timestamp,proto3" json:"timestamp"`
+	TransactionCount          int64    `protobuf:"varint,10,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count"`
+	LogCount                  int64    `protobuf:"varint,11,opt,name=log_count,json=logCount,proto3" json:"log_count"`
+	TransactionAmount         string   `protobuf:"bytes,12,opt,name=transaction_amount,json=transactionAmount,proto3" json:"transaction_amount"`
+	TransactionFees           string   `protobuf:"bytes,13,opt,name=transaction_fees,json=transactionFees,proto3" json:"transaction_fees"`
+	FailedTransactionCount    int64    `protobuf:"varint,14,opt,name=failed_transaction_count,json=failedTransactionCount,proto3" json:"failed_transaction_count"`
+	InternalTransactionCount  int64    `protobuf:"varint,15,opt,name=internal_transaction_count,json=internalTransactionCount,proto3" json:"internal_transaction_count"`
+	InternalTransactionAmount string   `protobuf:"bytes,16,opt,name=internal_transaction_amount,json=internalTransactionAmount,proto3" json:"internal_transaction_amount"`
 }
 
 func (m *Block) Reset()         { *m = Block{} }

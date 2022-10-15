@@ -404,7 +404,7 @@ func DefaultListTokenTransferByAddress(ctx context.Context, db *gorm.DB) ([]*Tok
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("log_index")
 	ormResponse := []TokenTransferByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

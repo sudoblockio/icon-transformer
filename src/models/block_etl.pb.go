@@ -22,15 +22,15 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type BlockETL struct {
-	Number               int64             `protobuf:"varint,1,opt,name=number,proto3" json:"number,omitempty"`
-	Hash                 string            `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
-	ParentHash           string            `protobuf:"bytes,3,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash,omitempty"`
-	MerkleRootHash       string            `protobuf:"bytes,4,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash,omitempty"`
-	PeerId               string            `protobuf:"bytes,5,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
-	Signature            string            `protobuf:"bytes,6,opt,name=signature,proto3" json:"signature,omitempty"`
-	Timestamp            int64             `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	Version              string            `protobuf:"bytes,8,opt,name=version,proto3" json:"version,omitempty"`
-	Transactions         []*TransactionETL `protobuf:"bytes,9,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	Number               int64             `protobuf:"varint,1,opt,name=number,proto3" json:"number"`
+	Hash                 string            `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash"`
+	ParentHash           string            `protobuf:"bytes,3,opt,name=parent_hash,json=parentHash,proto3" json:"parent_hash"`
+	MerkleRootHash       string            `protobuf:"bytes,4,opt,name=merkle_root_hash,json=merkleRootHash,proto3" json:"merkle_root_hash"`
+	PeerId               string            `protobuf:"bytes,5,opt,name=peer_id,json=peerId,proto3" json:"peer_id"`
+	Signature            string            `protobuf:"bytes,6,opt,name=signature,proto3" json:"signature"`
+	Timestamp            int64             `protobuf:"varint,7,opt,name=timestamp,proto3" json:"timestamp"`
+	Version              string            `protobuf:"bytes,8,opt,name=version,proto3" json:"version"`
+	Transactions         []*TransactionETL `protobuf:"bytes,9,rep,name=transactions,proto3" json:"transactions"`
 }
 
 func (m *BlockETL) Reset()         { *m = BlockETL{} }
@@ -122,26 +122,26 @@ func (m *BlockETL) GetTransactions() []*TransactionETL {
 }
 
 type TransactionETL struct {
-	Hash                 string    `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash,omitempty"`
-	Timestamp            int64     `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
-	TransactionIndex     int64     `protobuf:"varint,3,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index,omitempty"`
-	Nonce                string    `protobuf:"bytes,4,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	Nid                  string    `protobuf:"bytes,5,opt,name=nid,proto3" json:"nid,omitempty"`
-	FromAddress          string    `protobuf:"bytes,6,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress            string    `protobuf:"bytes,7,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
-	Value                string    `protobuf:"bytes,8,opt,name=value,proto3" json:"value,omitempty"`
-	Status               string    `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
-	StepPrice            string    `protobuf:"bytes,10,opt,name=step_price,json=stepPrice,proto3" json:"step_price,omitempty"`
-	StepUsed             string    `protobuf:"bytes,11,opt,name=step_used,json=stepUsed,proto3" json:"step_used,omitempty"`
-	StepLimit            string    `protobuf:"bytes,12,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit,omitempty"`
-	CumulativeStepUsed   string    `protobuf:"bytes,13,opt,name=cumulative_step_used,json=cumulativeStepUsed,proto3" json:"cumulative_step_used,omitempty"`
-	LogsBloom            string    `protobuf:"bytes,14,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom,omitempty"`
-	Data                 string    `protobuf:"bytes,15,opt,name=data,proto3" json:"data,omitempty"`
-	DataType             string    `protobuf:"bytes,16,opt,name=data_type,json=dataType,proto3" json:"data_type,omitempty"`
-	ScoreAddress         string    `protobuf:"bytes,17,opt,name=score_address,json=scoreAddress,proto3" json:"score_address,omitempty"`
-	Signature            string    `protobuf:"bytes,18,opt,name=signature,proto3" json:"signature,omitempty"`
-	Version              string    `protobuf:"bytes,19,opt,name=version,proto3" json:"version,omitempty"`
-	Logs                 []*LogETL `protobuf:"bytes,20,rep,name=logs,proto3" json:"logs,omitempty"`
+	Hash                 string    `protobuf:"bytes,1,opt,name=hash,proto3" json:"hash"`
+	Timestamp            int64     `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp"`
+	TransactionIndex     int64     `protobuf:"varint,3,opt,name=transaction_index,json=transactionIndex,proto3" json:"transaction_index"`
+	Nonce                string    `protobuf:"bytes,4,opt,name=nonce,proto3" json:"nonce"`
+	Nid                  string    `protobuf:"bytes,5,opt,name=nid,proto3" json:"nid"`
+	FromAddress          string    `protobuf:"bytes,6,opt,name=from_address,json=fromAddress,proto3" json:"from_address"`
+	ToAddress            string    `protobuf:"bytes,7,opt,name=to_address,json=toAddress,proto3" json:"to_address"`
+	Value                string    `protobuf:"bytes,8,opt,name=value,proto3" json:"value"`
+	Status               string    `protobuf:"bytes,9,opt,name=status,proto3" json:"status"`
+	StepPrice            string    `protobuf:"bytes,10,opt,name=step_price,json=stepPrice,proto3" json:"step_price"`
+	StepUsed             string    `protobuf:"bytes,11,opt,name=step_used,json=stepUsed,proto3" json:"step_used"`
+	StepLimit            string    `protobuf:"bytes,12,opt,name=step_limit,json=stepLimit,proto3" json:"step_limit"`
+	CumulativeStepUsed   string    `protobuf:"bytes,13,opt,name=cumulative_step_used,json=cumulativeStepUsed,proto3" json:"cumulative_step_used"`
+	LogsBloom            string    `protobuf:"bytes,14,opt,name=logs_bloom,json=logsBloom,proto3" json:"logs_bloom"`
+	Data                 string    `protobuf:"bytes,15,opt,name=data,proto3" json:"data"`
+	DataType             string    `protobuf:"bytes,16,opt,name=data_type,json=dataType,proto3" json:"data_type"`
+	ScoreAddress         string    `protobuf:"bytes,17,opt,name=score_address,json=scoreAddress,proto3" json:"score_address"`
+	Signature            string    `protobuf:"bytes,18,opt,name=signature,proto3" json:"signature"`
+	Version              string    `protobuf:"bytes,19,opt,name=version,proto3" json:"version"`
+	Logs                 []*LogETL `protobuf:"bytes,20,rep,name=logs,proto3" json:"logs"`
 }
 
 func (m *TransactionETL) Reset()         { *m = TransactionETL{} }
@@ -310,9 +310,9 @@ func (m *TransactionETL) GetLogs() []*LogETL {
 }
 
 type LogETL struct {
-	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Indexed              []string `protobuf:"bytes,2,rep,name=indexed,proto3" json:"indexed,omitempty"`
-	Data                 []string `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty"`
+	Address              string   `protobuf:"bytes,1,opt,name=address,proto3" json:"address"`
+	Indexed              []string `protobuf:"bytes,2,rep,name=indexed,proto3" json:"indexed"`
+	Data                 []string `protobuf:"bytes,3,rep,name=data,proto3" json:"data"`
 }
 
 func (m *LogETL) Reset()         { *m = LogETL{} }

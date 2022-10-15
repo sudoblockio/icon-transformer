@@ -125,7 +125,7 @@ func DefaultReadTransactionInternalByAddress(ctx context.Context, in *Transactio
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeReadApplyQuery); ok {
@@ -172,7 +172,7 @@ func DefaultDeleteTransactionInternalByAddress(ctx context.Context, in *Transact
 	if err != nil {
 		return err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeDelete_); ok {
@@ -202,23 +202,23 @@ func DefaultDeleteTransactionInternalByAddressSet(ctx context.Context, in []*Tra
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.TransactionHash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.TransactionHash)
 	}
 	if hook, ok := (interface{}(&TransactionInternalByAddressORM{})).(TransactionInternalByAddressORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&TransactionInternalByAddressORM{}).Error
+	err = db.Where("transaction_hash in (?)", keys).Delete(&TransactionInternalByAddressORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func DefaultStrictUpdateTransactionInternalByAddress(ctx context.Context, in *Tr
 		return nil, err
 	}
 	lockedRow := &TransactionInternalByAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("address=?", ormObj.Address).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -404,7 +404,7 @@ func DefaultListTransactionInternalByAddress(ctx context.Context, db *gorm.DB) (
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("address")
+	db = db.Order("transaction_hash")
 	ormResponse := []TransactionInternalByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

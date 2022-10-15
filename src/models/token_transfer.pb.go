@@ -22,19 +22,19 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type TokenTransfer struct {
-	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash,omitempty"`
-	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index,omitempty"`
-	TokenContractAddress string   `protobuf:"bytes,3,opt,name=token_contract_address,json=tokenContractAddress,proto3" json:"token_contract_address,omitempty"`
-	FromAddress          string   `protobuf:"bytes,4,opt,name=from_address,json=fromAddress,proto3" json:"from_address,omitempty"`
-	ToAddress            string   `protobuf:"bytes,5,opt,name=to_address,json=toAddress,proto3" json:"to_address,omitempty"`
-	BlockNumber          int64    `protobuf:"varint,6,opt,name=block_number,json=blockNumber,proto3" json:"block_number,omitempty"`
-	Value                string   `protobuf:"bytes,7,opt,name=value,proto3" json:"value,omitempty"`
-	ValueDecimal         float64  `protobuf:"fixed64,8,opt,name=value_decimal,json=valueDecimal,proto3" json:"value_decimal,omitempty"`
-	BlockTimestamp       int64    `protobuf:"varint,9,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp,omitempty"`
-	TokenContractName    string   `protobuf:"bytes,10,opt,name=token_contract_name,json=tokenContractName,proto3" json:"token_contract_name,omitempty"`
-	TokenContractSymbol  string   `protobuf:"bytes,11,opt,name=token_contract_symbol,json=tokenContractSymbol,proto3" json:"token_contract_symbol,omitempty"`
-	TransactionFee       string   `protobuf:"bytes,12,opt,name=transaction_fee,json=transactionFee,proto3" json:"transaction_fee,omitempty"`
-	NftId                int64    `protobuf:"varint,13,opt,name=nft_id,json=nftId,proto3" json:"nft_id,omitempty"`
+	TransactionHash      string   `protobuf:"bytes,1,opt,name=transaction_hash,json=transactionHash,proto3" json:"transaction_hash"`
+	LogIndex             int64    `protobuf:"varint,2,opt,name=log_index,json=logIndex,proto3" json:"log_index"`
+	TokenContractAddress string   `protobuf:"bytes,3,opt,name=token_contract_address,json=tokenContractAddress,proto3" json:"token_contract_address"`
+	FromAddress          string   `protobuf:"bytes,4,opt,name=from_address,json=fromAddress,proto3" json:"from_address"`
+	ToAddress            string   `protobuf:"bytes,5,opt,name=to_address,json=toAddress,proto3" json:"to_address"`
+	BlockNumber          int64    `protobuf:"varint,6,opt,name=block_number,json=blockNumber,proto3" json:"block_number"`
+	Value                string   `protobuf:"bytes,7,opt,name=value,proto3" json:"value"`
+	ValueDecimal         float64  `protobuf:"fixed64,8,opt,name=value_decimal,json=valueDecimal,proto3" json:"value_decimal"`
+	BlockTimestamp       int64    `protobuf:"varint,9,opt,name=block_timestamp,json=blockTimestamp,proto3" json:"block_timestamp"`
+	TokenContractName    string   `protobuf:"bytes,10,opt,name=token_contract_name,json=tokenContractName,proto3" json:"token_contract_name"`
+	TokenContractSymbol  string   `protobuf:"bytes,11,opt,name=token_contract_symbol,json=tokenContractSymbol,proto3" json:"token_contract_symbol"`
+	TransactionFee       string   `protobuf:"bytes,12,opt,name=transaction_fee,json=transactionFee,proto3" json:"transaction_fee"`
+	NftId                int64    `protobuf:"varint,13,opt,name=nft_id,json=nftId,proto3" json:"nft_id"`
 }
 
 func (m *TokenTransfer) Reset()         { *m = TokenTransfer{} }

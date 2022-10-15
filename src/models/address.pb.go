@@ -23,31 +23,31 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Address struct {
 	// BlockETL
-	Address                  string  `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	IsContract               bool    `protobuf:"varint,2,opt,name=is_contract,json=isContract,proto3" json:"is_contract,omitempty"`
-	TransactionCount         int64   `protobuf:"varint,3,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count,omitempty"`
-	TransactionInternalCount int64   `protobuf:"varint,4,opt,name=transaction_internal_count,json=transactionInternalCount,proto3" json:"transaction_internal_count,omitempty"`
-	LogCount                 int64   `protobuf:"varint,5,opt,name=log_count,json=logCount,proto3" json:"log_count,omitempty"`
-	TokenTransferCount       int64   `protobuf:"varint,6,opt,name=token_transfer_count,json=tokenTransferCount,proto3" json:"token_transfer_count,omitempty"`
-	Balance                  float64 `protobuf:"fixed64,7,opt,name=balance,proto3" json:"balance,omitempty"`
-	Type                     string  `protobuf:"bytes,8,opt,name=type,proto3" json:"type,omitempty"`
+	Address                  string  `protobuf:"bytes,1,opt,name=address,proto3" json:"address"`
+	IsContract               bool    `protobuf:"varint,2,opt,name=is_contract,json=isContract,proto3" json:"is_contract"`
+	TransactionCount         int64   `protobuf:"varint,3,opt,name=transaction_count,json=transactionCount,proto3" json:"transaction_count"`
+	TransactionInternalCount int64   `protobuf:"varint,4,opt,name=transaction_internal_count,json=transactionInternalCount,proto3" json:"transaction_internal_count"`
+	LogCount                 int64   `protobuf:"varint,5,opt,name=log_count,json=logCount,proto3" json:"log_count"`
+	TokenTransferCount       int64   `protobuf:"varint,6,opt,name=token_transfer_count,json=tokenTransferCount,proto3" json:"token_transfer_count"`
+	Balance                  float64 `protobuf:"fixed64,7,opt,name=balance,proto3" json:"balance"`
+	Type                     string  `protobuf:"bytes,8,opt,name=type,proto3" json:"type"`
 	// Contracts Processed
-	Name                 string `protobuf:"bytes,9,opt,name=name,proto3" json:"name,omitempty"`
-	CreatedTimestamp     int64  `protobuf:"varint,11,opt,name=created_timestamp,json=createdTimestamp,proto3" json:"created_timestamp,omitempty"`
-	IsToken              bool   `protobuf:"varint,12,opt,name=is_token,json=isToken,proto3" json:"is_token,omitempty"`
-	IsNft                bool   `protobuf:"varint,19,opt,name=is_nft,json=isNft,proto3" json:"is_nft,omitempty"`
-	ContractUpdatedBlock int64  `protobuf:"varint,14,opt,name=contract_updated_block,json=contractUpdatedBlock,proto3" json:"contract_updated_block,omitempty"`
-	AuditTxHash          string `protobuf:"bytes,20,opt,name=audit_tx_hash,json=auditTxHash,proto3" json:"audit_tx_hash,omitempty"`
-	CodeHash             string `protobuf:"bytes,21,opt,name=code_hash,json=codeHash,proto3" json:"code_hash,omitempty"`
-	DeployTxHash         string `protobuf:"bytes,22,opt,name=deploy_tx_hash,json=deployTxHash,proto3" json:"deploy_tx_hash,omitempty"`
-	ContractType         string `protobuf:"bytes,15,opt,name=contract_type,json=contractType,proto3" json:"contract_type,omitempty"`
-	Status               string `protobuf:"bytes,10,opt,name=status,proto3" json:"status,omitempty"`
-	Owner                string `protobuf:"bytes,23,opt,name=owner,proto3" json:"owner,omitempty"`
+	Name                 string `protobuf:"bytes,9,opt,name=name,proto3" json:"name"`
+	CreatedTimestamp     int64  `protobuf:"varint,11,opt,name=created_timestamp,json=createdTimestamp,proto3" json:"created_timestamp"`
+	IsToken              bool   `protobuf:"varint,12,opt,name=is_token,json=isToken,proto3" json:"is_token"`
+	IsNft                bool   `protobuf:"varint,19,opt,name=is_nft,json=isNft,proto3" json:"is_nft"`
+	ContractUpdatedBlock int64  `protobuf:"varint,14,opt,name=contract_updated_block,json=contractUpdatedBlock,proto3" json:"contract_updated_block"`
+	AuditTxHash          string `protobuf:"bytes,20,opt,name=audit_tx_hash,json=auditTxHash,proto3" json:"audit_tx_hash"`
+	CodeHash             string `protobuf:"bytes,21,opt,name=code_hash,json=codeHash,proto3" json:"code_hash"`
+	DeployTxHash         string `protobuf:"bytes,22,opt,name=deploy_tx_hash,json=deployTxHash,proto3" json:"deploy_tx_hash"`
+	ContractType         string `protobuf:"bytes,15,opt,name=contract_type,json=contractType,proto3" json:"contract_type"`
+	Status               string `protobuf:"bytes,10,opt,name=status,proto3" json:"status"`
+	Owner                string `protobuf:"bytes,23,opt,name=owner,proto3" json:"owner"`
 	// Governance Prep Processed
-	IsPrep bool `protobuf:"varint,13,opt,name=is_prep,json=isPrep,proto3" json:"is_prep,omitempty"`
+	IsPrep bool `protobuf:"varint,13,opt,name=is_prep,json=isPrep,proto3" json:"is_prep"`
 	// Tokens
-	TokenStandard        string   `protobuf:"bytes,16,opt,name=token_standard,json=tokenStandard,proto3" json:"token_standard,omitempty"`
-	Symbol               string   `protobuf:"bytes,17,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	TokenStandard        string   `protobuf:"bytes,16,opt,name=token_standard,json=tokenStandard,proto3" json:"token_standard"`
+	Symbol               string   `protobuf:"bytes,17,opt,name=symbol,proto3" json:"symbol"`
 }
 
 func (m *Address) Reset()         { *m = Address{} }

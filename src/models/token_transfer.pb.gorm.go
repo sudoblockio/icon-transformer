@@ -152,7 +152,7 @@ func DefaultReadTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm.D
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeReadApplyQuery); ok {
@@ -229,23 +229,23 @@ func DefaultDeleteTokenTransferSet(ctx context.Context, in []*TokenTransfer, db 
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.TransactionHash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.TransactionHash)
 	}
 	if hook, ok := (interface{}(&TokenTransferORM{})).(TokenTransferORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&TokenTransferORM{}).Error
+	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -467,7 +467,7 @@ func DefaultListTokenTransfer(ctx context.Context, db *gorm.DB) ([]*TokenTransfe
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("transaction_hash")
 	ormResponse := []TokenTransferORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

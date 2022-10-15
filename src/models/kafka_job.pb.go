@@ -30,11 +30,11 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 //  stop_offset bigint,
 //  PRIMARY KEY (job_id, worker_group, topic, partition, stop_offset));
 type KafkaJob struct {
-	JobId                string   `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
-	WorkerGroup          string   `protobuf:"bytes,2,opt,name=worker_group,json=workerGroup,proto3" json:"worker_group,omitempty"`
-	Topic                string   `protobuf:"bytes,3,opt,name=topic,proto3" json:"topic,omitempty"`
-	Partition            uint64   `protobuf:"varint,4,opt,name=partition,proto3" json:"partition,omitempty"`
-	StopOffset           uint64   `protobuf:"varint,5,opt,name=stop_offset,json=stopOffset,proto3" json:"stop_offset,omitempty"`
+	JobId                string   `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id"`
+	WorkerGroup          string   `protobuf:"bytes,2,opt,name=worker_group,json=workerGroup,proto3" json:"worker_group"`
+	Topic                string   `protobuf:"bytes,3,opt,name=topic,proto3" json:"topic"`
+	Partition            uint64   `protobuf:"varint,4,opt,name=partition,proto3" json:"partition"`
+	StopOffset           uint64   `protobuf:"varint,5,opt,name=stop_offset,json=stopOffset,proto3" json:"stop_offset"`
 }
 
 func (m *KafkaJob) Reset()         { *m = KafkaJob{} }
