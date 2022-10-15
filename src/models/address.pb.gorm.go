@@ -19,6 +19,7 @@ type AddressORM struct {
 	CreatedTimestamp         int64 `gorm:"index:address_idx_created_timestamp"`
 	DeployTxHash             string
 	IsContract               bool   `gorm:"index:address_idx_is_contract"`
+	IsNft                    bool   `gorm:"index:address_idx_is_nft"`
 	IsPrep                   bool   `gorm:"index:address_idx_is_governance_prep"`
 	IsToken                  bool   `gorm:"index:address_idx_is_token"`
 	LogCount                 int64  `gorm:"index:address_idx_log_count"`
@@ -59,6 +60,7 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	to.Name = m.Name
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
+	to.IsNft = m.IsNft
 	to.ContractUpdatedBlock = m.ContractUpdatedBlock
 	to.AuditTxHash = m.AuditTxHash
 	to.CodeHash = m.CodeHash
@@ -96,6 +98,7 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	to.Name = m.Name
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
+	to.IsNft = m.IsNft
 	to.ContractUpdatedBlock = m.ContractUpdatedBlock
 	to.AuditTxHash = m.AuditTxHash
 	to.CodeHash = m.CodeHash
@@ -452,6 +455,10 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 		}
 		if f == prefix+"IsToken" {
 			patchee.IsToken = patcher.IsToken
+			continue
+		}
+		if f == prefix+"IsNft" {
+			patchee.IsNft = patcher.IsNft
 			continue
 		}
 		if f == prefix+"ContractUpdatedBlock" {
