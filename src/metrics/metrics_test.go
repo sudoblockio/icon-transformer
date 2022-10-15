@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/sudoblockio/icon-transformer/config"
 
@@ -25,6 +26,7 @@ func TestMetricsApiStart(t *testing.T) {
 
 	// Start metrics server
 	Start()
+	time.Sleep(100 * time.Millisecond)
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%s%s", config.Config.MetricsPort, config.Config.MetricsPrefix))
 	assert.Equal(nil, err)
