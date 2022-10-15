@@ -10,17 +10,22 @@ import (
 )
 
 type AddressORM struct {
-	Address                  string  `gorm:"primary_key"`
+	Address                  string `gorm:"primary_key"`
+	AuditTxHash              string
 	Balance                  float64 `gorm:"index:address_idx_balance"`
-	ContractType             string  `gorm:"index:address_idx_contract_type"`
+	CodeHash                 string
+	ContractType             string `gorm:"index:address_idx_contract_type"`
 	ContractUpdatedBlock     int64
-	CreatedTimestamp         int64  `gorm:"index:address_idx_created_timestamp"`
+	CreatedTimestamp         int64 `gorm:"index:address_idx_created_timestamp"`
+	DeployTxHash             string
 	IsContract               bool   `gorm:"index:address_idx_is_contract"`
 	IsPrep                   bool   `gorm:"index:address_idx_is_governance_prep"`
 	IsToken                  bool   `gorm:"index:address_idx_is_token"`
 	LogCount                 int64  `gorm:"index:address_idx_log_count"`
 	Name                     string `gorm:"index:address_idx_contract_name"`
+	Owner                    string
 	Status                   string
+	Symbol                   string
 	TokenStandard            string `gorm:"index:address_idx_token_standard"`
 	TokenTransferCount       int64  `gorm:"index:address_idx_token_transfer_count"`
 	TransactionCount         int64  `gorm:"index:address_idx_transaction_count"`
@@ -52,13 +57,18 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	to.Balance = m.Balance
 	to.Type = m.Type
 	to.Name = m.Name
-	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
 	to.ContractUpdatedBlock = m.ContractUpdatedBlock
+	to.AuditTxHash = m.AuditTxHash
+	to.CodeHash = m.CodeHash
+	to.DeployTxHash = m.DeployTxHash
 	to.ContractType = m.ContractType
-	to.TokenStandard = m.TokenStandard
+	to.Status = m.Status
+	to.Owner = m.Owner
 	to.IsPrep = m.IsPrep
+	to.TokenStandard = m.TokenStandard
+	to.Symbol = m.Symbol
 	if posthook, ok := interface{}(m).(AddressWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -84,13 +94,18 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	to.Balance = m.Balance
 	to.Type = m.Type
 	to.Name = m.Name
-	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
 	to.ContractUpdatedBlock = m.ContractUpdatedBlock
+	to.AuditTxHash = m.AuditTxHash
+	to.CodeHash = m.CodeHash
+	to.DeployTxHash = m.DeployTxHash
 	to.ContractType = m.ContractType
-	to.TokenStandard = m.TokenStandard
+	to.Status = m.Status
+	to.Owner = m.Owner
 	to.IsPrep = m.IsPrep
+	to.TokenStandard = m.TokenStandard
+	to.Symbol = m.Symbol
 	if posthook, ok := interface{}(m).(AddressWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -431,10 +446,6 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 			patchee.Name = patcher.Name
 			continue
 		}
-		if f == prefix+"Status" {
-			patchee.Status = patcher.Status
-			continue
-		}
 		if f == prefix+"CreatedTimestamp" {
 			patchee.CreatedTimestamp = patcher.CreatedTimestamp
 			continue
@@ -447,16 +458,40 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 			patchee.ContractUpdatedBlock = patcher.ContractUpdatedBlock
 			continue
 		}
+		if f == prefix+"AuditTxHash" {
+			patchee.AuditTxHash = patcher.AuditTxHash
+			continue
+		}
+		if f == prefix+"CodeHash" {
+			patchee.CodeHash = patcher.CodeHash
+			continue
+		}
+		if f == prefix+"DeployTxHash" {
+			patchee.DeployTxHash = patcher.DeployTxHash
+			continue
+		}
 		if f == prefix+"ContractType" {
 			patchee.ContractType = patcher.ContractType
+			continue
+		}
+		if f == prefix+"Status" {
+			patchee.Status = patcher.Status
+			continue
+		}
+		if f == prefix+"Owner" {
+			patchee.Owner = patcher.Owner
+			continue
+		}
+		if f == prefix+"IsPrep" {
+			patchee.IsPrep = patcher.IsPrep
 			continue
 		}
 		if f == prefix+"TokenStandard" {
 			patchee.TokenStandard = patcher.TokenStandard
 			continue
 		}
-		if f == prefix+"IsPrep" {
-			patchee.IsPrep = patcher.IsPrep
+		if f == prefix+"Symbol" {
+			patchee.Symbol = patcher.Symbol
 			continue
 		}
 	}

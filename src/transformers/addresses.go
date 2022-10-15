@@ -12,10 +12,50 @@ import (
 
 var allAddresses = make(map[string]bool)
 
+func enrichContractsMeta(address *models.Address) {
+	result, err := service.IconNodeServiceGetScoreStatus(address.Address)
+	if err != nil {
+		zap.S().Warn("Could not get tx result for hash: ", err.Error(), ",Address=", address.Address)
+		return
+	}
+
+	auditTxHash, ok := result["current"].(map[string]interface{})["auditTxHash"].(string)
+	codeHash, ok := result["current"].(map[string]interface{})["codeHash"].(string)
+	deployTxHash, ok := result["current"].(map[string]interface{})["deployTxHash"].(string)
+	contractType, ok := result["current"].(map[string]interface{})["type"].(string)
+	status, ok := result["current"].(map[string]interface{})["status"].(string)
+	owner, ok := result["owner"].(string)
+
+	if ok == false {
+		zap.S().Info("not able to parse IconNodeServiceGetScoreStatus for address: ", address.Address)
+		return
+	}
+
+	address.AuditTxHash = auditTxHash
+	address.CodeHash = codeHash
+	address.DeployTxHash = deployTxHash
+	address.ContractType = contractType
+	address.Status = status
+	address.Owner = owner
+
+	contractName, _ := service.IconNodeServiceCallContractMethod(address.Address, "name")
+	address.Name = contractName
+	contractSymbol, _ := service.IconNodeServiceCallContractMethod(address.Address, "symbol")
+	address.Symbol = contractSymbol
+}
+
+// Check if the address has been seen by the transformer instance, enrich its metadata (expensive) and load it into DB
 func loadAddressCheckDuplicate(modelAddress *models.Address) {
 	if _, ok := allAddresses[modelAddress.Address]; !ok {
+
+		if modelAddress.IsContract || modelAddress.IsToken {
+			enrichContractsMeta(modelAddress)
+		}
+
 		allAddresses[modelAddress.Address] = true
-		crud.AddressContractCrud.LoaderChannel <- modelAddress
+		crud.AddressCrud.LoaderChannel <- modelAddress
+
+		// Metrics
 		metricsBlockTransformer.addressesSeen.Inc()
 		return
 	}
