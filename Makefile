@@ -1,4 +1,4 @@
-.PHONY: test help
+~.PHONY: test help
 
 test: up-dbs test-unit
 

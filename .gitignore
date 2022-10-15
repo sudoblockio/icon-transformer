@@ -72,3 +72,5 @@ ENV/
 
 # ginkgo
 *.coverprofile
+
+scratch
