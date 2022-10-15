@@ -137,7 +137,7 @@ func DefaultReadLog(ctx context.Context, in *Log, db *gorm.DB) (*Log, error) {
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.LogIndex == 0 {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(LogORMWithBeforeReadApplyQuery); ok {
@@ -184,7 +184,7 @@ func DefaultDeleteLog(ctx context.Context, in *Log, db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.LogIndex == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(LogORMWithBeforeDelete_); ok {
@@ -257,7 +257,7 @@ func DefaultStrictUpdateLog(ctx context.Context, in *Log, db *gorm.DB) (*Log, er
 		return nil, err
 	}
 	lockedRow := &LogORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(LogORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
