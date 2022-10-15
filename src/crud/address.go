@@ -1,33 +1,45 @@
 package crud
 
 import (
+	"github.com/sudoblockio/icon-transformer/models"
 	"sync"
 	"time"
-
-	"github.com/sudoblockio/icon-transformer/models"
 )
 
 var addressCrudOnce sync.Once
-
 var AddressCrud *Crud[models.Address, models.AddressORM]
-var AddressContractCrud *Crud[models.Address, models.AddressORM]
 
-// GetAddressCrud - create and/or return the crud object
 func GetAddressCrud() *Crud[models.Address, models.AddressORM] {
 	addressCrudOnce.Do(func() {
 		AddressCrud = GetCrud(models.Address{}, models.AddressORM{})
-
-		// There is no loader channel for generic addresses -> only contracts
 		AddressCrud.Migrate()
 
-		// For main transformer - requires tuning due to many duplicate records
-		AddressContractCrud = GetCrud(models.Address{}, models.AddressORM{})
-		AddressContractCrud.columns = []string{"address", "is_contract"}
-		//AddressContractCrud.dbBufferWait = 1 * time.Millisecond
-		AddressContractCrud.MakeStartLoaderChannel()
+		AddressCrud.dbBufferWait = 100 * time.Millisecond
+		AddressCrud.columns = []string{
+			"address",
+			"is_contract",
+			"audit_tx_hash",
+			"code_hash",
+			"deploy_tx_hash",
+			"contract_type",
+			"status",
+			"owner",
+			"name",
+			"symbol",
+		}
+		AddressCrud.MakeStartLoaderChannel()
 	})
-
 	return AddressCrud
+}
+
+func InitAddressCrud() {
+	GetAddressCrud()
+}
+
+// Routines
+type CrudConfig struct {
+	Name    string
+	Columns []string
 }
 
 var addressRoutinesCrudOnce sync.Once
@@ -79,10 +91,6 @@ func GetAddressRoutineCruds() map[string]*Crud[models.Address, models.AddressORM
 	})
 
 	return AddressRoutineCruds
-}
-
-func InitAddressCrud() {
-	GetAddressCrud()
 }
 
 //func (m *Crud[M, O]) addressBatchErrorHandler(b []*M, cols []string) error {
