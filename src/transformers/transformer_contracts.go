@@ -6,7 +6,10 @@ import (
 	"github.com/sudoblockio/icon-transformer/kafka"
 	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
+	// Depending on the version of protoc, we need to switch these out
+	// https://stackoverflow.com/a/65962599/12642712
+	//"google.golang.org/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 )
 
 func startContracts() {

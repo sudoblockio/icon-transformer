@@ -184,7 +184,7 @@ func DefaultDeleteLog(ctx context.Context, in *Log, db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.LogIndex == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(LogORMWithBeforeDelete_); ok {

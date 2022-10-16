@@ -9,7 +9,10 @@ import (
 	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
-	"google.golang.org/protobuf/proto"
+	// Depending on the version of protoc, we need to switch these out
+	// https://stackoverflow.com/a/65962599/12642712
+	//"google.golang.org/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"sync"
 )
 
@@ -36,6 +39,8 @@ func startBlocks() {
 		// Consume from kafka
 		consumerTopicMsg := <-kafkaBlocksTopicChannel
 		blockETL := &models.BlockETL{}
+
+		// Different imports of proto affect this line
 		err := proto.Unmarshal(consumerTopicMsg.Value, blockETL)
 		if err != nil {
 			zap.S().Warn(

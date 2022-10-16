@@ -320,7 +320,7 @@ func DefaultStrictUpdateTransaction(ctx context.Context, in *Transaction, db *go
 		return nil, err
 	}
 	lockedRow := &TransactionORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("log_index=?", ormObj.LogIndex).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("hash=?", ormObj.Hash).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -579,7 +579,7 @@ func DefaultListTransaction(ctx context.Context, db *gorm.DB) ([]*Transaction, e
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("hash")
 	ormResponse := []TransactionORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

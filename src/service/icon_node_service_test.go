@@ -106,3 +106,23 @@ func TestIconNodeServiceGetScoreAddressFromTransactionResult(t *testing.T) {
 	require.Nil(t, err)
 	require.NotEmpty(t, result)
 }
+
+func TestIconNodeServiceGetScoreStatus(t *testing.T) {
+	config.ReadEnvironment()
+	config.Config.IconNodeServiceURL = []string{"https://api.icon.community/api/v3"}
+	result, err := IconNodeServiceGetScoreStatus(
+		"cx203d9cd2a669be67177e997b8948ce2c35caffae",
+	)
+	require.Nil(t, err)
+	require.NotEmpty(t, result)
+}
+
+func TestIconNodeServiceCallContractMethod(t *testing.T) {
+	config.ReadEnvironment()
+	config.Config.IconNodeServiceURL = []string{"https://api.icon.community/api/v3"}
+	result, err := IconNodeServiceCallContractMethod(
+		"cx077807f2322aeb42ea19a1fcc0c9f3d3f35e1461", "symbol",
+	)
+	require.Nil(t, err)
+	assert.Equal(t, result, "BNB")
+}

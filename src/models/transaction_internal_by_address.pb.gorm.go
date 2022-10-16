@@ -245,7 +245,7 @@ func DefaultStrictUpdateTransactionInternalByAddress(ctx context.Context, in *Tr
 		return nil, err
 	}
 	lockedRow := &TransactionInternalByAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("address=?", ormObj.Address).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TransactionInternalByAddressORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err

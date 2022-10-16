@@ -125,7 +125,7 @@ func DefaultReadTokenTransferByAddress(ctx context.Context, in *TokenTransferByA
 	if err != nil {
 		return nil, err
 	}
-	if ormObj.Address == "" {
+	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeReadApplyQuery); ok {
@@ -172,7 +172,7 @@ func DefaultDeleteTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 	if err != nil {
 		return err
 	}
-	if ormObj.Address == "" {
+	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeDelete_); ok {
@@ -202,23 +202,23 @@ func DefaultDeleteTokenTransferByAddressSet(ctx context.Context, in []*TokenTran
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []string{}
+	keys := []int64{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.TransactionHash == "" {
+		if ormObj.LogIndex == 0 {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.TransactionHash)
+		keys = append(keys, ormObj.LogIndex)
 	}
 	if hook, ok := (interface{}(&TokenTransferByAddressORM{})).(TokenTransferByAddressORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferByAddressORM{}).Error
+	err = db.Where("log_index in (?)", keys).Delete(&TokenTransferByAddressORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -404,7 +404,7 @@ func DefaultListTokenTransferByAddress(ctx context.Context, db *gorm.DB) ([]*Tok
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("log_index")
 	ormResponse := []TokenTransferByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

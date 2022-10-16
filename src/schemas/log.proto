@@ -2,7 +2,7 @@ syntax = "proto3";
 package models;
 option go_package = "./models";
 
-import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+import "github.com/infobloxopen/protoc-gen-gorm/proto/options/gorm.proto";
 
 message Log {
   option (gorm.opts) = {ormable: true};

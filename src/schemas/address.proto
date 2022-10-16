@@ -2,7 +2,7 @@ syntax = "proto3";
 package models;
 option go_package = "./models";
 
-import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+import "github.com/infobloxopen/protoc-gen-gorm/proto/options/gorm.proto";
 
 message Address {
   option (gorm.opts) = {ormable: true};
@@ -19,14 +19,21 @@ message Address {
 
   // Contracts Processed
   string name = 9 [(gorm.field).tag = {index: "address_idx_contract_name"}];
-  string status = 10;
   int64 created_timestamp = 11 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
   bool is_token = 12 [(gorm.field).tag = {index: "address_idx_is_token"}];
+  bool is_nft = 19 [(gorm.field).tag = {index: "address_idx_is_nft"}];
   int64 contract_updated_block = 14;
 
+  string audit_tx_hash = 20;
+  string code_hash = 21;
+  string deploy_tx_hash = 22;
   string contract_type = 15 [(gorm.field).tag = {index: "address_idx_contract_type"}];
-  string token_standard = 16 [(gorm.field).tag = {index: "address_idx_token_standard"}];
+  string status = 10;
+  string owner = 23;
 
-  // Governance Prep Processed 
+  // Governance Prep Processed
   bool is_prep = 13 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
+  // Tokens
+  string token_standard = 16 [(gorm.field).tag = {index: "address_idx_token_standard"}];
+  string symbol = 17;
 }

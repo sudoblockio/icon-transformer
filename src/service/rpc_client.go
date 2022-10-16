@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -66,10 +65,6 @@ func JsonRpcRequestWithBackup(payload string) (map[string]interface{}, error) {
 		resp, err := JsonRpcRequest(payload, icon_node_url)
 		if err == nil {
 			return resp, err
-		}
-
-		if err != nil {
-			log.Println("icon node rpc err:", err)
 		}
 	}
 	return nil, err

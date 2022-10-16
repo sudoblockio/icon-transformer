@@ -115,7 +115,7 @@ func IconNodeServiceGetTokenDecimalBase(tokenContractAddress string) (int, error
 
 func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, error) {
 	// Redis cache
-	redisCacheKey := config.Config.RedisKeyPrefix + "token_contract_name_" + tokenContractAddress
+	redisCacheKey := config.Config.RedisKeyPrefix + "contract_name_" + tokenContractAddress
 	tokenContractName, err := redis.GetRedisClient().GetValue(redisCacheKey)
 	if err != nil {
 		return "", err
@@ -377,4 +377,74 @@ func IconNodeServiceGetTransactionResult(hash string) (map[string]interface{}, e
 	}
 
 	return result, nil
+}
+
+func IconNodeServiceGetScoreStatus(address string) (map[string]interface{}, error) {
+	// Request icon contract
+	payload := fmt.Sprintf(`{
+    "id": 1001,
+	"jsonrpc": "2.0",
+	"method": "icx_getScoreStatus",
+	"params": {
+	 "address": "%s"
+	}
+	}`, address)
+
+	body, err := JsonRpcRequestWithRetry(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	result, ok := body["result"].(map[string]interface{})
+	if ok == false {
+		return nil, errors.New("Invalid response")
+	}
+
+	return result, nil
+}
+
+func IconNodeServiceCallContractMethod(contractAddress string, method string) (string, error) {
+	// Redis cache
+	redisCacheKey := config.Config.RedisKeyPrefix + "contract_" + method + "_" + contractAddress
+	contractMethod, err := redis.GetRedisClient().GetValue(redisCacheKey)
+	if err != nil {
+		return "", err
+	} else if contractMethod != "" {
+		return contractMethod, nil
+	}
+
+	// Request icon contract
+	payload := fmt.Sprintf(`{
+    "jsonrpc": "2.0",
+    "id": 1234,
+    "method": "icx_call",
+    "params": {
+        "to": "%s",
+        "dataType": "call",
+        "data": {
+            "method": "%s",
+            "params": {}
+        }
+    }
+	}`, contractAddress, method)
+
+	body, err := JsonRpcRequestWithRetry(payload)
+	if err != nil {
+		return "", err
+	}
+
+	// Extract balance
+	contractMethod, ok := body["result"].(string)
+	if ok == false {
+		return "", errors.New("Invalid response")
+	}
+
+	// Redis cache
+	err = redis.GetRedisClient().SetValue(redisCacheKey, contractMethod)
+	if err != nil {
+		// Redis error
+		return "", err
+	}
+
+	return contractMethod, nil
 }

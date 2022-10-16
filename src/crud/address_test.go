@@ -15,7 +15,7 @@ func TestGetAddressCruds(t *testing.T) {
 		TransactionCount: 1,
 	}
 	GetAddressCrud()
-	AddressContractCrud.LoaderChannel <- address
+	AddressCrud.LoaderChannel <- address
 	time.Sleep(1 * time.Second)
 }
 
