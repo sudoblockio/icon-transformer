@@ -60,9 +60,9 @@ func findMissingBlocks() {
 		zap.S().Fatal(err.Error())
 	}
 
-	zap.S().Info("Found missing blocks. Now deleting old entries.")
+	zap.S().Info("Found", len(missingBlockNumbers), " missing blocks. Now deleting old entries.")
 	// Delete old rows
-	err = crud.GetMissingBlockCrud().DeleteMissing()
+	err = crud.GetMissingBlockCrud().DeleteMissing("number > 0")
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
@@ -70,8 +70,11 @@ func findMissingBlocks() {
 	// Insert new rows
 	for _, missingBlockNumber := range missingBlockNumbers {
 		zap.S().Warn(fmt.Sprintf("Found missing block %d", missingBlockNumber))
-		crud.GetMissingBlockCrud().LoaderChannel <- &models.MissingBlock{
+		err = crud.GetMissingBlockCrud().UpsertOne(&models.MissingBlock{
 			Number: missingBlockNumber,
+		})
+		if err != nil {
+			zap.S().Fatal(err.Error())
 		}
 	}
 

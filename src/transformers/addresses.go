@@ -15,7 +15,7 @@ var allAddresses = make(map[string]bool)
 func enrichContractsMeta(address *models.Address) {
 	result, err := service.IconNodeServiceGetScoreStatus(address.Address)
 	if err != nil {
-		zap.S().Warn("Could not get tx result for hash: ", err.Error(), ",Address=", address.Address)
+		zap.S().Warn("Could not get contract status: ", err.Error(), ",Address=", address.Address)
 		return
 	}
 
