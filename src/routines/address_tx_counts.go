@@ -80,6 +80,12 @@ func GetAddressTxCounts(address *models.Address) *models.Address {
 		return nil
 	}
 	if address.IsToken {
+		countTokenTx, err = crud.GetTokenTransferCrud().CountWhere("token_contract_address", address.Address)
+		if err != nil {
+			zap.S().Warn("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
+			return nil
+		}
+		address.TokenTransferCount = countTokenTx
 		err = redis.GetRedisClient().SetCount(
 			config.Config.RedisKeyPrefix+"token_transfer_count_by_token_contract_"+address.Address,
 			countTokenTx,
