@@ -79,6 +79,16 @@ func GetAddressTxCounts(address *models.Address) *models.Address {
 		zap.S().Warn("Routine=TokenTransfer, Address=", address.Address, " - Error: ", err.Error())
 		return nil
 	}
+	if address.IsToken {
+		err = redis.GetRedisClient().SetCount(
+			config.Config.RedisKeyPrefix+"token_transfer_count_by_token_contract_"+address.Address,
+			countTokenTx,
+		)
+		if err != nil {
+			zap.S().Warn("Routine=TokenTransfer, Address=", address.Address, " - Error: ", err.Error())
+			return nil
+		}
+	}
 
 	// Log Count
 	countLog, err := crud.GetLogCrud().CountWhere("address", address.Address)
