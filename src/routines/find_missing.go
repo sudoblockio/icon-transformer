@@ -59,12 +59,16 @@ func findMissingBlocks() {
 	if err != nil {
 		zap.S().Fatal(err.Error())
 	}
+	zap.S().Info("Found ", len(missingBlockNumbers), " missing blocks. Now deleting old entries.")
 
-	zap.S().Info("Found", len(missingBlockNumbers), " missing blocks. Now deleting old entries.")
-	// Delete old rows
-	err = crud.GetMissingBlockCrud().DeleteMissing("number > 0")
-	if err != nil {
-		zap.S().Fatal(err.Error())
+	_, tableCheck := crud.GetMissingBlockCrud().SelectMany(1,1)
+	if tableCheck != nil {
+		// Delete old rows
+		err = crud.GetMissingBlockCrud().DeleteMissing("number > 0")
+		if err != nil {
+			zap.S().Fatal(err.Error())
+		}
+		zap.S().Info("Deleted rows")
 	}
 
 	// Insert new rows
