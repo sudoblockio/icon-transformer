@@ -80,12 +80,17 @@ func findMissingBlocks() {
 	// Insert new rows
 	for _, missingBlockNumber := range missingBlockNumbers {
 		zap.S().Info(fmt.Sprintf("Found missing block %d", missingBlockNumber))
-		err = crud.GetMissingBlockCrud().UpsertOne(&models.MissingBlock{
+
+		missingBlock := &models.MissingBlock{
 			Number: missingBlockNumber,
-		})
-		if err != nil {
-			zap.S().Fatal(err.Error())
 		}
+		crud.MissingBlockCrud.LoaderChannel <- missingBlock
+		//err = crud.GetMissingBlockCrud().UpsertOne(&models.MissingBlock{
+		//	Number: missingBlockNumber,
+		//})
+		//if err != nil {
+		//	zap.S().Fatal(err.Error())
+		//}
 	}
 
 	zap.S().Info("Creating new jobs.")
