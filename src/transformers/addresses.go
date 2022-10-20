@@ -12,7 +12,7 @@ import (
 
 var allAddresses = make(map[string]bool)
 
-func enrichContractsMeta(address *models.Address) {
+func EnrichContractsMeta(address *models.Address) {
 	result, err := service.IconNodeServiceGetScoreStatus(address.Address)
 	if err != nil {
 		zap.S().Warn("Could not get contract status: ", err.Error(), ",Address=", address.Address)
@@ -49,7 +49,7 @@ func loadAddressCheckDuplicate(modelAddress *models.Address) {
 	if _, ok := allAddresses[modelAddress.Address]; !ok {
 
 		if modelAddress.IsContract || modelAddress.IsToken {
-			enrichContractsMeta(modelAddress)
+			EnrichContractsMeta(modelAddress)
 		}
 
 		allAddresses[modelAddress.Address] = true

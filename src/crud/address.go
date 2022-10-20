@@ -81,6 +81,21 @@ func GetAddressRoutineCruds() map[string]*Crud[models.Address, models.AddressORM
 				},
 				Name: "counts",
 			},
+			{
+				Columns: []string{
+					"address",
+					"is_contract",
+					"audit_tx_hash",
+					"code_hash",
+					"deploy_tx_hash",
+					"contract_type",
+					"status",
+					"owner",
+					"name",
+					"symbol",
+				},
+				Name: "contract_meta",
+			},
 		} {
 			AddressRoutineCruds[v.Name] = GetCrud(models.Address{}, models.AddressORM{})
 			AddressRoutineCruds[v.Name].dbBufferWait = 250 * time.Millisecond

@@ -16,6 +16,7 @@ import (
 var addressRoutines = []func(a *models.Address){
 	setAddressBalances,
 	SetAddressTxCounts,
+	setAddressContractMeta,
 }
 
 var tokenAddressRoutines = []func(t *models.TokenAddress){
