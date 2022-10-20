@@ -9,7 +9,6 @@ import (
 
 	"github.com/sudoblockio/icon-transformer/config"
 	"github.com/sudoblockio/icon-transformer/crud"
-	"github.com/sudoblockio/icon-transformer/models"
 	"go.uber.org/zap"
 )
 
@@ -66,32 +65,32 @@ func findMissingBlocks() {
 		return
 	}
 
-	_, tableCheck := crud.GetMissingBlockCrud().SelectMany(1, 1)
-	if tableCheck != nil {
-		// Delete old rows
-		zap.S().Info("Deleting missing blocks rows in DB.")
-		err = crud.GetMissingBlockCrud().DeleteMissing("number > 0")
-		if err != nil {
-			zap.S().Fatal(err.Error())
-		}
-		zap.S().Info("Deleted rows")
-	}
-
-	// Insert new rows
-	for _, missingBlockNumber := range missingBlockNumbers {
-		zap.S().Info(fmt.Sprintf("Found missing block %d", missingBlockNumber))
-
-		missingBlock := &models.MissingBlock{
-			Number: missingBlockNumber,
-		}
-		crud.MissingBlockCrud.LoaderChannel <- missingBlock
-		//err = crud.GetMissingBlockCrud().UpsertOne(&models.MissingBlock{
-		//	Number: missingBlockNumber,
-		//})
-		//if err != nil {
-		//	zap.S().Fatal(err.Error())
-		//}
-	}
+	//_, tableCheck := crud.GetMissingBlockCrud().SelectMany(1, 1)
+	//if tableCheck != nil {
+	//	// Delete old rows
+	//	zap.S().Info("Deleting missing blocks rows in DB.")
+	//	err = crud.GetMissingBlockCrud().DeleteMissing("number > 0")
+	//	if err != nil {
+	//		zap.S().Fatal(err.Error())
+	//	}
+	//	zap.S().Info("Deleted rows")
+	//}
+	//
+	//// Insert new rows
+	//for _, missingBlockNumber := range missingBlockNumbers {
+	//	zap.S().Info(fmt.Sprintf("Found missing block %d", missingBlockNumber))
+	//
+	//	missingBlock := &models.MissingBlock{
+	//		Number: missingBlockNumber,
+	//	}
+	//	crud.MissingBlockCrud.LoaderChannel <- missingBlock
+	//	//err = crud.GetMissingBlockCrud().UpsertOne(&models.MissingBlock{
+	//	//	Number: missingBlockNumber,
+	//	//})
+	//	//if err != nil {
+	//	//	zap.S().Fatal(err.Error())
+	//	//}
+	//}
 
 	zap.S().Info("Creating new jobs.")
 	// Create extractor jobs

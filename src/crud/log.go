@@ -1,10 +1,8 @@
 package crud
 
 import (
-	"sync"
-	"time"
-
 	"github.com/sudoblockio/icon-transformer/models"
+	"sync"
 )
 
 var logCrudOnce sync.Once
@@ -17,8 +15,6 @@ func GetLogCrud() *Crud[models.Log, models.LogORM] {
 
 		LogCrud.Migrate()
 		LogCrud.CreateIndexes("CREATE INDEX IF NOT EXISTS log_idx_address_block_number ON public.logs USING btree (address, block_number)")
-
-		LogCrud.dbBufferWait = 10 * time.Millisecond
 
 		LogCrud.MakeStartLoaderChannel()
 	})

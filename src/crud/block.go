@@ -1,10 +1,8 @@
 package crud
 
 import (
-	"sync"
-	"time"
-
 	"github.com/sudoblockio/icon-transformer/models"
+	"sync"
 )
 
 var blockCrudOnce sync.Once
@@ -16,7 +14,6 @@ func GetBlockCrud() *Crud[models.Block, models.BlockORM] {
 		BlockCrud = GetCrud(models.Block{}, models.BlockORM{})
 
 		BlockCrud.Migrate()
-		BlockCrud.dbBufferWait = 10 * time.Millisecond
 
 		BlockCrud.MakeStartLoaderChannel()
 	})
