@@ -77,6 +77,21 @@ func getModelPrimaryKeys[T any](model T) []clause.Column {
 	return fields
 }
 
+// getModelPrimaryKeyFields - Get a slice of primary keys in pascal case from the ORM Model's tags
+func getModelPrimaryKeyFields[T any](model T) []string {
+	var fields []string
+	vals := reflect.ValueOf(model)
+	for i, _ := range reflect.VisibleFields(vals.Type()) {
+		gormField, _ := vals.Type().Field(i).Tag.Lookup("gorm")
+		//if gormField == "primary_key" {
+		if matchPrimaryKey.MatchString(gormField) {
+			// Assuming keys are in snake case -> Should probably do another lookup
+			fields = append(fields, vals.Type().Field(i).Name)
+		}
+	}
+	return fields
+}
+
 // columnToString - return slice of strings from slice of columns
 func columnToString(cols []clause.Column) []string {
 	var columnString []string
@@ -106,7 +121,7 @@ func (m *Crud[M, O]) startBatchUpsertLoader() {
 				continue
 			}
 
-			channelOutputs = removeDuplicatePrimaryKeys[M](channelOutputs, columnToString(m.primaryKeys))
+			channelOutputs = removeDuplicatePrimaryKeys[M](channelOutputs, m.primaryKeyFields)
 
 			// Metrics
 			batchCounter++

@@ -22,6 +22,7 @@ type Crud[M any, O any] struct {
 	ModelORM            *O
 	columns             []string
 	primaryKeys         []clause.Column
+	primaryKeyFields    []string
 	TableName           string
 	metrics             CrudMetrics
 	LoaderChannel       chan *M
@@ -49,6 +50,7 @@ func GetCrud[M any, O ModelOrm](m M, o O) *Crud[M, O] {
 		ModelORM:            &o,
 		columns:             getModelColumnNames(m),
 		primaryKeys:         getModelPrimaryKeys(o),
+		primaryKeyFields:    getModelPrimaryKeyFields(o),
 		TableName:           o.TableName(),
 		dbBufferWait:        config.Config.DbBufferWait,
 		loaderChannelBuffer: config.Config.DbLoaderChannelBuffer,

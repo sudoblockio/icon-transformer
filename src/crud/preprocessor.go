@@ -1,7 +1,9 @@
 package crud
 
 import (
+	"fmt"
 	"reflect"
+	"strconv"
 )
 
 func removeDuplicatePrimaryKeys[m any](models []*m, primaryKeys []string) []*m {
@@ -11,7 +13,16 @@ func removeDuplicatePrimaryKeys[m any](models []*m, primaryKeys []string) []*m {
 
 	for _, v := range models {
 		for _, pk := range primaryKeys {
-			key += reflect.ValueOf(*v).FieldByName(pk).String()
+			r := reflect.ValueOf(*v).FieldByName(pk)
+
+			switch r.Type().String() {
+			default:
+				error.Error(fmt.Errorf("Unknown type of field %s", key))
+			case "string":
+				key += r.String()
+			case "int64", "int", "int32":
+				key += strconv.Itoa(int(r.Int()))
+			}
 		}
 
 		if _, ok := unique[key]; !ok {
