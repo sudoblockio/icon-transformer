@@ -20,15 +20,22 @@ func EnrichContractsMeta(address *models.Address) {
 	}
 
 	if result == nil {
-		zap.S().Warn("Could not get contract status: ", err.Error(), ",Address=", address.Address)
+		zap.S().Warn("Could not get contract status result: ", err.Error(), ",Address=", address.Address)
 		return
 	}
 
-	auditTxHash, ok := result["current"].(map[string]interface{})["auditTxHash"].(string)
-	codeHash, ok := result["current"].(map[string]interface{})["codeHash"].(string)
-	deployTxHash, ok := result["current"].(map[string]interface{})["deployTxHash"].(string)
-	contractType, ok := result["current"].(map[string]interface{})["type"].(string)
-	status, ok := result["current"].(map[string]interface{})["status"].(string)
+	current, ok := result["current"].(map[string]interface{})
+
+	if !ok {
+		zap.S().Warn("Could not parse contract status: ", err.Error(), ",Address=", address.Address)
+		return
+	}
+
+	auditTxHash, ok := current["auditTxHash"].(string)
+	codeHash, ok := current["codeHash"].(string)
+	deployTxHash, ok := current["deployTxHash"].(string)
+	contractType, ok := current["type"].(string)
+	status, ok := current["status"].(string)
 	owner, ok := result["owner"].(string)
 
 	if ok == false {
