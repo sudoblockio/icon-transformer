@@ -19,6 +19,11 @@ func EnrichContractsMeta(address *models.Address) {
 		return
 	}
 
+	if result == nil {
+		zap.S().Warn("Could not get contract status: ", err.Error(), ",Address=", address.Address)
+		return
+	}
+
 	auditTxHash, ok := result["current"].(map[string]interface{})["auditTxHash"].(string)
 	codeHash, ok := result["current"].(map[string]interface{})["codeHash"].(string)
 	deployTxHash, ok := result["current"].(map[string]interface{})["deployTxHash"].(string)
