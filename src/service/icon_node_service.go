@@ -146,7 +146,10 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 	// Extract balance
 	tokenContractName, ok := body["result"].(string)
 	if ok == false {
-		return "", errors.New("Invalid response")
+		return "", errors.New(fmt.Sprintf(
+			"Invalid response for Address=", tokenContractAddress,
+			" Body=", body,
+		))
 	}
 
 	// Redis cache
