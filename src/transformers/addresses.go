@@ -27,7 +27,7 @@ func EnrichContractsMeta(address *models.Address) {
 	current, ok := result["current"].(map[string]interface{})
 
 	if !ok {
-		zap.S().Warn("Could not parse contract status: ", err.Error(), ",Address=", address.Address)
+		zap.S().Warn("Could not parse contract status: Address=", address.Address)
 		return
 	}
 
