@@ -147,8 +147,7 @@ func IconNodeServiceGetTokenContractName(tokenContractAddress string) (string, e
 	tokenContractName, ok := body["result"].(string)
 	if ok == false {
 		return "", errors.New(fmt.Sprintf(
-			"Invalid response for Address=", tokenContractAddress,
-			" Body=", body,
+			"Invalid response for Address=%s and body=%s", tokenContractAddress, body,
 		))
 	}
 
