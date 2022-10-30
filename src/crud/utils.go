@@ -159,6 +159,12 @@ func (m *Crud[M, O]) createCrudMetrics() {
 		"number of duplicate msg errors sql 21000",
 		map[string]string{"table_name": m.TableName, "series": m.metrics.Name},
 	)
+
+	m.metrics.loaderChannelDeadlockErrors = metrics.CreateCounter(
+		"loader_deadlock_errors",
+		"number of deadlock msg errors sql 40P01",
+		map[string]string{"table_name": m.TableName, "series": m.metrics.Name},
+	)
 }
 
 func (m *Crud[M, O]) MakeStartLoaderChannel() {

@@ -13,6 +13,7 @@ type CrudMetrics struct {
 	Name                         string
 	loaderChannelLength          prometheus.Gauge
 	loaderChannelDuplicateErrors prometheus.Counter
+	loaderChannelDeadlockErrors  prometheus.Counter
 }
 
 // Generic struct to hold common objects when doing crud
@@ -101,6 +102,9 @@ func (m *Crud[M, O]) DefaultRetryHandler(err error, values []*M) error {
 		return nil
 	case "21000":
 		m.metrics.loaderChannelDuplicateErrors.Inc()
+		return m.LoopUpsertOne(values)
+	case "40P01":
+		m.metrics.loaderChannelDeadlockErrors.Inc()
 		return m.LoopUpsertOne(values)
 	default:
 		zap.S().Info("Error on table: ", m.TableName)
