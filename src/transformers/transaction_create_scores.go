@@ -58,17 +58,6 @@ func updateTransactionTypes(
 	} else {
 		upsertTransactionType(transactionETL.Hash, scoreAddress, oldStatus)
 	}
-
-	//if len(*transactionTypeCreationEvents) == 0 || blockETL.Number == (*transactionTypeCreationEvents)[0].BlockNumber {
-	//	upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
-	//} else if blockETL.Number < (*transactionTypeCreationEvents)[0].BlockNumber {
-	//	upsertTransactionType(blockETL.Hash, scoreAddress, newStatus)
-	//	for _, v := range *transactionTypeCreationEvents {
-	//		upsertTransactionType(v.Hash, scoreAddress, oldStatus)
-	//	}
-	//} else {
-	//	upsertTransactionType(blockETL.Hash, scoreAddress, oldStatus)
-	//}
 }
 
 func getTransactionTypes(scoreAddress string, transactionTypes []int32) *[]models.Transaction {
@@ -168,8 +157,6 @@ func transactionByAddressCreateScores(blockETL *models.BlockETL) {
 					Address:         scoreAddress,
 					BlockNumber:     blockETL.Number,
 				}
-
-				//transactionByAddresses = append(transactionByAddresses, transactionByAddress)
 
 				crud.TransactionByAddressCreateScoreCrud.LoaderChannel <- transactionByAddress
 				transactionTypeCreateScores := getTransactionTypes(scoreAddress, []int32{3, 4})

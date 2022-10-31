@@ -250,10 +250,6 @@ func tokenTransferCounts(tokenTransfer *models.TokenTransfer) {
 			zap.S().Warn(err.Error())
 		}
 
-		//////////////////////
-		// Count by address //
-		//////////////////////
-
 		// Get count
 		countByAddress := map[string]int64{}
 		countByTokenContract := map[string]int64{}

@@ -83,10 +83,6 @@ var Processors = []Processor{
 		initFunctions:       []func(){crud.InitLogCrud},
 	},
 	{
-		transformerFunction: tokenTransfers,
-		initFunctions:       []func(){crud.InitTokenTransferCrud},
-	},
-	{
 		transformerFunction: transactionByAddresses,
 		initFunctions:       []func(){crud.InitTransactionByAddressCrud},
 	},
@@ -149,8 +145,10 @@ func callProcessorInits() {
 }
 
 var metricsBlockTransformer struct {
-	addressesSeen    prometheus.Counter
-	addressesIgnored prometheus.Counter
+	addressesSeen         prometheus.Counter
+	addressesIgnored      prometheus.Counter
+	tokenAddressesSeen    prometheus.Counter
+	tokenAddressesIgnored prometheus.Counter
 }
 
 func setupBlockTransformerMetrics() {
@@ -162,6 +160,16 @@ func setupBlockTransformerMetrics() {
 	metricsBlockTransformer.addressesIgnored = metrics.CreateCounter(
 		"transformer_addresses_ignored",
 		"number of addresses ignored",
+		nil,
+	)
+	metricsBlockTransformer.tokenAddressesSeen = metrics.CreateCounter(
+		"transformer_token_addresses_seen",
+		"number of token addresses transformed",
+		nil,
+	)
+	metricsBlockTransformer.tokenAddressesIgnored = metrics.CreateCounter(
+		"transformer_token_addresses_ignored",
+		"number of token addresses ignored",
 		nil,
 	)
 }
@@ -177,6 +185,5 @@ func runBlockProcessors(blockETL *models.BlockETL) {
 			f(blockETL)
 		}()
 	}
-
 	wg.Wait()
 }

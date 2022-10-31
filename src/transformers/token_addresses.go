@@ -10,6 +10,21 @@ import (
 	"time"
 )
 
+var allTokenAddresses = make(map[string]bool)
+
+func LoadTokenContractCheckDuplicates(tokenAddress *models.TokenAddress) {
+	if _, ok := allTokenAddresses[tokenAddress.Address+tokenAddress.TokenContractAddress]; !ok {
+
+		allTokenAddresses[tokenAddress.Address+tokenAddress.TokenContractAddress] = true
+		crud.TokenAddressCrud.LoaderChannel <- tokenAddress
+
+		// Metrics
+		metricsBlockTransformer.tokenAddressesSeen.Inc()
+		return
+	}
+	metricsBlockTransformer.tokenAddressesIgnored.Inc()
+}
+
 func tokenAddresses(blockETL *models.BlockETL) {
 
 	tokenAddresses := []*models.TokenAddress{}
@@ -32,7 +47,7 @@ func tokenAddresses(blockETL *models.BlockETL) {
 					if config.Config.ProcessCounts {
 						tokenAddresses = append(tokenAddresses, tokenAddress)
 					}
-					crud.TokenAddressCrud.LoaderChannel <- tokenAddress
+					LoadTokenContractCheckDuplicates(tokenAddress)
 				}
 
 				// To Address
@@ -46,7 +61,7 @@ func tokenAddresses(blockETL *models.BlockETL) {
 					if config.Config.ProcessCounts {
 						tokenAddresses = append(tokenAddresses, tokenAddress)
 					}
-					crud.TokenAddressCrud.LoaderChannel <- tokenAddress
+					LoadTokenContractCheckDuplicates(tokenAddress)
 				}
 			}
 		}
@@ -76,10 +91,6 @@ func tokenAddressBalances(blockETL *models.BlockETL, tokenAddresses []*models.To
 				continue
 			}
 			tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
-
-			//// Copy struct for pointer conflicts
-			//tokenAddressCopy := &models.TokenAddress{}
-			//copier.Copy(tokenAddressCopy, &tokenAddress)
 
 			// Insert to database
 			crud.GetTokenAddressCrud().UpsertOneColumns(tokenAddress, []string{"address", "balance", "token_contract_address"})
