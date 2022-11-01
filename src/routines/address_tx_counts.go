@@ -101,7 +101,6 @@ func GetAddressTxCounts(address *models.Address) {
 
 func SetAddressTxCounts(address *models.Address) {
 	GetAddressTxCounts(address)
-	crud.GetAddressRoutineCruds()["counts"].LoaderChannel <- address
 	err := crud.GetAddressRoutineCruds()["counts"].UpsertOne(address)
 	if err != nil {
 		zap.S().Info(err)
