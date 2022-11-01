@@ -74,10 +74,10 @@ func GetAddressRoutineCruds() map[string]*Crud[models.Address, models.AddressORM
 			{
 				Columns: []string{
 					"address",
-					//"transaction_count",
-					//"transaction_internal_count",
-					//"token_transfer_count",
-					//"log_count",
+					"transaction_count",
+					"transaction_internal_count",
+					"token_transfer_count",
+					"log_count",
 				},
 				Name: "counts",
 			},
