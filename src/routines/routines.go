@@ -31,7 +31,9 @@ func StartRecovery() {
 	setTransactionCounts()
 
 	// One shot
-	addressTypeRoutine()
+	if config.Config.NetworkName == "mainnet" {
+		addressTypeRoutine()
+	}
 	countAddressesToRedisRoutine()
 
 	// By address
@@ -52,7 +54,9 @@ func CronStart() {
 
 	zap.S().Warn("Init cron...")
 	// Init - Jobs that run once on startup
-	addressTypeRoutine()
+	if config.Config.NetworkName == "mainnet" {
+		addressTypeRoutine()
+	}
 
 	// Short
 	go RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
