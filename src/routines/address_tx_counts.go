@@ -12,7 +12,7 @@ func GetAddressTxCounts(address *models.Address) {
 	// Regular Tx Count
 	countRegular, err := crud.GetTransactionByAddressCrud().CountWhere("address", address.Address)
 	if err != nil {
-		zap.S().Info("Routine=AddressCount - ERROR: ", err.Error())
+		zap.S().Info("Routine=RegularTxAddressCount - ERROR: ", err.Error())
 	} else {
 		address.TransactionCount = countRegular
 		err = redis.GetRedisClient().SetCount(
@@ -27,7 +27,7 @@ func GetAddressTxCounts(address *models.Address) {
 	// Regular Tx Count
 	countIcx, err := crud.GetTransactionCrud().CountTransactionIcxByAddress(address.Address)
 	if err != nil {
-		zap.S().Info("Routine=AddressCount - ERROR: ", err.Error())
+		zap.S().Info("Routine=IcxTxAddressCount - ERROR: ", err.Error())
 	} else {
 		err = redis.GetRedisClient().SetCount(
 			config.Config.RedisKeyPrefix+"transaction_icx_count_by_address_"+address.Address,
@@ -41,7 +41,7 @@ func GetAddressTxCounts(address *models.Address) {
 	// Internal Tx Count
 	countInternal, err := crud.GetTransactionCrud().CountTransactionsInternalByAddress(address.Address)
 	if err != nil {
-		zap.S().Info("Routine=AddressCount - ERROR: ", err.Error())
+		zap.S().Info("Routine=InternalTxAddressCount - ERROR: ", err.Error())
 	} else {
 		address.TransactionInternalCount = countInternal
 		err = redis.GetRedisClient().SetCount(
@@ -56,7 +56,7 @@ func GetAddressTxCounts(address *models.Address) {
 	// Token Transfer Count
 	countTokenTx, err := crud.GetTokenTransferCrud().CountByAddress(address.Address)
 	if err != nil {
-		zap.S().Info("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
+		zap.S().Info("Routine=TokenTxCount, Address=", address.Address, " - Error: ", err.Error())
 	} else {
 		address.TokenTransferCount = countTokenTx
 		err = redis.GetRedisClient().SetCount(
@@ -68,9 +68,9 @@ func GetAddressTxCounts(address *models.Address) {
 		}
 	}
 	if address.IsToken {
-		countTokenTx, err = crud.GetTokenTransferCrud().CountWhere("token_contract_address", address.Address)
+		countTokenTx, err := crud.GetTokenTransferCrud().CountWhere("token_contract_address", address.Address)
 		if err != nil {
-			zap.S().Info("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
+			zap.S().Info("Routine=TokenTxCount, Address=", address.Address, " - Error: ", err.Error())
 		} else {
 			address.TokenTransferCount = countTokenTx
 			err = redis.GetRedisClient().SetCount(
@@ -86,9 +86,9 @@ func GetAddressTxCounts(address *models.Address) {
 	// Log Count
 	countLog, err := crud.GetLogCrud().CountWhere("address", address.Address)
 	if err != nil {
-		zap.S().Info("Routine=InternalTxCount, Address=", address.Address, " - Error: ", err.Error())
+		zap.S().Info("Routine=LogCount, Address=", address.Address, " - Error: ", err.Error())
 	} else {
-		address.TransactionInternalCount = countLog
+		address.LogCount = countLog
 		err = redis.GetRedisClient().SetCount(
 			config.Config.RedisKeyPrefix+"log_count_by_address_"+address.Address,
 			countLog,
