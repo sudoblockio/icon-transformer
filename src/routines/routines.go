@@ -93,6 +93,8 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 			zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with workerId=", i)
 			// Run loop until addresses have all been iterated over
 			for {
+				wg.Add(1)
+
 				routineItems, err := Crud.SelectMany(limit, skip)
 				if errors.Is(err, gorm.ErrRecordNotFound) {
 					zap.S().Warn("Ending address routing with error=", err.Error())
@@ -118,6 +120,7 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 				zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
 
 				skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
+				wg.Done()
 			}
 		}()
 	}
