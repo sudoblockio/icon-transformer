@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.3.0](https://github.com/sudoblockio/icon-transformer/compare/v0.2.0...v0.3.0) (2022-11-18)
+
+
+### Features
+
+* add deduplication preprocessor to crud loader ([447ee0b](https://github.com/sudoblockio/icon-transformer/commit/447ee0b53a74e43a270c17ad60dce985f6cbeb64))
+* add metrics to addresses transformer ([05c4b28](https://github.com/sudoblockio/icon-transformer/commit/05c4b28154444234963fa72feb1cfe42a9fc63b1))
+
+
+### Bug Fixes
+
+* add addr on tx create score transformer ([1b829ef](https://github.com/sudoblockio/icon-transformer/commit/1b829eff65dd86ae21e672b2b94e116554e1ea54))
+* add contract metadata to addresses table ([ec638e6](https://github.com/sudoblockio/icon-transformer/commit/ec638e614d0b4a862142035c4a5f0e4cca837e79))
+* add token contract deduper to reduce deadlock issues ([9a3df67](https://github.com/sudoblockio/icon-transformer/commit/9a3df674f6109c8c54668d43ba2eecab8eaf81cd))
+* adding recovery for key=token_transfer_count_by_token_contract_ ([be3ac3a](https://github.com/sudoblockio/icon-transformer/commit/be3ac3a9b52979d636ce434dcdf02a52c409b203))
+* deadlock errors on upsert with metric to count errors ([e8e2a26](https://github.com/sudoblockio/icon-transformer/commit/e8e2a26be46669e94ce47471e2809e96f4a6526e))
+* deadlock on find missing routine ([28006c5](https://github.com/sudoblockio/icon-transformer/commit/28006c59cbabd2ca7267338b36c2721d843beb86))
+* dropped records from non-string primary keys in removeDuplicatePrimaryKeys func ([45f94d4](https://github.com/sudoblockio/icon-transformer/commit/45f94d46ecb57770a662a0c6ead15683f1126da8))
+* load address types for non-mainnet networks ([563957f](https://github.com/sudoblockio/icon-transformer/commit/563957f4d9572fa286a295bea59e018d2dee9d8b))
+* log counts not showing up properly [#58](https://github.com/sudoblockio/icon-transformer/issues/58) ([463b1c8](https://github.com/sudoblockio/icon-transformer/commit/463b1c85d53e17bcf116cf270b66021b165454b2))
+* returning nil for addreses with no balance / failed txs ([53f806f](https://github.com/sudoblockio/icon-transformer/commit/53f806fbfab7516bf41afa55f835dca28951a2e7))
+* soft error handling for address count routine that was overwriting with wrong values ([31c1564](https://github.com/sudoblockio/icon-transformer/commit/31c1564b0edeb4762842d05f25fca250c8267a34))
+
 ## [0.2.0](https://github.com/sudoblockio/icon-transformer/compare/v0.1.2...v0.2.0) (2022-08-17)
 
 
