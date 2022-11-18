@@ -78,14 +78,24 @@ func RoutinesCron(routines []func(), sleepDuration time.Duration) {
 	}
 }
 
+//func RunRoutine[M any, O any](routineItems *[]M, routines []func(*M)) {
+//	for i := 0; i < len(*routineItems); i++ {
+//		var item *M
+//		item = &(*routineItems)[i]
+//		for _, r := range routines {
+//			r(item)
+//		}
+//	}
+//}
+
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	var wg sync.WaitGroup
-	for i := 0; i <= (config.Config.RoutinesNumWorkers - 1); i++ {
+	for i := 0; i < config.Config.RoutinesNumWorkers; i++ {
 		wg.Add(1)
 
 		i := i
 		go func() {
-			defer wg.Done()
+			//defer wg.Done()
 			// Loop through all addresses
 			skip := i * config.Config.RoutinesBatchSize
 			limit := config.Config.RoutinesBatchSize
@@ -96,32 +106,30 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 
 				routineItems, err := Crud.SelectMany(limit, skip)
 				if errors.Is(err, gorm.ErrRecordNotFound) {
-					zap.S().Warn("Ending address routing with error=", err.Error())
+					zap.S().Warn("Ending address routine with error=", err.Error())
 					break
 				} else if err != nil {
-					zap.S().Warn("Ending address routing with error=", err.Error())
+					zap.S().Warn("Ending address routine with error=", err.Error())
 					break
 				}
 				if len(*routineItems) == 0 {
-					zap.S().Warn("Ending address routing, no more addresses")
+					zap.S().Warn("Ending address routine, no more addresses")
 					break
 				}
 
 				zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
 				for i := 0; i < len(*routineItems); i++ {
-					wg.Add(1)
 					var item *M
 					item = &(*routineItems)[i]
 					for _, r := range routines {
 						r(item)
 					}
-					wg.Done()
 				}
-
 				zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
 
 				skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 			}
+			wg.Done()
 		}()
 	}
 
