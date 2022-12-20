@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/sudoblockio/icon-transformer/compare/v0.3.0...v0.3.1) (2022-12-20)
+
+
+### Bug Fixes
+
+* add count routine to cron ([3c5262b](https://github.com/sudoblockio/icon-transformer/commit/3c5262bc005f714a8e1e8f69dc52f8fad77f4e48))
+
 ## [0.3.0](https://github.com/sudoblockio/icon-transformer/compare/v0.2.0...v0.3.0) (2022-11-18)
 
 
