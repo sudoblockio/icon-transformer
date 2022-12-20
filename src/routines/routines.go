@@ -42,12 +42,14 @@ func StartRecovery() {
 	LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
 
 	zap.S().Info("finished recovery. exiting..")
+	time.Sleep(2 * time.Second)
 	os.Exit(0)
 }
 
 var cronRoutines = []func(){
 	addressIsPrep,
 	tokenAddressCountRoutine, // Isn't used - RM?
+	countAddressesToRedisRoutine,
 }
 
 func CronStart() {
@@ -90,9 +92,8 @@ func RoutinesCron(routines []func(), sleepDuration time.Duration) {
 
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	var wg sync.WaitGroup
+	wg.Add(config.Config.RoutinesNumWorkers)
 	for i := 0; i < config.Config.RoutinesNumWorkers; i++ {
-		wg.Add(1)
-
 		i := i
 		go func() {
 			//defer wg.Done()
@@ -132,6 +133,5 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 			wg.Done()
 		}()
 	}
-
 	wg.Wait()
 }
