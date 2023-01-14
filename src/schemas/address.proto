@@ -28,7 +28,7 @@ message Address {
   string code_hash = 21;
   string deploy_tx_hash = 22;
   string contract_type = 15 [(gorm.field).tag = {index: "address_idx_contract_type"}];
-  string status = 10;
+  string status = 10 [(gorm.field).tag = {index: "address_idx_status"}];
   string owner = 23;
 
   // Governance Prep Processed

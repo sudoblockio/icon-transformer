@@ -25,7 +25,7 @@ type AddressORM struct {
 	LogCount                 int64  `gorm:"index:address_idx_log_count"`
 	Name                     string `gorm:"index:address_idx_contract_name"`
 	Owner                    string
-	Status                   string
+	Status                   string `gorm:"index:address_idx_status"`
 	Symbol                   string
 	TokenStandard            string `gorm:"index:address_idx_token_standard"`
 	TokenTransferCount       int64  `gorm:"index:address_idx_token_transfer_count"`
