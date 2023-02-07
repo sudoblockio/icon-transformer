@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/sudoblockio/icon-transformer/compare/v0.3.1...v0.3.2) (2023-02-07)
+
+
+### Bug Fixes
+
+* add appropriate indexes for speeding up queries for *_by_address tables [#66](https://github.com/sudoblockio/icon-transformer/issues/66) ([0b55c08](https://github.com/sudoblockio/icon-transformer/commit/0b55c089d83a090c0f3934d54fb6ad56d4175414))
+
 ## [0.3.1](https://github.com/sudoblockio/icon-transformer/compare/v0.3.0...v0.3.1) (2022-12-20)
 
 
