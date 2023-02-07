@@ -15,6 +15,11 @@ func GetTokenTransferByAddressCrud() *Crud[models.TokenTransferByAddress, models
 		TokenTransferByAddressCrud = GetCrud(models.TokenTransferByAddress{}, models.TokenTransferByAddressORM{})
 
 		TokenTransferByAddressCrud.Migrate()
+		TokenTransferByAddressCrud.CreateIndexes(`
+		create index if not exists token_transfer_by_addresses_idx_address_block_number_index
+		on public.token_transfer_by_addresses
+		(address asc, block_number desc)
+		`)
 
 		TokenTransferByAddressCrud.MakeStartLoaderChannel()
 	})

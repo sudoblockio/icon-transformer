@@ -14,6 +14,11 @@ func GetTransactionInternalByAddressCrud() *Crud[models.TransactionInternalByAdd
 		TransactionInternalByAddressCrud = GetCrud(models.TransactionInternalByAddress{}, models.TransactionInternalByAddressORM{})
 
 		TransactionInternalByAddressCrud.Migrate()
+		TransactionInternalByAddressCrud.CreateIndexes(`
+		create index if not exists transaction_by_address_idx_address_block_number
+		on transaction_internal_by_addresses
+		(address, block_number DESC);
+		`)
 
 		TransactionInternalByAddressCrud.MakeStartLoaderChannel()
 	})

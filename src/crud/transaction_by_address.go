@@ -15,7 +15,11 @@ func GetTransactionByAddressCrud() *Crud[models.TransactionByAddress, models.Tra
 		TransactionByAddressCrud = GetCrud(models.TransactionByAddress{}, models.TransactionByAddressORM{})
 
 		TransactionByAddressCrud.Migrate()
-		TransactionByAddressCrud.CreateIndexes("CREATE INDEX IF NOT EXISTS transaction_by_addresses_idx_address_block_number_index ON public.transaction_by_addresses (address asc, block_number desc)")
+		TransactionByAddressCrud.CreateIndexes(`
+		create index if not exists transaction_by_addresses_idx_address_block_number_index 
+		on public.transaction_by_addresses 
+		(address asc, block_number desc)
+		`)
 
 		TransactionByAddressCrud.MakeStartLoaderChannel()
 

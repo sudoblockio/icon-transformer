@@ -10,5 +10,5 @@ message TokenTransferByAddress {
   string transaction_hash = 1 [(gorm.field).tag = {primary_key: true}];
   int64  log_index = 2 [(gorm.field).tag = {primary_key: true}];
   string address = 3 [(gorm.field).tag = {primary_key: true}];
-  int64 block_number = 4 [(gorm.field).tag = {index: "token_transfer_by_address_idx_block_number"}];
+  int64 block_number = 4;  // Requires custom index - See migration script
 }

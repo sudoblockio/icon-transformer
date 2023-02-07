@@ -11,7 +11,7 @@ import (
 
 type TokenTransferByAddressORM struct {
 	Address         string `gorm:"primary_key"`
-	BlockNumber     int64  `gorm:"index:token_transfer_by_address_idx_block_number"`
+	BlockNumber     int64
 	LogIndex        int64  `gorm:"primary_key"`
 	TransactionHash string `gorm:"primary_key"`
 }
@@ -172,7 +172,7 @@ func DefaultDeleteTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 	if err != nil {
 		return err
 	}
-	if ormObj.TransactionHash == "" {
+	if ormObj.LogIndex == 0 {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeDelete_); ok {
@@ -202,23 +202,23 @@ func DefaultDeleteTokenTransferByAddressSet(ctx context.Context, in []*TokenTran
 		return errors.NilArgumentError
 	}
 	var err error
-	keys := []int64{}
+	keys := []string{}
 	for _, obj := range in {
 		ormObj, err := obj.ToORM(ctx)
 		if err != nil {
 			return err
 		}
-		if ormObj.LogIndex == 0 {
+		if ormObj.TransactionHash == "" {
 			return errors.EmptyIdError
 		}
-		keys = append(keys, ormObj.LogIndex)
+		keys = append(keys, ormObj.TransactionHash)
 	}
 	if hook, ok := (interface{}(&TokenTransferByAddressORM{})).(TokenTransferByAddressORMWithBeforeDeleteSet); ok {
 		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
 			return err
 		}
 	}
-	err = db.Where("log_index in (?)", keys).Delete(&TokenTransferByAddressORM{}).Error
+	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferByAddressORM{}).Error
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func DefaultStrictUpdateTokenTransferByAddress(ctx context.Context, in *TokenTra
 		return nil, err
 	}
 	lockedRow := &TokenTransferByAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
+	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("address=?", ormObj.Address).First(lockedRow)
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeStrictUpdateCleanup); ok {
 		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
 			return nil, err
@@ -404,7 +404,7 @@ func DefaultListTokenTransferByAddress(ctx context.Context, db *gorm.DB) ([]*Tok
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("address")
 	ormResponse := []TokenTransferByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
