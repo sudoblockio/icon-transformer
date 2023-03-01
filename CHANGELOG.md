@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3](https://github.com/sudoblockio/icon-transformer/compare/v0.3.2...v0.3.3) (2023-03-01)
+
+
+### Bug Fixes
+
+* add transaction_index to token_transfers to allow sorting [#71](https://github.com/sudoblockio/icon-transformer/issues/71) ([70907cc](https://github.com/sudoblockio/icon-transformer/commit/70907cc73d596a2cd73ff3e7ddd53fa7051267d4))
+* add tx index to token_transfers_by_addres ([b6fbf1e](https://github.com/sudoblockio/icon-transformer/commit/b6fbf1e5cbe8e7d67606e31cd1b85c16505cc41f))
+
 ## [0.3.2](https://github.com/sudoblockio/icon-transformer/compare/v0.3.1...v0.3.2) (2023-02-07)
 
 
