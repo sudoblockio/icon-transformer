@@ -103,6 +103,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 					TokenContractName:    tokenContractName,
 					TokenContractSymbol:  tokenContractSymbol,
 					TransactionFee:       transactionFee,
+					TransactionIndex:     transactionETL.TransactionIndex,
 				}
 
 				//tokenTransfers = append(tokenTransfers, tokenTransfer)
@@ -171,6 +172,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 					TokenContractSymbol:  tokenContractSymbol,
 					TransactionFee:       transactionFee,
 					NftId:                nftId,
+					TransactionIndex:     transactionETL.TransactionIndex,
 				}
 
 				//tokenTransfers = append(tokenTransfers, tokenTransfer)
@@ -229,6 +231,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 					BlockTimestamp:       blockTimestamp,
 					TransactionFee:       transactionFee,
 					NftId:                nftId,
+					TransactionIndex:     transactionETL.TransactionIndex,
 				}
 
 				crud.TokenTransferCrud.LoaderChannel <- tokenTransfer

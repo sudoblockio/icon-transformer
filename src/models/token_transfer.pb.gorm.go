@@ -21,6 +21,7 @@ type TokenTransferORM struct {
 	TokenContractSymbol  string
 	TransactionFee       string
 	TransactionHash      string `gorm:"primary_key"`
+	TransactionIndex     int64
 	Value                string
 	ValueDecimal         float64
 }
@@ -53,6 +54,7 @@ func (m *TokenTransfer) ToORM(ctx context.Context) (TokenTransferORM, error) {
 	to.TokenContractSymbol = m.TokenContractSymbol
 	to.TransactionFee = m.TransactionFee
 	to.NftId = m.NftId
+	to.TransactionIndex = m.TransactionIndex
 	if posthook, ok := interface{}(m).(TokenTransferWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -82,6 +84,7 @@ func (m *TokenTransferORM) ToPB(ctx context.Context) (TokenTransfer, error) {
 	to.TokenContractSymbol = m.TokenContractSymbol
 	to.TransactionFee = m.TransactionFee
 	to.NftId = m.NftId
+	to.TransactionIndex = m.TransactionIndex
 	if posthook, ok := interface{}(m).(TokenTransferWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -199,7 +202,7 @@ func DefaultDeleteTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm
 	if err != nil {
 		return err
 	}
-	if ormObj.LogIndex == 0 {
+	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeDelete_); ok {
@@ -436,6 +439,10 @@ func DefaultApplyFieldMaskTokenTransfer(ctx context.Context, patchee *TokenTrans
 		}
 		if f == prefix+"NftId" {
 			patchee.NftId = patcher.NftId
+			continue
+		}
+		if f == prefix+"TransactionIndex" {
+			patchee.TransactionIndex = patcher.TransactionIndex
 			continue
 		}
 	}
