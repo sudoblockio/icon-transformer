@@ -19,20 +19,22 @@ func tokenTransferByAddress(blockETL *models.BlockETL) {
 				// From Address
 				fromAddress := logETL.Indexed[1]
 				tokenTransferByFromAddress := &models.TokenTransferByAddress{
-					TransactionHash: transactionETL.Hash,
-					LogIndex:        int64(iL),
-					Address:         fromAddress,
-					BlockNumber:     blockETL.Number,
+					TransactionHash:  transactionETL.Hash,
+					LogIndex:         int64(iL),
+					Address:          fromAddress,
+					BlockNumber:      blockETL.Number,
+					TransactionIndex: transactionETL.TransactionIndex,
 				}
 				crud.TokenTransferByAddressCrud.LoaderChannel <- tokenTransferByFromAddress
 
 				// To Address
 				toAddress := logETL.Indexed[2]
 				tokenTransferByToAddress := &models.TokenTransferByAddress{
-					TransactionHash: transactionETL.Hash,
-					LogIndex:        int64(iL),
-					Address:         toAddress,
-					BlockNumber:     blockETL.Number,
+					TransactionHash:  transactionETL.Hash,
+					LogIndex:         int64(iL),
+					Address:          toAddress,
+					BlockNumber:      blockETL.Number,
+					TransactionIndex: transactionETL.TransactionIndex,
 				}
 				crud.TokenTransferByAddressCrud.LoaderChannel <- tokenTransferByToAddress
 			}

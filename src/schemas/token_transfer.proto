@@ -20,4 +20,5 @@ message TokenTransfer {
   string token_contract_symbol = 11;
   string transaction_fee = 12;
   int64 nft_id = 13;
+  int64 transaction_index = 14 [(gorm.field).tag = {index: "token_transfer_idx_transaction_index"}];
 }
