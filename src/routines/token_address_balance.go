@@ -23,7 +23,12 @@ func setTokenAddressBalances(tokenAddress *models.TokenAddress) {
 	// There are ~1000x more addresses than contracts so putting more info in addresses table might be not worth it
 	// Also begs the question if splitting up the contracts service was a good idea
 	// Hex -> float64
-	tokenAddress.Balance = utils.StringHexToFloat64(balance, 18)
+	decimalBase, err := service.IconNodeServiceGetTokenDecimalBase(tokenAddress.TokenContractAddress)
+	if err != nil {
+		// Icon node error
+		zap.S().Warn("Routine=TokenAddressBalanceRoutine - Error: ", err.Error())
+	}
+	tokenAddress.Balance = utils.StringHexToFloat64(balance, decimalBase)
 
 	crud.GetTokenAddressBalanceCrud().LoaderChannel <- tokenAddress
 	//err = crud.GetTokenAddressCrud().UpsertOneColumns(tokenAddress, []string{"address", "balance", "token_contract_address"})
