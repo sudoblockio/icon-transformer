@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/sudoblockio/icon-transformer/compare/v0.3.3...v0.3.4) (2023-03-20)
+
+
+### Bug Fixes
+
+* add decimals to token address balance [#74](https://github.com/sudoblockio/icon-transformer/issues/74) ([2e3ce95](https://github.com/sudoblockio/icon-transformer/commit/2e3ce954f4f6a3c34286db46378afc2cc7a08913))
+
 ## [0.3.3](https://github.com/sudoblockio/icon-transformer/compare/v0.3.2...v0.3.3) (2023-03-01)
 
 
