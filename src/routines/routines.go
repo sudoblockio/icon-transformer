@@ -81,8 +81,8 @@ func RoutinesCron(routines []func(), sleepDuration time.Duration) {
 }
 
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
-	i := 1
-	skip := i * config.Config.RoutinesBatchSize
+
+	skip := 0
 	limit := config.Config.RoutinesBatchSize
 
 	zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with limit=", limit)
@@ -102,14 +102,14 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 			break
 		}
 
-		zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
+		zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName)
 		for i := 0; i < len(*routineItems); i++ {
+			item := &(*routineItems)[i]
 			for _, r := range routines {
-				item := &(*routineItems)[i]
 				r(item)
 			}
 		}
-		zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
+		zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName)
 
 		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 	}
