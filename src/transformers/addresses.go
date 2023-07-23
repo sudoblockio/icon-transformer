@@ -24,22 +24,21 @@ func EnrichContractsMeta(address *models.Address) {
 		return
 	}
 
-	current, ok := result["current"].(map[string]interface{})
-
+	data, ok := result["current"].(map[string]interface{})
 	if !ok {
-		zap.S().Warn("Could not parse contract status: Address=", address.Address)
-		return
+		// Rejected contracts don't have the
+		data, ok = result["next"].(map[string]interface{})
 	}
 
-	auditTxHash, ok := current["auditTxHash"].(string)
-	codeHash, ok := current["codeHash"].(string)
-	deployTxHash, ok := current["deployTxHash"].(string)
-	contractType, ok := current["type"].(string)
-	status, ok := current["status"].(string)
+	auditTxHash, _ := data["auditTxHash"].(string)
+	codeHash, _ := data["codeHash"].(string)
+	deployTxHash, _ := data["deployTxHash"].(string)
+	contractType, _ := data["type"].(string)
+	status, _ := data["status"].(string)
 	owner, ok := result["owner"].(string)
 
 	if ok == false {
-		zap.S().Info("not able to parse IconNodeServiceGetScoreStatus for address: ", address.Address)
+		zap.S().Info("Could not parse contract status: Address=", address.Address)
 		return
 	}
 
@@ -82,8 +81,8 @@ func appendAddress(addresses []*models.Address, address *models.Address) []*mode
 }
 
 func addresses(blockETL *models.BlockETL) {
+	var addresses []*models.Address
 
-	addresses := []*models.Address{}
 	for _, transactionETL := range blockETL.Transactions {
 
 		// From address
