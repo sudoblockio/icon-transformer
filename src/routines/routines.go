@@ -20,14 +20,15 @@ var addressRoutines = []func(a *models.Address){
 
 var tokenAddressRoutines = []func(t *models.TokenAddress){
 	setTokenAddressBalances,
-	// TODO: Fix this
+	// TODO: Fix this - Might not need - not used it seems? This is not cached and does not hit db
+	//  function signiture would suggest another loop anyways.
 	//setTokenAddressTxCounts,
 }
 
 func StartRecovery() {
 	zap.S().Warn("Init recovery...")
 
-	// Global count
+	//Global count
 	setTransactionCounts()
 
 	// One shot
@@ -46,40 +47,6 @@ func StartRecovery() {
 	os.Exit(0)
 }
 
-var cronRoutines = []func(){
-	addressIsPrep,
-	tokenAddressCountRoutine, // Isn't used - RM?
-	countAddressesToRedisRoutine,
-}
-
-func CronStart() {
-
-	zap.S().Warn("Init cron...")
-	// Init - Jobs that run once on startup
-	if config.Config.NetworkName == "mainnet" {
-		addressTypeRoutine()
-	}
-
-	// Short
-	go RoutinesCron(cronRoutines, config.Config.RoutinesSleepDuration)
-
-	// Long
-	// TODO: These were snubbed because they stress DB and should be run with something to slow them down
-	//go AddressRoutinesCron(addressRoutines, 6*time.Hour)
-}
-
-// Wrapper for generic routines
-func RoutinesCron(routines []func(), sleepDuration time.Duration) {
-	for {
-		zap.S().Warn("Starting cron...")
-		for _, r := range routines {
-			r()
-		}
-		zap.S().Info("Completed routine, sleeping...")
-		time.Sleep(sleepDuration)
-	}
-}
-
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 
 	skip := 0
@@ -88,7 +55,7 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with limit=", limit)
 	// Run loop until addresses have all been iterated over
 	for {
-		routineItems, err := Crud.SelectMany(limit, skip)
+		routineItems, err := Crud.SelectBatchOrder(limit, skip, "address")
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			zap.S().Warn("Ending address routine with error=", err.Error())
 			break
@@ -114,49 +81,3 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
 	}
 }
-
-//func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
-//	var wg sync.WaitGroup
-//	wg.Add(config.Config.RoutinesNumWorkers)
-//	for i := 0; i < config.Config.RoutinesNumWorkers; i++ {
-//		i := i
-//		go func() {
-//			//defer wg.Done()
-//			// Loop through all addresses
-//			skip := i * config.Config.RoutinesBatchSize
-//			limit := config.Config.RoutinesBatchSize
-//
-//			zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with workerId=", i)
-//			// Run loop until addresses have all been iterated over
-//			for {
-//
-//				routineItems, err := Crud.SelectMany(limit, skip)
-//				if errors.Is(err, gorm.ErrRecordNotFound) {
-//					zap.S().Warn("Ending address routine with error=", err.Error())
-//					break
-//				} else if err != nil {
-//					zap.S().Warn("Ending address routine with error=", err.Error())
-//					break
-//				}
-//				if len(*routineItems) == 0 {
-//					zap.S().Warn("Ending address routine, no more addresses")
-//					break
-//				}
-//
-//				zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
-//				for i := 0; i < len(*routineItems); i++ {
-//					for _, r := range routines {
-//						var item *M
-//						item = &(*routineItems)[i]
-//						r(item)
-//					}
-//				}
-//				zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName, " workerId=", i)
-//
-//				skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
-//			}
-//			wg.Done()
-//		}()
-//	}
-//	wg.Wait()
-//}

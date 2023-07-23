@@ -36,11 +36,15 @@ func countAddressesToRedisRoutine() {
 		return
 	}
 
-	redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"address_count", countAll)
-	redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"address_contract_count", countContracts)
+	err = redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"address_count", countAll)
+	err = redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"address_contract_count", countContracts)
 
 	for address, count := range countTokenAddresses {
-		redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"token_address_count_by_token_contract_"+address, count)
+		err = redis.GetRedisClient().SetCount(config.Config.RedisKeyPrefix+"token_address_count_by_token_contract_"+address, count)
+		if err != nil {
+			// Try again
+			zap.S().Warn("Routine=AddressCount Redis - ERROR: ", err.Error())
+		}
 	}
 
 	zap.S().Info("Routine=AddressCount - Completed routine...")

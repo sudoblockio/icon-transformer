@@ -97,3 +97,20 @@ func (m *Crud[Model, ModelOrm]) SelectManyContractCreations(
 
 	return transactions, db.Error
 }
+
+func (m *Crud[Model, ModelOrm]) SelectBatchOrder(
+	limit int,
+	skip int,
+	order string,
+) (*[]Model, error) {
+	db := m.db
+	db = db.Model(&m.Model)
+	db = db.Limit(limit)
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+	db = db.Order(order)
+	output := &[]Model{}
+	db = db.Find(output)
+	return output, db.Error
+}
