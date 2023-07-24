@@ -102,6 +102,7 @@ func (m *Crud[Model, ModelOrm]) SelectBatchOrder(
 	limit int,
 	skip int,
 	order string,
+	only_contracts bool,
 ) (*[]Model, error) {
 	db := m.db
 	db = db.Model(&m.Model)
@@ -110,6 +111,9 @@ func (m *Crud[Model, ModelOrm]) SelectBatchOrder(
 		db = db.Offset(skip)
 	}
 	db = db.Order(order)
+	if only_contracts {
+		db = db.Where("is_contract = true")
+	}
 	output := &[]Model{}
 	db = db.Find(output)
 	return output, db.Error

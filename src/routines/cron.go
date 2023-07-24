@@ -10,6 +10,8 @@ var cronRoutines = []func(){
 	addressIsPrep,
 	tokenAddressCountRoutine, // Isn't used - RM?
 	countAddressesToRedisRoutine,
+	setTransactionCounts,
+	countAddressesToRedisRoutine,
 }
 
 func CronStart() {

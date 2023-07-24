@@ -96,7 +96,7 @@ type configType struct {
 	// Routines
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
 	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
-	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"1000"`
+	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"10"`
 	RoutinesNumWorkers    int           `envconfig:"ROUTINES_NUM_WORKERS" required:"false" default:"1"`
 
 	// FindMissing
@@ -106,7 +106,10 @@ type configType struct {
 	FindMissingExtractorAPILocation string `envconfig:"FIND_MISSING_EXTRACTOR_API_LOCATION" required:"false" default:"http://localhost:8000/api/v1"`
 
 	// Redis Recovery
-	RedisRecoveryRunOnly bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`
+	RedisRecoveryRunOnly        bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`
+	RedisRecoveryContractsOnly  bool `envconfig:"REDIS_RECOVERY_CONTRACTS_ONLY" required:"false" default:"false"`
+	RedisRecoveryAddresses      bool `envconfig:"REDIS_RECOVERY_ADDRESSES" required:"false" default:"true"`
+	RedisRecoveryTokenAddresses bool `envconfig:"REDIS_RECOVERY_TOKEN_ADDRESSES" required:"false" default:"true"`
 
 	// Backfill Params
 	ProcessCounts        bool     `envconfig:"TRANSFORMER_PROCESS_COUNTS" required:"false" default:"true"`

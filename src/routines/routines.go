@@ -27,20 +27,24 @@ var tokenAddressRoutines = []func(t *models.TokenAddress){
 
 func StartRecovery() {
 	zap.S().Warn("Init recovery...")
-
-	//Global count
-	setTransactionCounts()
-
 	// One shot
 	if config.Config.NetworkName == "mainnet" {
 		addressTypeRoutine()
 	}
-	countAddressesToRedisRoutine()
+
+	// Moved to cron
+	//Global count
+	//setTransactionCounts()
+	//countAddressesToRedisRoutine()
 
 	// By address
-	LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
+	if config.Config.RedisRecoveryAddresses {
+		LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
+	}
 	// By token address
-	LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
+	if config.Config.RedisRecoveryTokenAddresses {
+		LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
+	}
 
 	zap.S().Info("finished recovery. exiting..")
 	time.Sleep(30 * time.Second)
@@ -55,7 +59,8 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with limit=", limit)
 	// Run loop until addresses have all been iterated over
 	for {
-		routineItems, err := Crud.SelectBatchOrder(limit, skip, "address")
+		// Grabs a set of addresses or just contracts
+		routineItems, err := Crud.SelectBatchOrder(limit, skip, "address", config.Config.RedisRecoveryContractsOnly)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			zap.S().Warn("Ending address routine with error=", err.Error())
 			break
