@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/sudoblockio/icon-transformer/compare/v0.3.4...v0.3.5) (2023-08-02)
+
+
+### Bug Fixes
+
+* skip in routines ([0a5c338](https://github.com/sudoblockio/icon-transformer/commit/0a5c3388509ab3a6fe0c027e646b15b9ec5f7879))
+
 ## [0.3.4](https://github.com/sudoblockio/icon-transformer/compare/v0.3.3...v0.3.4) (2023-03-20)
 
 
