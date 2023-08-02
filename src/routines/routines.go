@@ -32,10 +32,9 @@ func StartRecovery() {
 		addressTypeRoutine()
 	}
 
-	// Moved to cron
 	//Global count
-	//setTransactionCounts()
-	//countAddressesToRedisRoutine()
+	setTransactionCounts()
+	countAddressesToRedisRoutine()
 
 	// By address
 	if config.Config.RedisRecoveryAddresses {
