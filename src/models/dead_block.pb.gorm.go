@@ -2,18 +2,16 @@ package models
 
 import (
 	context "context"
-	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type DeadBlockORM struct {
 	Key       string
-	Offset    int64  `gorm:"primary_key"`
-	Partition int64  `gorm:"primary_key"`
-	Topic     string `gorm:"primary_key"`
+	Offset    int64  `gorm:"primaryKey"`
+	Partition int64  `gorm:"primaryKey"`
+	Topic     string `gorm:"primaryKey"`
 	Value     string
 }
 
@@ -101,7 +99,7 @@ func DefaultCreateDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*D
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithAfterCreate_); ok {
@@ -131,13 +129,16 @@ func DefaultReadDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*Dea
 	if ormObj.Offset == 0 {
 		return nil, errors.EmptyIdError
 	}
+	if ormObj.Partition == 0 {
+		return nil, errors.EmptyIdError
+	}
+	if ormObj.Topic == "" {
+		return nil, errors.EmptyIdError
+	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeReadApplyQuery); ok {
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &DeadBlockORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -178,6 +179,12 @@ func DefaultDeleteDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) err
 	if ormObj.Offset == 0 {
 		return errors.EmptyIdError
 	}
+	if ormObj.Partition == 0 {
+		return errors.EmptyIdError
+	}
+	if ormObj.Topic == "" {
+		return errors.EmptyIdError
+	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeDelete_); ok {
 		if db, err = hook.BeforeDelete_(ctx, db); err != nil {
 			return err
@@ -198,159 +205,6 @@ type DeadBlockORMWithBeforeDelete_ interface {
 }
 type DeadBlockORMWithAfterDelete_ interface {
 	AfterDelete_(context.Context, *gorm.DB) error
-}
-
-func DefaultDeleteDeadBlockSet(ctx context.Context, in []*DeadBlock, db *gorm.DB) error {
-	if in == nil {
-		return errors.NilArgumentError
-	}
-	var err error
-	keys := []string{}
-	for _, obj := range in {
-		ormObj, err := obj.ToORM(ctx)
-		if err != nil {
-			return err
-		}
-		if ormObj.Topic == "" {
-			return errors.EmptyIdError
-		}
-		keys = append(keys, ormObj.Topic)
-	}
-	if hook, ok := (interface{}(&DeadBlockORM{})).(DeadBlockORMWithBeforeDeleteSet); ok {
-		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
-			return err
-		}
-	}
-	err = db.Where("topic in (?)", keys).Delete(&DeadBlockORM{}).Error
-	if err != nil {
-		return err
-	}
-	if hook, ok := (interface{}(&DeadBlockORM{})).(DeadBlockORMWithAfterDeleteSet); ok {
-		err = hook.AfterDeleteSet(ctx, in, db)
-	}
-	return err
-}
-
-type DeadBlockORMWithBeforeDeleteSet interface {
-	BeforeDeleteSet(context.Context, []*DeadBlock, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockORMWithAfterDeleteSet interface {
-	AfterDeleteSet(context.Context, []*DeadBlock, *gorm.DB) error
-}
-
-// DefaultStrictUpdateDeadBlock clears / replaces / appends first level 1:many children and then executes a gorm update call
-func DefaultStrictUpdateDeadBlock(ctx context.Context, in *DeadBlock, db *gorm.DB) (*DeadBlock, error) {
-	if in == nil {
-		return nil, fmt.Errorf("Nil argument to DefaultStrictUpdateDeadBlock")
-	}
-	ormObj, err := in.ToORM(ctx)
-	if err != nil {
-		return nil, err
-	}
-	lockedRow := &DeadBlockORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("partition=?", ormObj.Partition).First(lockedRow)
-	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeStrictUpdateCleanup); ok {
-		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeStrictUpdateSave); ok {
-		if db, err = hook.BeforeStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if err = db.Save(&ormObj).Error; err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithAfterStrictUpdateSave); ok {
-		if err = hook.AfterStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := ormObj.ToPB(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &pbResponse, err
-}
-
-type DeadBlockORMWithBeforeStrictUpdateCleanup interface {
-	BeforeStrictUpdateCleanup(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockORMWithBeforeStrictUpdateSave interface {
-	BeforeStrictUpdateSave(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockORMWithAfterStrictUpdateSave interface {
-	AfterStrictUpdateSave(context.Context, *gorm.DB) error
-}
-
-// DefaultPatchDeadBlock executes a basic gorm update call with patch behavior
-func DefaultPatchDeadBlock(ctx context.Context, in *DeadBlock, updateMask *field_mask.FieldMask, db *gorm.DB) (*DeadBlock, error) {
-	if in == nil {
-		return nil, errors.NilArgumentError
-	}
-	var pbObj DeadBlock
-	var err error
-	if hook, ok := interface{}(&pbObj).(DeadBlockWithBeforePatchRead); ok {
-		if db, err = hook.BeforePatchRead(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&pbObj).(DeadBlockWithBeforePatchApplyFieldMask); ok {
-		if db, err = hook.BeforePatchApplyFieldMask(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if _, err := DefaultApplyFieldMaskDeadBlock(ctx, &pbObj, in, updateMask, "", db); err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&pbObj).(DeadBlockWithBeforePatchSave); ok {
-		if db, err = hook.BeforePatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := DefaultStrictUpdateDeadBlock(ctx, &pbObj, db)
-	if err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(pbResponse).(DeadBlockWithAfterPatchSave); ok {
-		if err = hook.AfterPatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	return pbResponse, nil
-}
-
-type DeadBlockWithBeforePatchRead interface {
-	BeforePatchRead(context.Context, *DeadBlock, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockWithBeforePatchApplyFieldMask interface {
-	BeforePatchApplyFieldMask(context.Context, *DeadBlock, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockWithBeforePatchSave interface {
-	BeforePatchSave(context.Context, *DeadBlock, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type DeadBlockWithAfterPatchSave interface {
-	AfterPatchSave(context.Context, *DeadBlock, *field_mask.FieldMask, *gorm.DB) error
-}
-
-// DefaultPatchSetDeadBlock executes a bulk gorm update call with patch behavior
-func DefaultPatchSetDeadBlock(ctx context.Context, objects []*DeadBlock, updateMasks []*field_mask.FieldMask, db *gorm.DB) ([]*DeadBlock, error) {
-	if len(objects) != len(updateMasks) {
-		return nil, fmt.Errorf(errors.BadRepeatedFieldMaskTpl, len(updateMasks), len(objects))
-	}
-
-	results := make([]*DeadBlock, 0, len(objects))
-	for i, patcher := range objects {
-		pbResponse, err := DefaultPatchDeadBlock(ctx, patcher, updateMasks[i], db)
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, pbResponse)
-	}
-
-	return results, nil
 }
 
 // DefaultApplyFieldMaskDeadBlock patches an pbObject with patcher according to a field mask.
@@ -401,17 +255,13 @@ func DefaultListDeadBlock(ctx context.Context, db *gorm.DB) ([]*DeadBlock, error
 			return nil, err
 		}
 	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &DeadBlockORM{}, &DeadBlock{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
 	if hook, ok := interface{}(&ormObj).(DeadBlockORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {
 			return nil, err
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("topic")
+	db = db.Order("offset, partition, topic")
 	ormResponse := []DeadBlockORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
