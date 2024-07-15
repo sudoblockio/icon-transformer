@@ -2,18 +2,16 @@ package models
 
 import (
 	context "context"
-	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type TokenTransferByAddressORM struct {
-	Address          string `gorm:"primary_key"`
+	Address          string `gorm:"primaryKey"`
 	BlockNumber      int64
-	LogIndex         int64  `gorm:"primary_key"`
-	TransactionHash  string `gorm:"primary_key"`
+	LogIndex         int64  `gorm:"primaryKey"`
+	TransactionHash  string `gorm:"primaryKey"`
 	TransactionIndex int64  `gorm:"index:token_transfer_by_address_idx_transaction_index"`
 }
 
@@ -101,7 +99,7 @@ func DefaultCreateTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithAfterCreate_); ok {
@@ -128,6 +126,12 @@ func DefaultReadTokenTransferByAddress(ctx context.Context, in *TokenTransferByA
 	if err != nil {
 		return nil, err
 	}
+	if ormObj.Address == "" {
+		return nil, errors.EmptyIdError
+	}
+	if ormObj.LogIndex == 0 {
+		return nil, errors.EmptyIdError
+	}
 	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
@@ -135,9 +139,6 @@ func DefaultReadTokenTransferByAddress(ctx context.Context, in *TokenTransferByA
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &TokenTransferByAddressORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -175,6 +176,12 @@ func DefaultDeleteTokenTransferByAddress(ctx context.Context, in *TokenTransferB
 	if err != nil {
 		return err
 	}
+	if ormObj.Address == "" {
+		return errors.EmptyIdError
+	}
+	if ormObj.LogIndex == 0 {
+		return errors.EmptyIdError
+	}
 	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
@@ -198,159 +205,6 @@ type TokenTransferByAddressORMWithBeforeDelete_ interface {
 }
 type TokenTransferByAddressORMWithAfterDelete_ interface {
 	AfterDelete_(context.Context, *gorm.DB) error
-}
-
-func DefaultDeleteTokenTransferByAddressSet(ctx context.Context, in []*TokenTransferByAddress, db *gorm.DB) error {
-	if in == nil {
-		return errors.NilArgumentError
-	}
-	var err error
-	keys := []string{}
-	for _, obj := range in {
-		ormObj, err := obj.ToORM(ctx)
-		if err != nil {
-			return err
-		}
-		if ormObj.TransactionHash == "" {
-			return errors.EmptyIdError
-		}
-		keys = append(keys, ormObj.TransactionHash)
-	}
-	if hook, ok := (interface{}(&TokenTransferByAddressORM{})).(TokenTransferByAddressORMWithBeforeDeleteSet); ok {
-		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
-			return err
-		}
-	}
-	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferByAddressORM{}).Error
-	if err != nil {
-		return err
-	}
-	if hook, ok := (interface{}(&TokenTransferByAddressORM{})).(TokenTransferByAddressORMWithAfterDeleteSet); ok {
-		err = hook.AfterDeleteSet(ctx, in, db)
-	}
-	return err
-}
-
-type TokenTransferByAddressORMWithBeforeDeleteSet interface {
-	BeforeDeleteSet(context.Context, []*TokenTransferByAddress, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressORMWithAfterDeleteSet interface {
-	AfterDeleteSet(context.Context, []*TokenTransferByAddress, *gorm.DB) error
-}
-
-// DefaultStrictUpdateTokenTransferByAddress clears / replaces / appends first level 1:many children and then executes a gorm update call
-func DefaultStrictUpdateTokenTransferByAddress(ctx context.Context, in *TokenTransferByAddress, db *gorm.DB) (*TokenTransferByAddress, error) {
-	if in == nil {
-		return nil, fmt.Errorf("Nil argument to DefaultStrictUpdateTokenTransferByAddress")
-	}
-	ormObj, err := in.ToORM(ctx)
-	if err != nil {
-		return nil, err
-	}
-	lockedRow := &TokenTransferByAddressORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
-	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeStrictUpdateCleanup); ok {
-		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeStrictUpdateSave); ok {
-		if db, err = hook.BeforeStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if err = db.Save(&ormObj).Error; err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithAfterStrictUpdateSave); ok {
-		if err = hook.AfterStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := ormObj.ToPB(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &pbResponse, err
-}
-
-type TokenTransferByAddressORMWithBeforeStrictUpdateCleanup interface {
-	BeforeStrictUpdateCleanup(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressORMWithBeforeStrictUpdateSave interface {
-	BeforeStrictUpdateSave(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressORMWithAfterStrictUpdateSave interface {
-	AfterStrictUpdateSave(context.Context, *gorm.DB) error
-}
-
-// DefaultPatchTokenTransferByAddress executes a basic gorm update call with patch behavior
-func DefaultPatchTokenTransferByAddress(ctx context.Context, in *TokenTransferByAddress, updateMask *field_mask.FieldMask, db *gorm.DB) (*TokenTransferByAddress, error) {
-	if in == nil {
-		return nil, errors.NilArgumentError
-	}
-	var pbObj TokenTransferByAddress
-	var err error
-	if hook, ok := interface{}(&pbObj).(TokenTransferByAddressWithBeforePatchRead); ok {
-		if db, err = hook.BeforePatchRead(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&pbObj).(TokenTransferByAddressWithBeforePatchApplyFieldMask); ok {
-		if db, err = hook.BeforePatchApplyFieldMask(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if _, err := DefaultApplyFieldMaskTokenTransferByAddress(ctx, &pbObj, in, updateMask, "", db); err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&pbObj).(TokenTransferByAddressWithBeforePatchSave); ok {
-		if db, err = hook.BeforePatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := DefaultStrictUpdateTokenTransferByAddress(ctx, &pbObj, db)
-	if err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(pbResponse).(TokenTransferByAddressWithAfterPatchSave); ok {
-		if err = hook.AfterPatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	return pbResponse, nil
-}
-
-type TokenTransferByAddressWithBeforePatchRead interface {
-	BeforePatchRead(context.Context, *TokenTransferByAddress, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressWithBeforePatchApplyFieldMask interface {
-	BeforePatchApplyFieldMask(context.Context, *TokenTransferByAddress, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressWithBeforePatchSave interface {
-	BeforePatchSave(context.Context, *TokenTransferByAddress, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferByAddressWithAfterPatchSave interface {
-	AfterPatchSave(context.Context, *TokenTransferByAddress, *field_mask.FieldMask, *gorm.DB) error
-}
-
-// DefaultPatchSetTokenTransferByAddress executes a bulk gorm update call with patch behavior
-func DefaultPatchSetTokenTransferByAddress(ctx context.Context, objects []*TokenTransferByAddress, updateMasks []*field_mask.FieldMask, db *gorm.DB) ([]*TokenTransferByAddress, error) {
-	if len(objects) != len(updateMasks) {
-		return nil, fmt.Errorf(errors.BadRepeatedFieldMaskTpl, len(updateMasks), len(objects))
-	}
-
-	results := make([]*TokenTransferByAddress, 0, len(objects))
-	for i, patcher := range objects {
-		pbResponse, err := DefaultPatchTokenTransferByAddress(ctx, patcher, updateMasks[i], db)
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, pbResponse)
-	}
-
-	return results, nil
 }
 
 // DefaultApplyFieldMaskTokenTransferByAddress patches an pbObject with patcher according to a field mask.
@@ -401,17 +255,13 @@ func DefaultListTokenTransferByAddress(ctx context.Context, db *gorm.DB) ([]*Tok
 			return nil, err
 		}
 	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &TokenTransferByAddressORM{}, &TokenTransferByAddress{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferByAddressORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {
 			return nil, err
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("address, log_index, transaction_hash")
 	ormResponse := []TokenTransferByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

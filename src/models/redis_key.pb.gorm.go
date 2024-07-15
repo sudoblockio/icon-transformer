@@ -3,14 +3,13 @@ package models
 import (
 	context "context"
 	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type RedisKeyORM struct {
-	Key   string `gorm:"primary_key"`
+	Key   string `gorm:"primaryKey"`
 	Value string
 }
 
@@ -92,7 +91,7 @@ func DefaultCreateRedisKey(ctx context.Context, in *RedisKey, db *gorm.DB) (*Red
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(RedisKeyORMWithAfterCreate_); ok {
@@ -126,9 +125,6 @@ func DefaultReadRedisKey(ctx context.Context, in *RedisKey, db *gorm.DB) (*Redis
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &RedisKeyORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(RedisKeyORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -250,7 +246,7 @@ func DefaultStrictUpdateRedisKey(ctx context.Context, in *RedisKey, db *gorm.DB)
 			return nil, err
 		}
 	}
-	if err = db.Save(&ormObj).Error; err != nil {
+	if err = db.Omit().Save(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(RedisKeyORMWithAfterStrictUpdateSave); ok {
@@ -379,10 +375,6 @@ func DefaultListRedisKey(ctx context.Context, db *gorm.DB) ([]*RedisKey, error) 
 		if db, err = hook.BeforeListApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &RedisKeyORM{}, &RedisKey{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(RedisKeyORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {
