@@ -3,16 +3,17 @@ package crud
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sudoblockio/icon-transformer/config"
-	"github.com/sudoblockio/icon-transformer/metrics"
-	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
-	"gorm.io/gorm/clause"
 	"log"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/metrics"
+	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
+	"gorm.io/gorm/clause"
 )
 
 // getModelColumnNames - Get a slice of column names from a Model's tags
@@ -60,7 +61,7 @@ func ToSnakeCase(str string) string {
 	return strings.ToLower(snake)
 }
 
-var matchPrimaryKey = regexp.MustCompile("primary_key")
+var matchPrimaryKey = regexp.MustCompile("primaryKey")
 
 // getModelPrimaryKeys - Get a slice of primary keys from the ORM Model's tags
 func getModelPrimaryKeys[T any](model T) []clause.Column {
