@@ -3,10 +3,10 @@
 test: up-dbs test-unit
 
 up-dbs:  ## Bring up the DBs
-	docker-compose -f docker-compose.db.yml up -d
+	docker compose -f docker-compose.db.yml up -d
 
 down-dbs:  ## Take down the DBs
-	docker-compose -f docker-compose.db.yml down
+	docker compose -f docker-compose.db.yml down
 
 test-unit:  ## Run unit tests - Need DB compose up
 	cd src && go test ./... -v --tags=unit
