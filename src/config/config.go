@@ -79,6 +79,7 @@ type configType struct {
 	RedisPassword                 string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
 	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
 	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
+	RedisSentinelPassword         string `envconfig:"REDIS_SENTINEL_PASSWORD" required:"false" default:""`
 	RedisKeyPrefix                string `envconfig:"REDIS_KEY_PREFIX" required:"false" default:"icon_"`
 
 	// Redis Channels

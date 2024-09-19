@@ -39,8 +39,9 @@ func GetRedisClient() *Client {
 			} else {
 				// Use sentinel client
 				redisClient.client = redis.NewFailoverClient(&redis.FailoverOptions{
-					MasterName:    config.Config.RedisSentinelClientMasterName,
-					SentinelAddrs: []string{addr},
+					MasterName:       config.Config.RedisSentinelClientMasterName,
+					SentinelAddrs:    []string{addr},
+					SentinelPassword: config.Config.RedisSentinelPassword,
 				})
 			}
 
