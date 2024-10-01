@@ -2,11 +2,9 @@ package models
 
 import (
 	context "context"
-	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type TransactionORM struct {
@@ -17,9 +15,9 @@ type TransactionORM struct {
 	Data               string
 	DataType           string
 	FromAddress        string `gorm:"index:transaction_idx_from_address"`
-	Hash               string `gorm:"primary_key"`
+	Hash               string `gorm:"primaryKey"`
 	LogCount           int64
-	LogIndex           int64 `gorm:"primary_key"`
+	LogIndex           int64 `gorm:"primaryKey"`
 	LogsBloom          string
 	Method             string `gorm:"index:transaction_idx_method"`
 	Nid                string
@@ -173,7 +171,7 @@ func DefaultCreateTransaction(ctx context.Context, in *Transaction, db *gorm.DB)
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithAfterCreate_); ok {
@@ -203,13 +201,13 @@ func DefaultReadTransaction(ctx context.Context, in *Transaction, db *gorm.DB) (
 	if ormObj.Hash == "" {
 		return nil, errors.EmptyIdError
 	}
+	if ormObj.LogIndex == 0 {
+		return nil, errors.EmptyIdError
+	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeReadApplyQuery); ok {
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &TransactionORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -250,6 +248,9 @@ func DefaultDeleteTransaction(ctx context.Context, in *Transaction, db *gorm.DB)
 	if ormObj.Hash == "" {
 		return errors.EmptyIdError
 	}
+	if ormObj.LogIndex == 0 {
+		return errors.EmptyIdError
+	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeDelete_); ok {
 		if db, err = hook.BeforeDelete_(ctx, db); err != nil {
 			return err
@@ -270,159 +271,6 @@ type TransactionORMWithBeforeDelete_ interface {
 }
 type TransactionORMWithAfterDelete_ interface {
 	AfterDelete_(context.Context, *gorm.DB) error
-}
-
-func DefaultDeleteTransactionSet(ctx context.Context, in []*Transaction, db *gorm.DB) error {
-	if in == nil {
-		return errors.NilArgumentError
-	}
-	var err error
-	keys := []string{}
-	for _, obj := range in {
-		ormObj, err := obj.ToORM(ctx)
-		if err != nil {
-			return err
-		}
-		if ormObj.Hash == "" {
-			return errors.EmptyIdError
-		}
-		keys = append(keys, ormObj.Hash)
-	}
-	if hook, ok := (interface{}(&TransactionORM{})).(TransactionORMWithBeforeDeleteSet); ok {
-		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
-			return err
-		}
-	}
-	err = db.Where("hash in (?)", keys).Delete(&TransactionORM{}).Error
-	if err != nil {
-		return err
-	}
-	if hook, ok := (interface{}(&TransactionORM{})).(TransactionORMWithAfterDeleteSet); ok {
-		err = hook.AfterDeleteSet(ctx, in, db)
-	}
-	return err
-}
-
-type TransactionORMWithBeforeDeleteSet interface {
-	BeforeDeleteSet(context.Context, []*Transaction, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionORMWithAfterDeleteSet interface {
-	AfterDeleteSet(context.Context, []*Transaction, *gorm.DB) error
-}
-
-// DefaultStrictUpdateTransaction clears / replaces / appends first level 1:many children and then executes a gorm update call
-func DefaultStrictUpdateTransaction(ctx context.Context, in *Transaction, db *gorm.DB) (*Transaction, error) {
-	if in == nil {
-		return nil, fmt.Errorf("Nil argument to DefaultStrictUpdateTransaction")
-	}
-	ormObj, err := in.ToORM(ctx)
-	if err != nil {
-		return nil, err
-	}
-	lockedRow := &TransactionORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("hash=?", ormObj.Hash).First(lockedRow)
-	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeStrictUpdateCleanup); ok {
-		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeStrictUpdateSave); ok {
-		if db, err = hook.BeforeStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if err = db.Save(&ormObj).Error; err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&ormObj).(TransactionORMWithAfterStrictUpdateSave); ok {
-		if err = hook.AfterStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := ormObj.ToPB(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &pbResponse, err
-}
-
-type TransactionORMWithBeforeStrictUpdateCleanup interface {
-	BeforeStrictUpdateCleanup(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionORMWithBeforeStrictUpdateSave interface {
-	BeforeStrictUpdateSave(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionORMWithAfterStrictUpdateSave interface {
-	AfterStrictUpdateSave(context.Context, *gorm.DB) error
-}
-
-// DefaultPatchTransaction executes a basic gorm update call with patch behavior
-func DefaultPatchTransaction(ctx context.Context, in *Transaction, updateMask *field_mask.FieldMask, db *gorm.DB) (*Transaction, error) {
-	if in == nil {
-		return nil, errors.NilArgumentError
-	}
-	var pbObj Transaction
-	var err error
-	if hook, ok := interface{}(&pbObj).(TransactionWithBeforePatchRead); ok {
-		if db, err = hook.BeforePatchRead(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&pbObj).(TransactionWithBeforePatchApplyFieldMask); ok {
-		if db, err = hook.BeforePatchApplyFieldMask(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if _, err := DefaultApplyFieldMaskTransaction(ctx, &pbObj, in, updateMask, "", db); err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&pbObj).(TransactionWithBeforePatchSave); ok {
-		if db, err = hook.BeforePatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := DefaultStrictUpdateTransaction(ctx, &pbObj, db)
-	if err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(pbResponse).(TransactionWithAfterPatchSave); ok {
-		if err = hook.AfterPatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	return pbResponse, nil
-}
-
-type TransactionWithBeforePatchRead interface {
-	BeforePatchRead(context.Context, *Transaction, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionWithBeforePatchApplyFieldMask interface {
-	BeforePatchApplyFieldMask(context.Context, *Transaction, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionWithBeforePatchSave interface {
-	BeforePatchSave(context.Context, *Transaction, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TransactionWithAfterPatchSave interface {
-	AfterPatchSave(context.Context, *Transaction, *field_mask.FieldMask, *gorm.DB) error
-}
-
-// DefaultPatchSetTransaction executes a bulk gorm update call with patch behavior
-func DefaultPatchSetTransaction(ctx context.Context, objects []*Transaction, updateMasks []*field_mask.FieldMask, db *gorm.DB) ([]*Transaction, error) {
-	if len(objects) != len(updateMasks) {
-		return nil, fmt.Errorf(errors.BadRepeatedFieldMaskTpl, len(updateMasks), len(objects))
-	}
-
-	results := make([]*Transaction, 0, len(objects))
-	for i, patcher := range objects {
-		pbResponse, err := DefaultPatchTransaction(ctx, patcher, updateMasks[i], db)
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, pbResponse)
-	}
-
-	return results, nil
 }
 
 // DefaultApplyFieldMaskTransaction patches an pbObject with patcher according to a field mask.
@@ -569,17 +417,13 @@ func DefaultListTransaction(ctx context.Context, db *gorm.DB) ([]*Transaction, e
 			return nil, err
 		}
 	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &TransactionORM{}, &Transaction{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
 	if hook, ok := interface{}(&ormObj).(TransactionORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {
 			return nil, err
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("hash")
+	db = db.Order("hash, log_index")
 	ormResponse := []TransactionORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

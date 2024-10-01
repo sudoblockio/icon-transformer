@@ -2,12 +2,13 @@ package crud
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/sudoblockio/icon-transformer/models"
-	"gorm.io/gorm/clause"
 	"reflect"
 	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/sudoblockio/icon-transformer/models"
+	"gorm.io/gorm/clause"
 )
 
 func TestCrudUtilsExtractFilledFieldsFromModel(t *testing.T) {
@@ -51,7 +52,7 @@ func TestCrudUtilsRegex(t *testing.T) {
 	for _, test := range []TestsRegex{
 		{
 			regexp: matchPrimaryKey,
-			input:  "primary_key",
+			input:  "primaryKey",
 			output: true,
 		},
 		{
@@ -61,7 +62,7 @@ func TestCrudUtilsRegex(t *testing.T) {
 		},
 		{
 			regexp: matchPrimaryKey,
-			input:  "primary_key;index:log_foo",
+			input:  "primaryKey;index:log_foo",
 			output: true,
 		},
 	} {

@@ -3,15 +3,14 @@ package models
 import (
 	context "context"
 	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type TransactionCreateScoreORM struct {
 	AcceptTransactionHash   string
-	CreationTransactionHash string `gorm:"primary_key"`
+	CreationTransactionHash string `gorm:"primaryKey"`
 	RejectTransactionHash   string
 }
 
@@ -95,7 +94,7 @@ func DefaultCreateTransactionCreateScore(ctx context.Context, in *TransactionCre
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionCreateScoreORMWithAfterCreate_); ok {
@@ -129,9 +128,6 @@ func DefaultReadTransactionCreateScore(ctx context.Context, in *TransactionCreat
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &TransactionCreateScoreORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionCreateScoreORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -253,7 +249,7 @@ func DefaultStrictUpdateTransactionCreateScore(ctx context.Context, in *Transact
 			return nil, err
 		}
 	}
-	if err = db.Save(&ormObj).Error; err != nil {
+	if err = db.Omit().Save(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionCreateScoreORMWithAfterStrictUpdateSave); ok {
@@ -386,10 +382,6 @@ func DefaultListTransactionCreateScore(ctx context.Context, db *gorm.DB) ([]*Tra
 		if db, err = hook.BeforeListApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &TransactionCreateScoreORM{}, &TransactionCreateScore{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TransactionCreateScoreORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {

@@ -2,26 +2,24 @@ package models
 
 import (
 	context "context"
-	fmt "fmt"
-	gorm1 "github.com/infobloxopen/atlas-app-toolkit/gorm"
 	errors "github.com/infobloxopen/protoc-gen-gorm/errors"
-	gorm "github.com/jinzhu/gorm"
 	field_mask "google.golang.org/genproto/protobuf/field_mask"
+	gorm "gorm.io/gorm"
 )
 
 type TokenTransferORM struct {
 	BlockNumber          int64 `gorm:"index:token_transfer_idx_block_number"`
 	BlockTimestamp       int64
 	FromAddress          string `gorm:"index:token_transfer_idx_from_address"`
-	LogIndex             int64  `gorm:"primary_key"`
+	LogIndex             int64  `gorm:"primaryKey"`
 	NftId                int64
 	ToAddress            string `gorm:"index:token_transfer_idx_to_address"`
 	TokenContractAddress string `gorm:"index:token_transfer_idx_token_contract_address"`
 	TokenContractName    string
 	TokenContractSymbol  string
 	TransactionFee       string
-	TransactionHash      string `gorm:"primary_key"`
-	TransactionIndex     int64
+	TransactionHash      string `gorm:"primaryKey"`
+	TransactionIndex     int64  `gorm:"index:token_transfer_idx_transaction_index"`
 	Value                string
 	ValueDecimal         float64
 }
@@ -128,7 +126,7 @@ func DefaultCreateTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm
 			return nil, err
 		}
 	}
-	if err = db.Create(&ormObj).Error; err != nil {
+	if err = db.Omit().Create(&ormObj).Error; err != nil {
 		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithAfterCreate_); ok {
@@ -155,6 +153,9 @@ func DefaultReadTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm.D
 	if err != nil {
 		return nil, err
 	}
+	if ormObj.LogIndex == 0 {
+		return nil, errors.EmptyIdError
+	}
 	if ormObj.TransactionHash == "" {
 		return nil, errors.EmptyIdError
 	}
@@ -162,9 +163,6 @@ func DefaultReadTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm.D
 		if db, err = hook.BeforeReadApplyQuery(ctx, db); err != nil {
 			return nil, err
 		}
-	}
-	if db, err = gorm1.ApplyFieldSelection(ctx, db, nil, &TokenTransferORM{}); err != nil {
-		return nil, err
 	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeReadFind); ok {
 		if db, err = hook.BeforeReadFind(ctx, db); err != nil {
@@ -202,6 +200,9 @@ func DefaultDeleteTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm
 	if err != nil {
 		return err
 	}
+	if ormObj.LogIndex == 0 {
+		return errors.EmptyIdError
+	}
 	if ormObj.TransactionHash == "" {
 		return errors.EmptyIdError
 	}
@@ -225,159 +226,6 @@ type TokenTransferORMWithBeforeDelete_ interface {
 }
 type TokenTransferORMWithAfterDelete_ interface {
 	AfterDelete_(context.Context, *gorm.DB) error
-}
-
-func DefaultDeleteTokenTransferSet(ctx context.Context, in []*TokenTransfer, db *gorm.DB) error {
-	if in == nil {
-		return errors.NilArgumentError
-	}
-	var err error
-	keys := []string{}
-	for _, obj := range in {
-		ormObj, err := obj.ToORM(ctx)
-		if err != nil {
-			return err
-		}
-		if ormObj.TransactionHash == "" {
-			return errors.EmptyIdError
-		}
-		keys = append(keys, ormObj.TransactionHash)
-	}
-	if hook, ok := (interface{}(&TokenTransferORM{})).(TokenTransferORMWithBeforeDeleteSet); ok {
-		if db, err = hook.BeforeDeleteSet(ctx, in, db); err != nil {
-			return err
-		}
-	}
-	err = db.Where("transaction_hash in (?)", keys).Delete(&TokenTransferORM{}).Error
-	if err != nil {
-		return err
-	}
-	if hook, ok := (interface{}(&TokenTransferORM{})).(TokenTransferORMWithAfterDeleteSet); ok {
-		err = hook.AfterDeleteSet(ctx, in, db)
-	}
-	return err
-}
-
-type TokenTransferORMWithBeforeDeleteSet interface {
-	BeforeDeleteSet(context.Context, []*TokenTransfer, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferORMWithAfterDeleteSet interface {
-	AfterDeleteSet(context.Context, []*TokenTransfer, *gorm.DB) error
-}
-
-// DefaultStrictUpdateTokenTransfer clears / replaces / appends first level 1:many children and then executes a gorm update call
-func DefaultStrictUpdateTokenTransfer(ctx context.Context, in *TokenTransfer, db *gorm.DB) (*TokenTransfer, error) {
-	if in == nil {
-		return nil, fmt.Errorf("Nil argument to DefaultStrictUpdateTokenTransfer")
-	}
-	ormObj, err := in.ToORM(ctx)
-	if err != nil {
-		return nil, err
-	}
-	lockedRow := &TokenTransferORM{}
-	db.Model(&ormObj).Set("gorm:query_option", "FOR UPDATE").Where("transaction_hash=?", ormObj.TransactionHash).First(lockedRow)
-	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeStrictUpdateCleanup); ok {
-		if db, err = hook.BeforeStrictUpdateCleanup(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeStrictUpdateSave); ok {
-		if db, err = hook.BeforeStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	if err = db.Save(&ormObj).Error; err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithAfterStrictUpdateSave); ok {
-		if err = hook.AfterStrictUpdateSave(ctx, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := ormObj.ToPB(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return &pbResponse, err
-}
-
-type TokenTransferORMWithBeforeStrictUpdateCleanup interface {
-	BeforeStrictUpdateCleanup(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferORMWithBeforeStrictUpdateSave interface {
-	BeforeStrictUpdateSave(context.Context, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferORMWithAfterStrictUpdateSave interface {
-	AfterStrictUpdateSave(context.Context, *gorm.DB) error
-}
-
-// DefaultPatchTokenTransfer executes a basic gorm update call with patch behavior
-func DefaultPatchTokenTransfer(ctx context.Context, in *TokenTransfer, updateMask *field_mask.FieldMask, db *gorm.DB) (*TokenTransfer, error) {
-	if in == nil {
-		return nil, errors.NilArgumentError
-	}
-	var pbObj TokenTransfer
-	var err error
-	if hook, ok := interface{}(&pbObj).(TokenTransferWithBeforePatchRead); ok {
-		if db, err = hook.BeforePatchRead(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if hook, ok := interface{}(&pbObj).(TokenTransferWithBeforePatchApplyFieldMask); ok {
-		if db, err = hook.BeforePatchApplyFieldMask(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	if _, err := DefaultApplyFieldMaskTokenTransfer(ctx, &pbObj, in, updateMask, "", db); err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(&pbObj).(TokenTransferWithBeforePatchSave); ok {
-		if db, err = hook.BeforePatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	pbResponse, err := DefaultStrictUpdateTokenTransfer(ctx, &pbObj, db)
-	if err != nil {
-		return nil, err
-	}
-	if hook, ok := interface{}(pbResponse).(TokenTransferWithAfterPatchSave); ok {
-		if err = hook.AfterPatchSave(ctx, in, updateMask, db); err != nil {
-			return nil, err
-		}
-	}
-	return pbResponse, nil
-}
-
-type TokenTransferWithBeforePatchRead interface {
-	BeforePatchRead(context.Context, *TokenTransfer, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferWithBeforePatchApplyFieldMask interface {
-	BeforePatchApplyFieldMask(context.Context, *TokenTransfer, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferWithBeforePatchSave interface {
-	BeforePatchSave(context.Context, *TokenTransfer, *field_mask.FieldMask, *gorm.DB) (*gorm.DB, error)
-}
-type TokenTransferWithAfterPatchSave interface {
-	AfterPatchSave(context.Context, *TokenTransfer, *field_mask.FieldMask, *gorm.DB) error
-}
-
-// DefaultPatchSetTokenTransfer executes a bulk gorm update call with patch behavior
-func DefaultPatchSetTokenTransfer(ctx context.Context, objects []*TokenTransfer, updateMasks []*field_mask.FieldMask, db *gorm.DB) ([]*TokenTransfer, error) {
-	if len(objects) != len(updateMasks) {
-		return nil, fmt.Errorf(errors.BadRepeatedFieldMaskTpl, len(updateMasks), len(objects))
-	}
-
-	results := make([]*TokenTransfer, 0, len(objects))
-	for i, patcher := range objects {
-		pbResponse, err := DefaultPatchTokenTransfer(ctx, patcher, updateMasks[i], db)
-		if err != nil {
-			return nil, err
-		}
-
-		results = append(results, pbResponse)
-	}
-
-	return results, nil
 }
 
 // DefaultApplyFieldMaskTokenTransfer patches an pbObject with patcher according to a field mask.
@@ -464,17 +312,13 @@ func DefaultListTokenTransfer(ctx context.Context, db *gorm.DB) ([]*TokenTransfe
 			return nil, err
 		}
 	}
-	db, err = gorm1.ApplyCollectionOperators(ctx, db, &TokenTransferORM{}, &TokenTransfer{}, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
 	if hook, ok := interface{}(&ormObj).(TokenTransferORMWithBeforeListFind); ok {
 		if db, err = hook.BeforeListFind(ctx, db); err != nil {
 			return nil, err
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("log_index, transaction_hash")
 	ormResponse := []TokenTransferORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
