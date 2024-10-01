@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.5](https://github.com/sudoblockio/icon-transformer/compare/v0.3.4...v0.3.5) (2024-10-01)
+
+
+### Bug Fixes
+
+* add redis sentinel pass option ([71de015](https://github.com/sudoblockio/icon-transformer/commit/71de015e040b8aa063f396fe376f3bb0f21ecf71))
+* skip in routines ([0a5c338](https://github.com/sudoblockio/icon-transformer/commit/0a5c3388509ab3a6fe0c027e646b15b9ec5f7879))
+* update regex for primary key ([5e7f4f4](https://github.com/sudoblockio/icon-transformer/commit/5e7f4f4380494d7e4096465d6f9435f55e482516))
+* update unit test ([5de1012](https://github.com/sudoblockio/icon-transformer/commit/5de10129b32ffdffde9efe402e4ee1763639af85))
+
 ## [0.3.4](https://github.com/sudoblockio/icon-transformer/compare/v0.3.3...v0.3.4) (2023-03-20)
 
 
