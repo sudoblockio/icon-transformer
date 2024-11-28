@@ -21,7 +21,7 @@ test-coverage:  ## Run unit tests - Need DB compose up
 	cd src && go test ./... -v -race -covermode=atomic -coverprofile=../coverage.out
 
 pull:
-	docker compose -f docker compose.db.yml -f docker-compose.yml pull
+	docker compose -f docker-compose.db.yml -f docker-compose.yml pull
 
 up:  ## Bring everything up as containers
 	docker compose -f docker-compose.db.yml -f docker-compose.yml up -d
@@ -39,7 +39,7 @@ build-swagger:  ## Build the swagger docs
     cd src/api && swag init -g routes/api.go
 
 build:  ## Build everything
-	docker-compose build
+	docker compose build
 
 ps:  ## List all containers and running status
 	docker compose -f docker-compose.db.yml -f docker-compose.yml ps
