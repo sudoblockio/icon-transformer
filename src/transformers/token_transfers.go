@@ -136,7 +136,9 @@ func tokenTransfers(blockETL *models.BlockETL) {
 				// Token Contract Name
 				tokenContractName, err := service.IconNodeServiceGetTokenContractName(tokenContractAddress)
 				if err != nil {
-					zap.S().Fatal(err)
+					// It is possible for a contract to remove its name and thus we'll just
+					// ignore these events.
+					return
 				}
 
 				// Token Contract Symbol
