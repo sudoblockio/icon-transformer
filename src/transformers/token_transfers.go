@@ -58,7 +58,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 				// NOTE every token has a different decimal base
 				tokenDecimalBase, err := service.IconNodeServiceGetTokenDecimalBase(tokenContractAddress)
 				if err != nil {
-					zap.S().Fatalf("Error processing address %s: %v", logETL.Address, err)
+					continue
 				}
 
 				valueDecimal := utils.StringHexToFloat64(value, tokenDecimalBase)
@@ -69,13 +69,13 @@ func tokenTransfers(blockETL *models.BlockETL) {
 				// Token Contract Name
 				tokenContractName, err := service.IconNodeServiceGetTokenContractName(tokenContractAddress)
 				if err != nil {
-					zap.S().Fatal(err)
+					continue
 				}
 
 				// Token Contract Symbol
 				tokenContractSymbol, err := service.IconNodeServiceGetTokenContractSymbol(tokenContractAddress)
 				if err != nil {
-					zap.S().Fatal(err)
+					continue
 				}
 
 				// Transaction Fee
@@ -136,9 +136,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 				// Token Contract Name
 				tokenContractName, err := service.IconNodeServiceGetTokenContractName(tokenContractAddress)
 				if err != nil {
-					// It is possible for a contract to remove its name and thus we'll just
-					// ignore these events.
-					return
+					continue
 				}
 
 				// Token Contract Symbol
