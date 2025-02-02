@@ -58,7 +58,7 @@ func tokenTransfers(blockETL *models.BlockETL) {
 				// NOTE every token has a different decimal base
 				tokenDecimalBase, err := service.IconNodeServiceGetTokenDecimalBase(tokenContractAddress)
 				if err != nil {
-					zap.S().Fatal(err)
+					zap.S().Fatalf("Error processing address %s: %v", logETL.Address, err)
 				}
 
 				valueDecimal := utils.StringHexToFloat64(value, tokenDecimalBase)
