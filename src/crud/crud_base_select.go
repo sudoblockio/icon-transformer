@@ -1,6 +1,9 @@
 package crud
 
-import "github.com/sudoblockio/icon-transformer/models"
+import (
+	"github.com/sudoblockio/icon-transformer/config"
+	"github.com/sudoblockio/icon-transformer/models"
+)
 
 func (m *Crud[Model, ModelOrm]) SelectMany(
 	limit int,
@@ -101,8 +104,6 @@ func (m *Crud[Model, ModelOrm]) SelectManyContractCreations(
 func (m *Crud[Model, ModelOrm]) SelectBatchOrder(
 	limit int,
 	skip int,
-	order string,
-	only_contracts bool,
 ) (*[]Model, error) {
 	db := m.db
 	db = db.Model(&m.Model)
@@ -110,9 +111,13 @@ func (m *Crud[Model, ModelOrm]) SelectBatchOrder(
 	if skip != 0 {
 		db = db.Offset(skip)
 	}
-	db = db.Order(order)
-	if only_contracts {
+	db = db.Order("address")
+	if config.Config.RedisRecoveryContractsOnly {
 		db = db.Where("is_contract = true")
+	}
+
+	if config.Config.RedisRecoverySkipContracts {
+		db = db.Where("is_contract = false")
 	}
 	output := &[]Model{}
 	db = db.Find(output)

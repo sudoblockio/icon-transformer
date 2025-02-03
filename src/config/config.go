@@ -109,6 +109,7 @@ type configType struct {
 	// Redis Recovery
 	RedisRecoveryRunOnly        bool `envconfig:"REDIS_RECOVERY_RUN_ONLY" required:"false" default:"false"`
 	RedisRecoveryContractsOnly  bool `envconfig:"REDIS_RECOVERY_CONTRACTS_ONLY" required:"false" default:"false"`
+	RedisRecoverySkipContracts  bool `envconfig:"REDIS_RECOVERY_SKIP_CONTRACTS" required:"false" default:"false"`
 	RedisRecoveryAddresses      bool `envconfig:"REDIS_RECOVERY_ADDRESSES" required:"false" default:"true"`
 	RedisRecoveryTokenAddresses bool `envconfig:"REDIS_RECOVERY_TOKEN_ADDRESSES" required:"false" default:"true"`
 

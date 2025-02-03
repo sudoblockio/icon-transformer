@@ -65,7 +65,10 @@ func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 			skip := id * batchSize
 			for {
 				zap.S().Infof("Worker %d: fetching batch with skip=%d, limit=%d, table=%s", id, skip, batchSize, Crud.TableName)
-				routineItems, err := Crud.SelectBatchOrder(batchSize, skip, "address", config.Config.RedisRecoveryContractsOnly)
+				routineItems, err := Crud.SelectBatchOrder(
+					batchSize,
+					skip,
+				)
 				if errors.Is(err, gorm.ErrRecordNotFound) {
 					zap.S().Warnf("Worker %d: no more records (%s)", id, err.Error())
 					break
