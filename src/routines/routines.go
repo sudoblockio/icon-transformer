@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -32,9 +33,9 @@ func StartRecovery() {
 		addressTypeRoutine()
 	}
 
-	//Global count
-	setTransactionCounts()
-	countAddressesToRedisRoutine()
+	////Global count
+	//setTransactionCounts()
+	//countAddressesToRedisRoutine()
 
 	// By address
 	if config.Config.RedisRecoveryAddresses {
@@ -51,37 +52,47 @@ func StartRecovery() {
 }
 
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
+	batchSize := config.Config.RoutinesBatchSize
+	numWorkers := config.Config.RoutinesNumWorkers
 
-	skip := 0
-	limit := config.Config.RoutinesBatchSize
+	var wg sync.WaitGroup
+	wg.Add(numWorkers)
 
-	zap.S().Info("Starting worker on table=", Crud.TableName, " with skip=", skip, " with limit=", limit)
-	// Run loop until addresses have all been iterated over
-	for {
-		// Grabs a set of addresses or just contracts
-		routineItems, err := Crud.SelectBatchOrder(limit, skip, "address", config.Config.RedisRecoveryContractsOnly)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			zap.S().Warn("Ending address routine with error=", err.Error())
-			break
-		}
-		if err != nil {
-			zap.S().Warn("Ending address routine with error=", err.Error())
-			break
-		}
-		if len(*routineItems) == 0 {
-			zap.S().Warn("Ending address routine, no more addresses")
-			break
-		}
+	for workerID := 0; workerID < numWorkers; workerID++ {
+		go func(id int) {
+			defer wg.Done()
+			// Each worker starts at a different offset
+			skip := id * batchSize
+			for {
+				zap.S().Infof("Worker %d: fetching batch with skip=%d, limit=%d, table=%s", id, skip, batchSize, Crud.TableName)
+				routineItems, err := Crud.SelectBatchOrder(batchSize, skip, "address", config.Config.RedisRecoveryContractsOnly)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					zap.S().Warnf("Worker %d: no more records (%s)", id, err.Error())
+					break
+				}
+				if err != nil {
+					zap.S().Warnf("Worker %d: error fetching records (%s)", id, err.Error())
+					break
+				}
+				if len(*routineItems) == 0 {
+					zap.S().Warnf("Worker %d: no more records", id)
+					break
+				}
 
-		zap.S().Info("Starting skip=", skip, " limit=", limit, " table=", Crud.TableName)
-		for i := 0; i < len(*routineItems); i++ {
-			item := &(*routineItems)[i]
-			for _, r := range routines {
-				r(item)
+				// Process each record in the batch
+				for i := 0; i < len(*routineItems); i++ {
+					item := &(*routineItems)[i]
+					for _, r := range routines {
+						r(item)
+					}
+				}
+
+				// Increment skip by the total number of records processed across all workers per iteration.
+				skip += numWorkers * batchSize
 			}
-		}
-		zap.S().Info("Finished skip=", skip, " limit=", limit, " table=", Crud.TableName)
-
-		skip += config.Config.RoutinesBatchSize * config.Config.RoutinesNumWorkers
+		}(workerID)
 	}
+
+	wg.Wait()
+	zap.S().Info("All workers finished processing table=", Crud.TableName)
 }
