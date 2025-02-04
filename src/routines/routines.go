@@ -38,9 +38,9 @@ func StartRecovery() {
 	//countAddressesToRedisRoutine()
 
 	// By address
-	if config.Config.RedisRecoveryAddresses {
-		LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
-	}
+	//if config.Config.RedisRecoveryAddresses {
+	//	LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
+	//}
 	// By token address
 	if config.Config.RedisRecoveryTokenAddresses {
 		LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
