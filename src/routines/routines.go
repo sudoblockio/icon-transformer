@@ -53,49 +53,46 @@ func StartRecovery() {
 
 func LoopRoutine[M any, O any](Crud *crud.Crud[M, O], routines []func(*M)) {
 	batchSize := config.Config.RoutinesBatchSize
-	numWorkers := config.Config.RoutinesNumWorkers
+	skip := 0
 
-	var wg sync.WaitGroup
-	wg.Add(numWorkers)
+	// Loop until there are no more records
+	for {
+		zap.S().Infof("Fetching batch with skip=%d, limit=%d, table=%s", skip, batchSize, Crud.TableName)
+		routineItems, err := Crud.SelectBatchOrder(batchSize, skip)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			zap.S().Warnf("No more records (%s)", err.Error())
+			break
+		}
+		if err != nil {
+			zap.S().Warnf("Error fetching records (%s)", err.Error())
+			break
+		}
+		if len(*routineItems) == 0 {
+			zap.S().Warn("No more records")
+			break
+		}
 
-	for workerID := 0; workerID < numWorkers; workerID++ {
-		go func(id int) {
-			defer wg.Done()
-			// Each worker starts at a different offset
-			skip := id * batchSize
-			for {
-				zap.S().Infof("Worker %d: fetching batch with skip=%d, limit=%d, table=%s", id, skip, batchSize, Crud.TableName)
-				routineItems, err := Crud.SelectBatchOrder(
-					batchSize,
-					skip,
-				)
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					zap.S().Warnf("Worker %d: no more records (%s)", id, err.Error())
-					break
-				}
-				if err != nil {
-					zap.S().Warnf("Worker %d: error fetching records (%s)", id, err.Error())
-					break
-				}
-				if len(*routineItems) == 0 {
-					zap.S().Warnf("Worker %d: no more records", id)
-					break
-				}
-
-				// Process each record in the batch
-				for i := 0; i < len(*routineItems); i++ {
-					item := &(*routineItems)[i]
-					for _, r := range routines {
-						r(item)
-					}
-				}
-
-				// Increment skip by the total number of records processed across all workers per iteration.
-				skip += numWorkers * batchSize
+		// Process the fetched records asynchronously.
+		// We use a WaitGroup to ensure all processing for the current batch finishes
+		// before fetching the next batch.
+		var procWg sync.WaitGroup
+		for i := range *routineItems {
+			item := &(*routineItems)[i]
+			// Run each routine concurrently for the current record.
+			for _, routine := range routines {
+				procWg.Add(1)
+				go func(proc func(*M), record *M) {
+					defer procWg.Done()
+					proc(record)
+				}(routine, item)
 			}
-		}(workerID)
+		}
+		// Wait for all asynchronous processing on the batch to complete.
+		procWg.Wait()
+
+		// Move to the next batch.
+		skip += batchSize
 	}
 
-	wg.Wait()
-	zap.S().Info("All workers finished processing table=", Crud.TableName)
+	zap.S().Info("Finished processing table=", Crud.TableName)
 }

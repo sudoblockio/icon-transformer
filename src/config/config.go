@@ -98,7 +98,7 @@ type configType struct {
 	RoutinesRunOnly       bool          `envconfig:"ROUTINES_RUN_ONLY" required:"false" default:"false"`
 	RoutinesSleepDuration time.Duration `envconfig:"ROUTINES_SLEEP_DURATION" required:"false" default:"1h"`
 	RoutinesBatchSize     int           `envconfig:"ROUTINES_BATCH_SIZE" required:"false" default:"10"`
-	RoutinesNumWorkers    int           `envconfig:"ROUTINES_NUM_WORKERS" required:"false" default:"1"`
+	//RoutinesNumWorkers    int           `envconfig:"ROUTINES_NUM_WORKERS" required:"false" default:"1"`
 
 	// FindMissing
 	FindMissingRunOnly              bool   `envconfig:"FIND_MISSING_RUN_ONLY" required:"false" default:"false"`
