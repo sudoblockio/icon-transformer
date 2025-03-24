@@ -22,7 +22,7 @@ var addressRoutines = []func(a *models.Address){
 var tokenAddressRoutines = []func(t *models.TokenAddress){
 	setTokenAddressBalances,
 	// TODO: Fix this - Might not need - not used it seems? This is not cached and does not hit db
-	//  function signiture would suggest another loop anyways.
+	//  function signature would suggest another loop anyways.
 	//setTokenAddressTxCounts,
 }
 
@@ -33,14 +33,14 @@ func StartRecovery() {
 		addressTypeRoutine()
 	}
 
-	////Global count
-	//setTransactionCounts()
-	//countAddressesToRedisRoutine()
+	//Global count
+	setTransactionCounts()
+	countAddressesToRedisRoutine()
 
 	// By address
-	//if config.Config.RedisRecoveryAddresses {
-	//	LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
-	//}
+	if config.Config.RedisRecoveryAddresses {
+		LoopRoutine(crud.GetCrud(models.Address{}, models.AddressORM{}), addressRoutines)
+	}
 	// By token address
 	if config.Config.RedisRecoveryTokenAddresses {
 		LoopRoutine(crud.GetCrud(models.TokenAddress{}, models.TokenAddressORM{}), tokenAddressRoutines)
