@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/sudoblockio/icon-transformer/compare/v0.3.5...v0.3.6) (2025-07-25)
+
+
+### Bug Fixes
+
+* ci targets ([1c74cef](https://github.com/sudoblockio/icon-transformer/commit/1c74cef2acfe63d289fbcfd9f3e6242373b2e0e3))
+
 ## [0.3.5](https://github.com/sudoblockio/icon-transformer/compare/v0.3.4...v0.3.5) (2025-03-24)
 
 
